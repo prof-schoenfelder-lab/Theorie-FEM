@@ -13,3 +13,5 @@ werkzeuge/mathematica_*.wl
 
 # Ausschnitte aus Original-Tafelbildern (nur lokal)
 grafiken/uebernommen/
+
+/.quarto/

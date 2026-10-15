@@ -1,6 +1,7 @@
 ---
-title: "Einführung: Mathematica und die Struktur K p = q"
+title: "Einführung: Mathematica und die Struktur $\\mathbf{K}\\,\\mathbf{p} = \\mathbf{q}$"
 subtitle: "Theorie der Finite-Elemente-Methode · Vorlesung 0"
+pagetitle: "Einführung: Mathematica und K p = q"
 page-layout: full
 ---
 

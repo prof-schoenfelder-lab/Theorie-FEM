@@ -322,6 +322,21 @@ def aufgabe_konisch():
     return abb.speichern(ZIEL / "aufgabe-konisch.svg")
 
 
+def federsystem_beispiel():
+    """Gesamtsystem (Lagerung, Kräfte, Freiheitsgrade) für das marimo-Beispiel: Ebenen aus federsystem.svg,
+    Ausschnitt ohne Freischnitt. Liegt in beispiele/public/ und wird beim Export mitgenommen."""
+    import re
+    from ebenen_export import nur_ebenen
+    svg = (ZIEL / "federsystem.svg").read_text(encoding="utf-8")
+    svg = nur_ebenen(svg, ["system", "last", "dof"])
+    svg = re.sub(r'width="[^"]*" height="[^"]*" viewBox="[^"]*"', 'width="680" height="265" viewBox="40 20 680 265"', svg, count=1)
+    ziel = ZIEL.parent.parent / "beispiele" / "public" / "federsystem-system.svg"
+    ziel.parent.mkdir(parents=True, exist_ok=True)
+    ziel.write_text(svg, encoding="utf-8")
+    return ziel
+
+
 if __name__ == "__main__":
-    for fn in (kurve, traeger71, eigengewicht, federsystem, federsystem_3dof, aufgabe73, aufgabe_konisch):
+    for fn in (kurve, traeger71, eigengewicht, federsystem, federsystem_3dof, aufgabe73, aufgabe_konisch,
+               federsystem_beispiel):
         print(fn())

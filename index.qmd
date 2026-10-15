@@ -20,7 +20,7 @@ Rayleigh-Ritz bis zu den Elementen Stab, Balken, Rahmen und Scheibe.
 
 | | Thema | Beispiel (Vorlesung) | Übung (Mathematica) | Stand |
 |:-:|:--|:--|:--|:-:|
-| 0 | [**Einführung: Mathematica und K p = q**](vorlesung/00-einfuehrung.qmd)<br>Kurvendiskussion, Schnittgrößen, DGL, Federsystem | [Federsystem: Steifigkeitsmatrix](beispiele/federsystem/index.html) | [Erste Schritte](mathematica/00-einfuehrung-task.nb){download=""}<br>[Schnittgrößen 7.3](mathematica/00-schnittgroessen-7-3-task.nb){download=""}<br>[DGL konischer Stab](mathematica/00-dgl-stab-konisch-task.nb){download=""} | online |
+| 0 | [**Einführung: Mathematica und $\mathbf{K}\,\mathbf{p} = \mathbf{q}$**](vorlesung/00-einfuehrung.qmd)<br>Kurvendiskussion, Schnittgrößen, DGL, Federsystem | [Federsystem: Steifigkeitsmatrix](beispiele/federsystem/index.html) | [Erste Schritte](mathematica/00-einfuehrung-task.nb){download=""}<br>[Schnittgrößen 7.3](mathematica/00-schnittgroessen-7-3-task.nb){download=""}<br>[DGL konischer Stab](mathematica/00-dgl-stab-konisch-task.nb){download=""} | online |
 | 1 | Energieprinzipien<br>Formänderungsenergie, Minimum der potentiellen Energie | | | geplant |
 | 2 | Verfahren nach Rayleigh-Ritz<br>Ansatz für das ganze Bauteil, konischer Stab | | | geplant |
 | 3 | [**Normalkraftstab: von Ritz zur FEM**](vorlesung/03-stab.qmd)<br>Elementsteifigkeitsmatrix, Inzidenzmatrizen, Ablauf der FEM | [Konischer Stab: Konvergenz](beispiele/stab-konvergenz/index.html) | [Konischer Stab mit 2 Elementen](mathematica/03-stab-konisch-fem-task.nb){download=""} | in Arbeit |

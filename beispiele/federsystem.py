@@ -30,6 +30,14 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    mo.image(src=str(mo.notebook_location() / "public" / "federsystem-system.svg"),
+             alt="Federsystem: Wand links, Federn c1, c2, c3, Platten mit den Kräften f1, f2 und den Verschiebungen p1, p2",
+             width="100%")
+    return
+
+
+@app.cell
+def _(mo):
     c1 = mo.ui.slider(0, 6, step=0.5, value=2, label=r"$c_1 / k$", show_value=True)
     c2 = mo.ui.slider(0, 6, step=0.5, value=4, label=r"$c_2 / k$", show_value=True)
     c3 = mo.ui.slider(0, 6, step=0.5, value=1, label=r"$c_3 / k$", show_value=True)
@@ -83,7 +91,7 @@ def _(K, N, det, mo, p, q, singulaer):
 
 
 @app.cell
-def _(GRAU, GRUEN, N, ROT, np, p, plt, singulaer):
+def _(GRAU, GRUEN, N, ROT, f1, f2, np, p, plt, singulaer):
     def feder(ax, x0, x1, y, farbe, lw):
         n, a = 8, 0.12
         xs = np.linspace(x0 + 0.25 * (x1 - x0), x1 - 0.25 * (x1 - x0), 2 * n + 1)
@@ -97,7 +105,10 @@ def _(GRAU, GRUEN, N, ROT, np, p, plt, singulaer):
 
     fig, ax = plt.subplots(figsize=(8, 3.2))
     xw, xm, xr = 0.0, 2.0, 4.0
-    ax.plot([xw, xw], [-0.2, 2.2], color="k", lw=2.5)
+    s = 0.0 if singulaer else 0.5 / max(1e-9, np.max(np.abs(p)))
+    ax.plot([xw, xw], [-0.2, 2.2], color="k", lw=2.5)                 # feste Wand links
+    for yy in np.arange(-0.15, 2.2, 0.15):
+        ax.plot([xw, xw - 0.12], [yy, yy - 0.12], color="k", lw=0.8)
     for zustand in ("unverformt", "verformt"):
         if zustand == "verformt" and singulaer:
             continue
@@ -105,19 +116,28 @@ def _(GRAU, GRUEN, N, ROT, np, p, plt, singulaer):
             dm = dr = 0.0
             farbe, alpha, lw = GRAU, 0.35, 1.0
         else:
-            s = 0.5 / max(1e-9, np.max(np.abs(p)))           # Darstellung skaliert
-            dm, dr = s * p[1], s * p[0]
+            dm, dr = s * p[1], s * p[0]               # Darstellung skaliert
             farbe, alpha, lw = ROT, 0.9, 1.6
         platte(ax, xm + dm, -0.1, 1.3, farbe, alpha)
         platte(ax, xr + dr, -0.1, 2.1, farbe, alpha)
         feder(ax, xw, xm + dm - 0.06, 0.6, farbe if zustand == "verformt" else GRAU, lw)
         feder(ax, xm + dm + 0.06, xr + dr - 0.06, 0.6, farbe if zustand == "verformt" else GRAU, lw * 1.6)
         feder(ax, xw, xr + dr - 0.06, 1.7, farbe if zustand == "verformt" else GRAU, lw)
+    # äußere Kräfte an den Platten (Länge ~ Betrag, Richtung nach Vorzeichen), an der verformten Lage
+    dm_k, dr_k = (0.0, 0.0) if singulaer else (s * p[1], s * p[0])
+    for xp, y, fw, name in ((xm + dm_k, 1.15, f2.value, "f_2"), (xr + dr_k, 1.95, f1.value, "f_1")):
+        if abs(fw) > 1e-9:
+            x0 = xp + np.sign(fw) * 0.06                      # Pfeil beginnt an der Plattenseite
+            lang = 0.15 * abs(fw) + 0.2
+            ax.annotate("", xy=(x0 + np.sign(fw) * lang, y), xytext=(x0, y),
+                        arrowprops=dict(arrowstyle="-|>", color=ROT, lw=2, mutation_scale=14))
+            ax.text(x0 + np.sign(fw) * lang / 2, y + 0.12, f"${name} = {fw:g}\\,F$", color=ROT, ha="center", fontsize=11,
+                    bbox=dict(fc="white", ec="none", pad=1, alpha=0.85))
     if not singulaer:
         for x, y, nn in ((1.0, 0.95, f"$N_1 = {N[0]:.3g}\\,F$"), (3.0, 0.95, f"$N_2 = {N[1]:.3g}\\,F$"),
                          (2.0, 2.05, f"$N_3 = {N[2]:.3g}\\,F$")):
             ax.text(x, y, nn, ha="center", color=GRUEN, fontsize=11)
-    ax.set_xlim(-0.3, 5.2); ax.set_ylim(-0.4, 2.4); ax.axis("off")
+    ax.set_xlim(-0.3, 5.9); ax.set_ylim(-0.4, 2.4); ax.axis("off")
     ax.set_title("grau: unverformt · rot: verformt (Verschiebungen skaliert)", fontsize=10, color="#555555")
     fig.tight_layout()
     fig
