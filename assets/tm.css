@@ -137,8 +137,22 @@ body, .navbar, h1, h2, h3, h4, h5, h6, .title, .subtitle {
 h1, h2, h3, .title { font-weight: 600; }
 .navbar-brand img { max-height: 28px; margin-right: 0.4rem; }
 .tm-dozent { font-size: 0.95rem; color: #555; }
-.tm-fusszeile { display: flex; align-items: center; gap: 1.5rem; justify-content: center; flex-wrap: wrap; }
-.tm-fusszeile img { height: 34px; }
+/* Fußzeile über die ganze Breite: Fakultätslogo links, Lehrveranstaltung und Name rechts, einzeilig */
+.nav-footer-left, .nav-footer-right { display: none; }
+.nav-footer-center { flex: 1 1 100%; max-width: none; text-align: left; }
+.tm-fusszeile { width: 100%; }
+.tm-fusszeile p {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 2rem; flex-wrap: nowrap; margin: 0.4rem 0;
+  padding-right: 5.5rem;            /* Platz für die Beamer-Schaltfläche unten rechts */
+}
+.tm-fusszeile img { height: 58px; width: auto; }
+.tm-fusszeile span { white-space: nowrap; font-size: 0.95rem; }
+@media (max-width: 700px) {
+  .tm-fusszeile p { flex-wrap: wrap; justify-content: center; gap: 0.6rem; padding-right: 0; padding-bottom: 2.5rem; }
+  .tm-fusszeile img { height: 46px; }
+  .tm-fusszeile span { white-space: normal; text-align: center; }
+}
 
 /* Formeln linksbündig (MathJax) */
 mjx-container[display="true"] { text-align: left !important; margin-left: 0 !important; }
