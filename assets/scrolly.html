@@ -1,0 +1,129 @@
+<button class="beamer-schalter" type="button" title="Beamer-Modus (Taste B): größere Schrift, Schrittweise mit Bild↓/Bild↑ oder Pfeiltasten →/←">Beamer</button>
+<script>
+/* Scrollytelling: blendet beim Scrollen Ebenen der SVG-Grafik ein/aus und
+   animiert den Bildausschnitt (viewBox) – ähnlich „Morphen“ in PowerPoint. */
+(function () {
+  const alleSchritte = [];
+
+  function zahlen(s) { return s.trim().split(/[\s,]+/).map(Number); }
+  function liste(s) { return (s || "").trim().split(/\s+/).filter(Boolean); }
+  const glatt = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+  document.querySelectorAll(".scrolly").forEach(function (sc) {
+    const svg = sc.querySelector(".scrolly-sticky svg");
+    if (!svg) return;
+    svg.removeAttribute("width");
+    svg.removeAttribute("height");
+    // Ebenen = oberste Gruppen (aus dem Baukasten mit data-ebene, aus Inkscape mit groupmode="layer")
+    const ebenen = Array.from(svg.children).filter(g => g.tagName.toLowerCase() === "g" &&
+      (g.dataset.ebene || g.getAttribute("inkscape:groupmode") === "layer"));
+    ebenen.forEach(g => { if (!g.dataset.ebene) g.dataset.ebene = g.id; });
+    const schritte = Array.from(sc.querySelectorAll(".schritt"));
+    const zaehler = sc.querySelector(".scrolly-zaehler");
+    const vb0 = zahlen(svg.getAttribute("viewBox"));
+    let vb = vb0.slice(), anim = null, aktiv = null;
+
+    function zoom(ziel) {
+      if (anim) cancelAnimationFrame(anim);
+      const start = vb.slice(), t0 = performance.now(), dauer = 750;
+      const schritt = jetzt => {
+        const t = Math.min(1, (jetzt - t0) / dauer), k = glatt(t);
+        vb = start.map((v, i) => v + (ziel[i] - v) * k);
+        svg.setAttribute("viewBox", vb.join(" "));
+        if (t < 1) anim = requestAnimationFrame(schritt);
+      };
+      anim = requestAnimationFrame(schritt);
+    }
+
+    function aktiviere(s) {
+      if (s === aktiv) return;
+      aktiv = s;
+      schritte.forEach(x => x.classList.toggle("aktiv", x === s));
+      const zeige = liste(s.dataset.zeige), dimmen = liste(s.dataset.dimmen);
+      ebenen.forEach(l => {
+        const n = l.dataset.ebene;
+        const war = l.classList.contains("sichtbar");
+        const sichtbar = zeige.includes(n) || dimmen.includes(n);
+        l.classList.toggle("sichtbar", sichtbar);
+        l.classList.toggle("gedimmt", dimmen.includes(n));
+        l.classList.toggle("neu", sichtbar && !war && !dimmen.includes(n));
+      });
+      zoom(s.dataset.zoom ? zahlen(s.dataset.zoom) : vb0);
+      if (zaehler) zaehler.textContent = (schritte.indexOf(s) + 1) + " / " + schritte.length;
+    }
+
+    const beob = new IntersectionObserver(eintraege => {
+      eintraege.forEach(e => { if (e.isIntersecting) aktiviere(e.target); });
+    }, { rootMargin: "-48% 0px -48% 0px" });
+    schritte.forEach(s => { beob.observe(s); alleSchritte.push(s); });
+    if (schritte.length) {
+      // Startzustand ohne Animation
+      aktiviere(schritte[0]);
+      if (anim) cancelAnimationFrame(anim);
+      vb = schritte[0].dataset.zoom ? zahlen(schritte[0].dataset.zoom) : vb0;
+      svg.setAttribute("viewBox", vb.join(" "));
+    }
+  });
+
+  // Tastatur / Presenter: Bild↓, Bild↑, →, ← springen von Schritt zu Schritt
+  function naechster(richtung) {
+    const mitte = window.innerHeight / 2;
+    const pos = alleSchritte.map(s => {
+      const r = s.getBoundingClientRect();
+      return r.top + r.height / 2 - mitte;
+    });
+    let ziel = null;
+    if (richtung > 0) {
+      const i = pos.findIndex(p => p > 5);
+      ziel = i >= 0 ? alleSchritte[i] : null;
+    } else {
+      for (let i = pos.length - 1; i >= 0; i--) if (pos[i] < -5) { ziel = alleSchritte[i]; break; }
+    }
+    if (ziel) { ziel.scrollIntoView({ behavior: "smooth", block: "center" }); return true; }
+    return false;
+  }
+  document.addEventListener("keydown", e => {
+    if (e.target.closest("input, textarea, select, [contenteditable]")) return;
+    if (e.key === "b" || e.key === "B") { document.documentElement.classList.toggle("beamer"); return; }
+    if (!alleSchritte.length) return;
+    const vor = ["PageDown", "ArrowRight"].includes(e.key);
+    const zur = ["PageUp", "ArrowLeft"].includes(e.key);
+    if ((vor || zur) && naechster(vor ? 1 : -1)) e.preventDefault();
+  });
+  const knopf = document.querySelector(".beamer-schalter");
+  if (knopf) knopf.addEventListener("click", () => document.documentElement.classList.toggle("beamer"));
+
+  // Hilfe-Schaltfläche (ARSnova Q&A) auf den Vorlesungsseiten
+  if (/\/vorlesung\//.test(location.pathname)) {
+    const hilfe = document.createElement("a");
+    hilfe.className = "hilfe-schalter";
+    hilfe.href = "https://arsnova.imn.htwk-leipzig.de/p/62264415";
+    hilfe.target = "_blank";
+    hilfe.rel = "noopener";
+    hilfe.title = "Frage stellen: Fragen und Antworten auf ARSnova (öffnet in neuem Tab)";
+    hilfe.innerHTML = '<span class="hilfe-zeichen" aria-hidden="true">?</span><span class="hilfe-text">Frage stellen</span>';
+    document.body.appendChild(hilfe);
+    document.documentElement.classList.add("mit-hilfe");
+  }
+
+  // Abgesetzte Formeln, die breiter als die Textspalte sind, verkleinern statt abschneiden
+  function formelnEinpassen() {
+    document.querySelectorAll('mjx-container[display="true"]').forEach(m => {
+      if (m.dataset.fs === undefined) m.dataset.fs = m.style.fontSize || "";
+      m.style.fontSize = m.dataset.fs;
+      const block = m.closest("p, li, div, td");
+      if (!block) return;
+      const breite = block.clientWidth;
+      const ist = m.firstElementChild ? m.firstElementChild.getBoundingClientRect().width : m.scrollWidth;
+      if (ist > breite + 1) {
+        const basis = parseFloat(m.dataset.fs) || 100;
+        m.style.fontSize = Math.max(55, Math.floor(basis * breite / ist) - 2) + "%";
+      }
+    });
+  }
+  const mjBereit = () => (window.MathJax && MathJax.startup && MathJax.startup.promise) ? MathJax.startup.promise : Promise.resolve();
+  window.addEventListener("load", () => mjBereit().then(formelnEinpassen));
+  window.addEventListener("resize", () => { clearTimeout(window.__tmFit); window.__tmFit = setTimeout(formelnEinpassen, 200); });
+  new MutationObserver(formelnEinpassen).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+})();
+</script>

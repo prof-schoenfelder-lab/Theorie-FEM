@@ -1,0 +1,67 @@
+# Baut die Kursseite und veröffentlicht sie auf GitHub Pages
+# (Einstellungen → Pages → Source: GitHub Actions).
+#
+# Musterlösungen (mathematica/*-solved.nb) liegen nicht im Repository.
+# Entwürfe aus entwuerfe.txt werden vor dem Rendern entfernt.
+
+name: Seite bauen und veröffentlichen
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: veroeffentlichen
+  cancel-in-progress: true
+
+jobs:
+  bauen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Python-Pakete (marimo-Export, Grafiken)
+        run: pip install marimo==0.25.1 numpy matplotlib uv
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.10.18
+
+      - name: Entwürfe ausblenden (entwuerfe.txt)
+        run: python werkzeuge/entwuerfe_ausblenden.py
+
+      - name: Rendern
+        run: quarto render
+
+      - name: Kontrolle – keine Musterlösungen und Entwürfe in der Seite
+        run: |
+          if ls _site/mathematica/*-solved* 2>/dev/null; then
+            echo "Musterlösung in _site gefunden – Abbruch"; exit 1
+          fi
+          grep -v '^#' entwuerfe.txt | sed -e 's/\.qmd$/.html/' -e 's/\.py$//' | while read -r f; do
+            if [ -n "$f" ] && [ -e "_site/$f" ]; then echo "Entwurf $f in _site – Abbruch"; exit 1; fi
+          done
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  veroeffentlichen:
+    needs: bauen
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

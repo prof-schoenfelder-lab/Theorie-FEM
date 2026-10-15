@@ -1,0 +1,15 @@
+.venv
+_site/
+.quarto/
+__pycache__/
+/.DS_Store
+**/.DS_Store
+**/*.quarto_ipynb
+
+# Nicht veröffentlichen: Musterlösungen und ihre Erzeugung (enthalten den Lösungscode)
+mathematica/*-solved.nb
+werkzeuge/mathematica_*.wl
+!werkzeuge/mathematica_hilfen.wl
+
+# Ausschnitte aus Original-Tafelbildern (nur lokal)
+grafiken/uebernommen/

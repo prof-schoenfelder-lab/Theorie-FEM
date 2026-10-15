@@ -1,0 +1,374 @@
+---
+title: "Normalkraftstab: von Ritz zur FEM"
+subtitle: "Theorie der Finite-Elemente-Methode · Vorlesung 3"
+page-layout: full
+---
+
+::: {.merke}
+**Worum geht es?** Beim Verfahren nach Rayleigh-Ritz haben wir **eine** Ansatzfunktion für das ganze
+Bauteil gewählt und die potentielle Energie minimiert. Die Finite-Elemente-Methode macht genau dasselbe,
+nur **elementweise**: Das Bauteil wird in viele einfache Stücke zerlegt, auf jedem Stück gilt ein ganz
+einfacher Ansatz. Heraus kommt ein Gleichungssystem $\mathbf{K}_{sys}\,\mathbf{p}_{sys} = \mathbf{q}_{sys}$,
+das ein Computer für beliebig viele Elemente aufstellen und lösen kann.
+:::
+
+## Das Beispiel: konischer Zugstab
+
+:::: {.scrolly svg="../grafiken/stab/system.svg"}
+
+::: {.schritt zeige="stab last mass" zoom="95 30 650 235"}
+### Mechanisches System abstrahieren
+
+Ein Stab mit linear veränderlichem Querschnitt ist links gelagert und rechts mit der Kraft $F$ auf Zug belastet:
+
+$$
+A(x) = A_0 - \frac{A_0 - A_1}{L}\,x
+$$
+
+**Zahlenwerte:** $E = 70\,000$ MPa, $L = 1000$ mm, $F = 5000$ N, $A_0 = 100$ mm², $A_1 = 20$ mm²
+:::
+
+::: {.schritt zeige="stab last mass" zoom="95 30 650 235"}
+### Die exakte Lösung als Referenz
+
+Für diesen Stab gibt es eine geschlossene Lösung. Die Normalkraft ist überall $N = F$, also
+
+$$
+u(x) = \int_0^x \frac{F}{E\,A(\bar x)}\,\mathrm{d}\bar x
+= \frac{F L}{E\,(A_0 - A_1)}\,\ln\frac{A_0}{A(x)}
+$$
+
+Am Stabende: $u(L) = 1{,}437$ mm, $\sigma(L) = F/A_1 = 250$ MPa.
+
+Bei echten Bauteilen gibt es so eine Lösung fast nie. Wir nutzen sie hier, um die FEM zu **bewerten**.
+:::
+
+::: {.schritt zeige="stab last elemente" dimmen="mass" zoom="95 30 650 235"}
+### System in Elemente einteilen
+
+Wir zerlegen den Stab in **drei Elemente** gleicher Länge $L^e = L/3$. Jedes Element bekommt
+einen **konstanten** Querschnitt, hier den Wert in Elementmitte:
+
+$$
+A^1 = 86{,}7 \text{ mm}^2, \quad A^2 = 60 \text{ mm}^2, \quad A^3 = 33{,}3 \text{ mm}^2
+$$
+
+Die Elemente sind an den **Knoten** miteinander verbunden.
+:::
+
+::: {.schritt zeige="stab last elemente sysdof" zoom="95 30 650 235"}
+### Systemfreiheitsgrade
+
+Jeder Knoten kann sich in Stabrichtung verschieben. Diese Bewegungsrichtungen heißen
+**Freiheitsgrade** (DOF, *degrees of freedom*):
+
+$$
+\mathbf{p}_{sys} = \begin{pmatrix} p_1 & p_2 & p_3 & p_4 \end{pmatrix}^\mathsf{T}
+$$
+
+Das Lager hält $p_1 = 0$ fest. Gesucht sind $p_2$, $p_3$, $p_4$.
+:::
+
+::: {.schritt zeige="stab last elemente sysdof einzeln verbindung"}
+### Elementfreiheitsgrade
+
+Jedes Element für sich hat zwei Knoten und damit zwei **Elementfreiheitsgrade**:
+$p_2^e$ am linken und $p_1^e$ am rechten Knoten. Jedes Element hat außerdem eine eigene
+Koordinate $x^e$ von $0$ bis $L^e$.
+
+Für **ein** Element leiten wir alles nur einmal her. Danach müssen wir die Elemente nur noch
+richtig miteinander verbinden.
+:::
+
+::::
+
+## Der Normalkraftstab als finites Element
+
+:::: {.scrolly svg="../grafiken/stab/element.svg"}
+
+::: {.schritt zeige="element dof kraefte"}
+### Potentielle Energie des Elements
+
+Die innere potentielle Energie ist die Formänderungsenergie des Stabes, die äußere stammt von den Knotenkräften:
+
+$$
+\Pi_i^e = \frac{1}{2}\int_{L^e} E^e A^e\, u^e{}'(x^e)^2\,\mathrm{d}x^e,
+\qquad
+\Pi_a^e = -p_1^e q_1^e - p_2^e q_2^e
+$$
+
+Die gesamte potentielle Energie $\Pi^e = \Pi_i^e + \Pi_a^e$ muss **minimal** werden. Gesucht ist also eine
+Funktion $u^e(x^e)$, die $\Pi^e$ minimiert.
+:::
+
+::: {.schritt zeige="element dof ansatz_achsen ansatz"}
+### Linearer Ansatz
+
+Wie bei Ritz wählen wir einen Ansatz, hier den einfachsten:
+
+$$
+u^e(x^e) = a_1\,x^e + a_2
+$$
+
+Statt der abstrakten Koeffizienten $a_1$, $a_2$ verwenden wir die **Knotenverschiebungen**:
+$u^e(0) = p_2^e$ und $u^e(L^e) = p_1^e$. Daraus folgt
+
+$$
+u^e(x^e) = \frac{p_1^e - p_2^e}{L^e}\,x^e + p_2^e
+$$
+:::
+
+::: {.schritt zeige="element dof ansatz_achsen ansatz form_achsen formfkt"}
+### Ansatzfunktionen
+
+Sortiert nach den Freiheitsgraden:
+
+$$
+u^e(x^e) = \frac{x^e}{L^e}\,p_1^e + \left(1 - \frac{x^e}{L^e}\right) p_2^e
+= \mathbf{N}^e\,\mathbf{p}^e
+$$
+
+$$
+\mathbf{N}^e = \begin{pmatrix} \dfrac{x^e}{L^e} & 1 - \dfrac{x^e}{L^e} \end{pmatrix},
+\qquad
+\mathbf{p}^e = \begin{pmatrix} p_1^e \\ p_2^e \end{pmatrix}
+$$
+
+Jede Ansatzfunktion ist an „ihrem“ Knoten $1$ und am anderen Knoten $0$. Damit sind die Koeffizienten
+des Ansatzes direkt die Knotenverschiebungen.
+:::
+
+::::
+
+## Die Elementsteifigkeitsmatrix
+
+Wir setzen $u^e = \mathbf{N}^e\mathbf{p}^e$ in die innere Energie ein. Die Ableitung ist
+$u^e{}' = \mathbf{N}^e{}'\,\mathbf{p}^e$ mit $\mathbf{N}^e{}' = \begin{pmatrix} \frac{1}{L^e} & -\frac{1}{L^e} \end{pmatrix}$:
+
+$$
+\Pi_i^e = \frac{1}{2}\,\mathbf{p}^{e\mathsf{T}}
+\underbrace{\left( \int_{L^e} \mathbf{N}^e{}'^{\mathsf{T}}\, E^e A^e\, \mathbf{N}^e{}'\,\mathrm{d}x^e \right)}_{\mathbf{K}^e}
+\mathbf{p}^e
+\qquad\Longrightarrow\qquad
+\mathbf{K}^e = \frac{E^e A^e}{L^e}\begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix}
+$$
+
+Die äußere Energie lautet in Matrixschreibweise $\Pi_a^e = -\mathbf{p}^{e\mathsf{T}}\mathbf{q}^e$.
+
+::: {.merke}
+**Der Stab ist eine Feder.** Die Elementsteifigkeitsmatrix des Stabes ist die einer Feder mit der
+Steifigkeit $c = E^e A^e / L^e$. Material ($E^e$) und Geometrie ($A^e$, $L^e$) stecken vollständig in
+$\mathbf{K}^e$. Für unser Beispiel: $c_1 = 18\,200$ N/mm, $c_2 = 12\,600$ N/mm, $c_3 = 7000$ N/mm.
+:::
+
+::: {.vertiefung titel="Ausführlicher: Integration der Steifigkeitsmatrix"}
+Mit $E^e A^e = \text{const}$ im Element:
+
+$$
+\mathbf{K}^e = E^e A^e \int_0^{L^e} \begin{pmatrix} \frac{1}{L^e} \\ -\frac{1}{L^e} \end{pmatrix}
+\begin{pmatrix} \frac{1}{L^e} & -\frac{1}{L^e} \end{pmatrix} \mathrm{d}x^e
+= \frac{E^e A^e}{L^{e\,2}} \begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix} \int_0^{L^e} \mathrm{d}x^e
+= \frac{E^e A^e}{L^e} \begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix}
+$$
+
+Ist der Querschnitt im Element veränderlich, bleibt $A^e(x^e)$ im Integral stehen. Bei einem linearen
+Querschnittsverlauf ergibt das genau den Mittelwert $A^e = \frac{1}{2}(A^e(0) + A^e(L^e))$, also die
+Fläche in Elementmitte, die wir oben verwendet haben.
+:::
+
+## Inzidenzmatrizen: Element und System verbinden
+
+:::: {.scrolly svg="../grafiken/stab/system.svg"}
+
+::: {.schritt zeige="stab elemente sysdof einzeln verbindung"}
+### Welcher Elementknoten ist welcher Systemknoten?
+
+Aus dem Bild lesen wir die **Kinematik** ab:
+
+| Systemknoten | Elementfreiheitsgrade |
+|:-:|:--|
+| $p_1$ | $p_2^1$ |
+| $p_2$ | $p_1^1 = p_2^2$ |
+| $p_3$ | $p_1^2 = p_2^3$ |
+| $p_4$ | $p_1^3$ |
+
+Gesucht ist eine Matrix, die genau diese Zuordnung beschreibt: $\mathbf{p}^e = \boldsymbol{\Lambda}^e\,\mathbf{p}_{sys}$.
+:::
+
+::: {.schritt zeige="stab elemente sysdof einzeln verbindung"}
+### Inzidenzmatrix als Tabelle
+
+Für Element 1 tragen wir eine $1$ ein, wo ein Elementfreiheitsgrad zu einem Systemfreiheitsgrad gehört:
+
+| | $p_1$ | $p_2$ | $p_3$ | $p_4$ |
+|:-:|:-:|:-:|:-:|:-:|
+| $p_1^1$ | 0 | 1 | 0 | 0 |
+| $p_2^1$ | 1 | 0 | 0 | 0 |
+
+$$
+\begin{pmatrix} p_1^1 \\ p_2^1 \end{pmatrix}
+= \underbrace{\begin{pmatrix} 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \end{pmatrix}}_{\boldsymbol{\Lambda}^1}
+\begin{pmatrix} p_1 \\ p_2 \\ p_3 \\ p_4 \end{pmatrix}
+= \begin{pmatrix} p_2 \\ p_1 \end{pmatrix}
+$$
+:::
+
+::: {.schritt zeige="stab elemente sysdof einzeln verbindung"}
+### Alle drei Inzidenzmatrizen
+
+$$
+\boldsymbol{\Lambda}^1 = \begin{pmatrix} 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \end{pmatrix},\quad
+\boldsymbol{\Lambda}^2 = \begin{pmatrix} 0 & 0 & 1 & 0 \\ 0 & 1 & 0 & 0 \end{pmatrix},\quad
+\boldsymbol{\Lambda}^3 = \begin{pmatrix} 0 & 0 & 0 & 1 \\ 0 & 0 & 1 & 0 \end{pmatrix}
+$$
+
+Die Inzidenzmatrizen beschreiben die **Konnektivität** des Netzes. Sie enthalten nur Nullen und Einsen,
+keine Mechanik. Ein FEM-Programm erzeugt sie beim Vernetzen automatisch.
+:::
+
+::::
+
+## Zusammenbau: die Systemsteifigkeitsmatrix
+
+Die innere Energie des Systems ist die Summe der Elementenergien. Mit $\mathbf{p}^e = \boldsymbol{\Lambda}^e\mathbf{p}_{sys}$:
+
+$$
+\Pi_i = \sum_{e=1}^{n} \frac{1}{2}\,\mathbf{p}^{e\mathsf{T}}\mathbf{K}^e\mathbf{p}^e
+= \frac{1}{2}\,\mathbf{p}_{sys}^\mathsf{T}
+\underbrace{\left(\sum_{e=1}^{n} \boldsymbol{\Lambda}^{e\mathsf{T}}\mathbf{K}^e\boldsymbol{\Lambda}^e\right)}_{\mathbf{K}_{sys}}
+\mathbf{p}_{sys}
+$$
+
+Mit der äußeren Energie $\Pi_a = -\mathbf{p}_{sys}^\mathsf{T}\mathbf{q}_{sys}$ lautet das Gesamtpotential
+
+$$
+\Pi_{ges} = \frac{1}{2}\,\mathbf{p}_{sys}^\mathsf{T}\mathbf{K}_{sys}\mathbf{p}_{sys} - \mathbf{p}_{sys}^\mathsf{T}\mathbf{q}_{sys}
+\qquad\xrightarrow{\;\partial \Pi_{ges} / \partial \mathbf{p}_{sys} \,\overset{!}{=}\, \mathbf{0}\;}\qquad
+\boxed{\mathbf{K}_{sys}\,\mathbf{p}_{sys} = \mathbf{q}_{sys}}
+$$
+
+Das ist dieselbe Form wie das Federgesetz $F = c\,u$, nur für alle Freiheitsgrade gleichzeitig.
+
+Für unseren Stab ($c_e = E^e A^e / L^e$):
+
+$$
+\mathbf{K}_{sys} =
+\begin{pmatrix}
+c_1 & -c_1 & 0 & 0 \\
+-c_1 & c_1 + c_2 & -c_2 & 0 \\
+0 & -c_2 & c_2 + c_3 & -c_3 \\
+0 & 0 & -c_3 & c_3
+\end{pmatrix},
+\qquad
+\mathbf{p}_{sys} = \begin{pmatrix} 0 \\ p_2 \\ p_3 \\ p_4 \end{pmatrix},
+\qquad
+\mathbf{q}_{sys} = \begin{pmatrix} q_1 \\ 0 \\ 0 \\ F \end{pmatrix}
+$$
+
+::: {.merke}
+**Was man an $\mathbf{K}_{sys}$ sieht:** Sie ist symmetrisch und nur nahe der Diagonale besetzt (Bandstruktur),
+weil jedes Element nur seine Nachbarknoten koppelt. An jedem inneren Knoten addieren sich die Steifigkeiten
+der angrenzenden Elemente. Ohne Lager wäre $\mathbf{K}_{sys}$ singulär: Der Stab könnte frei verschoben werden.
+:::
+
+::: {.vertiefung titel="Ausführlicher: Randbedingung einarbeiten"}
+Wegen $p_1 = 0$ ist die erste Gleichung zunächst nicht nutzbar: Sie enthält die unbekannte Lagerkraft $q_1$.
+Wir streichen die erste Zeile und Spalte und lösen das reduzierte System
+
+$$
+\begin{pmatrix} 30\,800 & -12\,600 & 0 \\ -12\,600 & 19\,600 & -7000 \\ 0 & -7000 & 7000 \end{pmatrix}
+\begin{pmatrix} p_2 \\ p_3 \\ p_4 \end{pmatrix}
+= \begin{pmatrix} 0 \\ 0 \\ 5000 \end{pmatrix}
+\quad\Rightarrow\quad
+\begin{pmatrix} p_2 \\ p_3 \\ p_4 \end{pmatrix} = \begin{pmatrix} 0{,}275 \\ 0{,}672 \\ 1{,}386 \end{pmatrix} \text{mm}
+$$
+
+Die gestrichene erste Gleichung liefert anschließend die Lagerkraft:
+$q_1 = -c_1\,p_2 = -5000$ N.
+:::
+
+## Lösung und Auswertung
+
+:::: {.scrolly svg="../grafiken/stab/ergebnis.svg"}
+
+::: {.schritt zeige="achsen fem_u"}
+### Verschiebungen im Element
+
+Aus der Lösung $\mathbf{p}_{sys}$ holen wir uns die Elementfreiheitsgrade zurück und setzen sie in den Ansatz ein:
+
+$$
+u^e(x^e) = \mathbf{N}^e\,\mathbf{p}^e = \mathbf{N}^e\,\boldsymbol{\Lambda}^e\,\mathbf{p}_{sys}
+$$
+
+Die Verschiebung ist **stückweise linear**: ein Polygonzug durch die Knotenwerte.
+:::
+
+::: {.schritt zeige="achsen exakt fem_u"}
+### Vergleich mit der exakten Lösung
+
+| | $p_2$ | $p_3$ | $p_4$ |
+|:--|:-:|:-:|:-:|
+| FEM, 3 Elemente | 0,275 | 0,672 | 1,386 |
+| exakt | 0,277 | 0,681 | 1,437 |
+
+Die Verschiebung ist schon mit drei Elementen gut getroffen. Am Stabende fehlen $3{,}6\,\%$.
+:::
+
+::: {.schritt zeige="achsen exakt fem_s"}
+### Dehnungen und Spannungen
+
+Ableiten des Ansatzes liefert die Dehnung, das Hookesche Gesetz die Spannung:
+
+$$
+\varepsilon^e = \mathbf{N}^e{}'\,\boldsymbol{\Lambda}^e\,\mathbf{p}_{sys}, \qquad
+\sigma^e = E^e\,\mathbf{N}^e{}'\,\boldsymbol{\Lambda}^e\,\mathbf{p}_{sys}
+$$
+
+Beim linearen Element ist die Spannung **je Element konstant**: $57{,}7$, $83{,}3$ und $150$ MPa.
+Das Maximum von $250$ MPa am Stabende wird deutlich unterschätzt.
+
+**Spannungen sind ungenauer als Verschiebungen**, weil sie aus der Ableitung entstehen.
+:::
+
+::::
+
+::: {.aufgabe}
+**Ausprobieren:** Im Beispiel [Konischer Stab: Elementanzahl und Konvergenz](../beispiele/stab-konvergenz/index.html)
+können Sie die Anzahl der Elemente und das Verhältnis $A_1/A_0$ verändern. Wie viele Elemente brauchen Sie,
+damit die maximale Spannung auf $5\,\%$ genau ist? Und wie viele für die Verschiebung am Stabende?
+:::
+
+## Der Ablauf der FEM
+
+Was wir am Stab Schritt für Schritt gemacht haben, läuft in jedem FEM-Programm genauso ab:
+
+| | Schritt | Ergebnis |
+|:--|:--|:--|
+| [**Preprocessor**]{style="color:#0050b4"} | 1a. Elementtyp wählen | $\mathbf{K}^e$, $\mathbf{p}^e$, $\mathbf{N}^e$ |
+| | 1b. Vernetzen: Einteilung in Elemente | $\mathbf{p}_{sys}$, $\mathbf{q}_{sys}$ |
+| | 2. Elementmatrizen mit Material und Geometrie belegen | $\mathbf{K}^e$ |
+| | 3. Konnektivität | $\boldsymbol{\Lambda}^e$ |
+| [**Solution**]{style="color:#d40000"} | 4. Zusammenbau | $\mathbf{K}_{sys} = \sum_e \boldsymbol{\Lambda}^{e\mathsf{T}}\mathbf{K}^e\boldsymbol{\Lambda}^e$ |
+| | 5. Gleichungssystem lösen | $\mathbf{K}_{sys}\,\mathbf{p}_{sys} = \mathbf{q}_{sys}$ |
+| [**Postprocessor**]{style="color:#006414"} | 6. Elementverschiebungen | $\mathbf{p}^e = \boldsymbol{\Lambda}^e\mathbf{p}_{sys}$ |
+| | 7. Verschiebungsverlauf im Element | $u^e = \mathbf{N}^e\boldsymbol{\Lambda}^e\mathbf{p}_{sys}$ |
+| | 8. Dehnungen und Spannungen | $\sigma^e = E^e\mathbf{N}^e{}'\boldsymbol{\Lambda}^e\mathbf{p}_{sys}$ |
+
+: {.striped}
+
+::: {.merke}
+**Ritz und FEM im Vergleich.** Beide minimieren die potentielle Energie mit einem Ansatz. Bei Ritz gilt
+**ein** Ansatz für das ganze Bauteil, und er muss für jede Aufgabe neu gewählt werden. Bei der FEM gilt ein
+**einfacher Ansatz je Element**. Er wird einmal hergeleitet und immer wieder verwendet. Mehr Genauigkeit
+erhält man durch mehr Elemente (oder höhere Ansätze, siehe Vorlesung 4).
+:::
+
+## Übung mit Mathematica
+
+::: {.aufgabe}
+**Konischer Stab mit zwei Elementen.** Lösen Sie das Beispiel mit **zwei** Elementen gleicher Länge.
+Gehen Sie dabei den Ablauf der FEM Schritt für Schritt durch: Elementsteifigkeitsmatrizen, Inzidenzmatrizen,
+Zusammenbau, Lösung, Verschiebungs- und Spannungsverlauf. Vergleichen Sie mit der exakten Lösung.
+
+[Aufgabe herunterladen (Mathematica)](../mathematica/03-stab-konisch-fem-task.nb){download="03-stab-konisch-fem-task.nb"}
+:::

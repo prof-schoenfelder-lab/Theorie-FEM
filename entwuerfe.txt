@@ -1,0 +1,5 @@
+# Entwürfe: werden beim Veröffentlichen (GitHub Actions) weggelassen, lokal aber gebaut.
+# Eine Datei pro Zeile (Seiten .qmd, Beispiele .py, Mathematica-Aufgaben .nb); zum Freigeben die Zeile löschen.
+vorlesung/03-stab.qmd
+beispiele/stab-konvergenz.py
+mathematica/03-stab-konisch-fem-task.nb

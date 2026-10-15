@@ -1,0 +1,62 @@
+project:
+  type: website
+  output-dir: _site
+  # Grafiken vor jedem Rendern neu erzeugen, marimo-Beispiele danach exportieren
+  pre-render: werkzeuge/vor_render.py
+  post-render: werkzeuge/nach_render.py
+  render:
+    - index.qmd
+    - spickzettel.qmd
+    - vorlesung/*.qmd
+  resources:
+    - assets/fonts/
+    - assets/logos/
+    - mathematica/*-task.nb
+
+lang: de
+
+website:
+  title: "Theorie der Finite-Elemente-Methode"
+  page-navigation: true
+  navbar:
+    logo: assets/logos/htwk-schwarz.svg
+    logo-alt: "HTWK Leipzig"
+    left:
+      - href: index.qmd
+        text: Übersicht
+      - text: Vorlesung
+        menu:
+          - href: vorlesung/00-einfuehrung.qmd
+            text: "0 · Einführung: Mathematica und K p = q"
+          - href: vorlesung/03-stab.qmd
+            text: "3 · Normalkraftstab: von Ritz zur FEM"
+      - text: Beispiele
+        menu:
+          - href: beispiele/federsystem/index.html
+            text: "Federsystem: Steifigkeitsmatrix"
+          - href: beispiele/stab-konvergenz/index.html
+            text: "Konischer Stab: Elementanzahl und Konvergenz"
+      - href: spickzettel.qmd
+        text: Spickzettel
+    right:
+      - text: "Prof. Dr.-Ing. Stephan Schönfelder"
+        href: "https://fing.htwk-leipzig.de/fakultaet/professuren/prof-stephan-schoenfelder"
+        target: _blank
+  page-footer:
+    center: |
+      <div class="tm-fusszeile">
+        <img src="/assets/logos/fakultaet-ing-schwarz.png" alt="Fakultät Ingenieurwissenschaften">
+        <span>Theorie der Finite-Elemente-Methode · <a href="https://fing.htwk-leipzig.de/fakultaet/professuren/prof-stephan-schoenfelder" target="_blank">Prof. Dr.-Ing. Stephan Schönfelder</a> · <a href="/index.html#ki-hinweis">Hinweis zur KI-Nutzung</a></span>
+      </div>
+
+format:
+  html:
+    theme: cosmo
+    mainfont: "Source Sans Pro"
+    css: assets/tm.css
+    include-after-body: assets/scrolly.html
+    html-math-method: mathjax
+    toc: false
+
+filters:
+  - assets/scrolly.lua

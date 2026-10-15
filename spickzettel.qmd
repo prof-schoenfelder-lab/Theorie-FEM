@@ -1,0 +1,206 @@
+---
+title: "Mathematica-Spickzettel"
+subtitle: "Die wichtigsten Befehle für TM und FEM, zusammengestellt aus den Mathematica-Dateien des Moduls"
+page-layout: full
+---
+
+::: {.merke}
+**Grundlage:** Für diesen Spickzettel wurden alle Mathematica-Dateien des Moduls ausgewertet: Vorlesung,
+Übung, Praktikum und Abschlussübungen. Aufgenommen sind die Befehle, die dort tatsächlich vorkommen. Mit
+rund 40 Befehlen lassen sich fast alle Aufgaben lösen.
+:::
+
+::::: {.spick}
+
+:::: {.spick-block}
+### Grundregeln
+
+| Schreibweise | Bedeutung |
+|:--|:--|
+| `Sin[x]`, `Solve[...]` | Funktionen groß, Argumente in **eckigen** Klammern |
+| `(a + b) c` | runde Klammern nur zum Gruppieren |
+| `a b` oder `a*b` | Multiplikation (Leerzeichen!), `ab` ist **ein** Name |
+| `a = 3` | Zuweisung (Set) |
+| `x^2 == 4` | Gleichung (Equal), für `Solve`, `DSolve` |
+| `f[x_] := x^2` | Funktion definieren (SetDelayed) |
+| `x -> 3` | Regel (Rule) |
+| `ausdruck /. regeln` | Regeln einsetzen (ReplaceAll) |
+| `befehl;` | Ausgabe unterdrücken |
+| `ausdruck // N` | Befehl hinten anhängen, wie `N[ausdruck]` |
+| `%`, `%%` | letzte, vorletzte Ausgabe |
+| `(* Kommentar *)` | Kommentar |
+| **Shift + Enter** | Zelle auswerten |
+| `?Plot`, **F1** | Hilfe zu einem Befehl |
+::::
+
+:::: {.spick-block}
+### Eingabe von Formeln
+
+| Tasten | Ergebnis |
+|:--|:--|
+| **Ctrl + _** | Index $x_1$ (Subscript, **128**) |
+| **Ctrl + ^** | Hochzahl $x^2$ |
+| **Ctrl + /** | Bruch |
+| **Ctrl + 2** | Wurzel |
+| **Esc** `a` **Esc** | $\alpha$ (ebenso `b`, `s`, `L` für $\Lambda$ …) |
+| **Esc** `ee` **Esc** | Eulersche Zahl $e$ |
+| **Esc** `->` **Esc** | Pfeil $\to$ |
+
+Indizes sehen gut aus, sind aber fehleranfällig: `Subscript[p, 1]` ist ein anderer Name als `p1`.
+Innerhalb einer Datei einheitlich bleiben.
+::::
+
+:::: {.spick-block}
+### Ausdrücke umformen
+
+| Befehl | Wirkung |
+|:--|:--|
+| `Simplify[a]` | vereinfachen |
+| `FullSimplify[a]` | gründlicher vereinfachen |
+| `Expand[a]`, `Factor[a]` | ausmultiplizieren, faktorisieren |
+| `N[a]` | numerischer Wert |
+| `Chop[a]` | kleine Zahlen wie `1.*^-16` auf 0 setzen |
+| `Coefficient[a, x]` | Koeffizient von $x$ |
+| `Clear[x]` | Belegung von `x` löschen |
+| `data = {E0 -> 70000, L -> 1000};` | Zahlenwerte als Regelliste |
+| `ausdruck /. data` | Zahlen erst am Ende einsetzen |
+::::
+
+:::: {.spick-block}
+### Gleichungen lösen
+
+| Befehl | Wirkung |
+|:--|:--|
+| `Solve[x^2 == 4, x]` | exakt lösen, Ergebnis: Liste von Regeln |
+| `Solve[{g1, g2}, {a, b}]` | Gleichungssystem |
+| `Solve[f == 0, x, Reals]` | nur reelle Lösungen |
+| `NSolve[...]`, `FindRoot[f == 0, {x, 1}]` | numerisch |
+| `LinearSolve[K, q]` | $\mathbf{K}\mathbf{p} = \mathbf{q}$ lösen |
+| `lsg[[1]]` | erste Lösung (Regelliste) |
+| `x /. lsg[[1]]` | Wert herausholen |
+| `ausdruck /. lsg[[1]]` | Lösung einsetzen |
+
+```mathematica
+lsg = Solve[{gh, gv, gm}, {Ah, Av, B}];
+lager = lsg[[1]];  Av /. lager
+```
+::::
+
+:::: {.spick-block}
+### Ableiten, Integrieren, Summieren
+
+| Befehl | Wirkung |
+|:--|:--|
+| `D[f, x]` | Ableitung $f'$ |
+| `D[f, {x, 2}]` | zweite Ableitung |
+| `D[vektor, {{p1, p2}}]` | Jacobi-Matrix (z. B. $\mathbf{K}$ aus inneren Kräften) |
+| `Integrate[f, x]` | Stammfunktion |
+| `Integrate[f, {x, 0, L}]` | bestimmtes Integral |
+| `Sum[a[i], {i, 1, n}]` | Summe, z. B. Zusammenbau von $\mathbf{K}_{sys}$ |
+| `FindMaximum[f, {x, 1}]`, `Maximize`, `Minimize` | Extremwerte |
+::::
+
+:::: {.spick-block}
+### Differentialgleichungen
+
+`u[x]` mit eckigen Klammern ist eine **unbekannte Funktion**. `u'[x]` und `D[u[x], x]` sind gleichwertig.
+
+```mathematica
+dgl = D[Em A[x] D[u[x], x], x] == -q[x];
+rb  = {u[0] == 0, Em A[L] u'[L] == F};
+lsg = DSolve[{dgl, Sequence @@ rb}, u[x], x];
+uex = u[x] /. lsg[[1]]
+Nx  = Em A[x] D[uex, x]
+```
+
+Ohne Randbedingungen erscheinen Konstanten `C[1]`, `C[2]`.
+::::
+
+:::: {.spick-block}
+### Listen, Vektoren, Matrizen
+
+| Befehl | Wirkung |
+|:--|:--|
+| `v = {1, 2, 3}` | Vektor (Liste) |
+| `K = {{1, -1}, {-1, 1}}` | Matrix (Liste von Zeilen) |
+| `v[[2]]`, `K[[1, 2]]` | Element |
+| `K[[All, 1]]` | erste Spalte |
+| `A . B` | Matrix- und Skalarprodukt |
+| `Transpose[A]` | transponieren |
+| `MatrixForm[A]` | als Matrix anzeigen |
+| `IdentityMatrix[n]`, `Inverse[A]`, `Det[A]` | Einheitsmatrix, Inverse, Determinante |
+| `Eigenvalues[A]`, `Eigensystem[A]` | Eigenwerte (Hauptspannungen) |
+| `Table[f[i], {i, 1, n}]` | Liste erzeugen |
+| `Outer[Times, a, b]` | dyadisches Produkt $\mathbf{a}\mathbf{b}^\mathsf{T}$ |
+| `Flatten[l]`, `Length[l]`, `Dimensions[A]` | einebnen, Länge, Größe |
+| `CoefficientArrays[glg, vars]` | Gleichungssystem → Matrix |
+::::
+
+:::: {.spick-block}
+### Stückweise Funktionen
+
+```mathematica
+M = Piecewise[{{M1 /. x1 -> x,       0 <= x <= 3 a},
+               {M2 /. x2 -> x - 3 a, 3 a < x <= 4 a}}];
+```
+
+Für Schnittgrößenverläufe über mehrere Bereiche und für die FEM-Lösung über alle Elemente.
+::::
+
+:::: {.spick-block}
+### Diagramme
+
+| Befehl / Option | Wirkung |
+|:--|:--|
+| `Plot[f, {x, 0, L}]` | Funktion zeichnen |
+| `Plot[{f, g}, {x, 0, L}]` | mehrere Kurven |
+| `Plot[Evaluate[f /. data], ...]` | erst einsetzen, dann zeichnen |
+| `PlotStyle -> {Red, Dashed, Thick}` | Linienstil |
+| `Filling -> Axis` | Fläche zur Achse füllen |
+| `PlotRange -> All` | ganzen Wertebereich zeigen |
+| `AxesOrigin -> {0, 0}` | Achsenursprung |
+| `PlotLegends -> {"exakt", "FEM"}` | Legende |
+| `PlotTheme -> "Detailed"` | Gitter und Rahmen |
+| `FrameLabel -> {"x [mm]", "u [mm]"}` | Achsenbeschriftung (mit Rahmen) |
+| `AxesLabel -> {"x", "u"}` | Achsenbeschriftung (ohne Rahmen) |
+| `Show[p1, p2]` | Diagramme überlagern |
+| `GraphicsRow[{p1, p2}]`, `GraphicsGrid` | nebeneinander |
+| `ListPlot[{{x1, y1}, ...}]` | Punkte |
+| `ContourPlot[f, {x, 0, a}, {y, 0, b}]` | Felder in 2D (Spannungen) |
+| `Plot3D`, `DensityPlot` | Flächen, Farbdichte |
+| `Manipulate[Plot[...], {c, 1, 10}]` | Schieberegler |
+::::
+
+:::: {.spick-block}
+### FEM-Muster aus der Vorlesung
+
+```mathematica
+Ne  = {xe/Le, 1 - xe/Le};             (* Ansatzfunktionen *)
+dNe = D[Ne, xe];
+Ke  = Integrate[Outer[Times, dNe, dNe] Ee Ae, {xe, 0, Le}];
+K[e_] := Ke /. {Ee -> Em, Ae -> ae[[e]], Le -> le[[e]]}
+Λ[1] = {{0, 1, 0}, {1, 0, 0}};         (* Inzidenzmatrizen *)
+Ksys = Sum[Transpose[Λ[e]] . K[e] . Λ[e], {e, nel}];
+lsg  = Solve[Ksys . psys == qsys, unbekannte];
+pe   = Λ[e] . psys /. lsg[[1]];       (* Elementverschiebungen *)
+ue   = Ne . pe;  sige = Em dNe . pe;
+```
+::::
+
+:::: {.spick-block .spick-warnung}
+### Typische Fehler
+
+| Problem | Abhilfe |
+|:--|:--|
+| `E`, `N`, `D`, `C`, `I` sind belegt (Eulersche Zahl, numerisch, Ableitung, Konstante, imaginäre Einheit) | `Em`, `Nx`, `c1` usw. verwenden |
+| `K = {...} // MatrixForm` – danach rechnet `K` nicht mehr | nur zur Anzeige: `K = {...}; K // MatrixForm` |
+| `x = 3` gesetzt, später überall 3 | `Clear[x]` oder Kernel neu starten (*Auswertung → Kernel beenden*) |
+| `=` statt `==` in `Solve` | Gleichungen immer mit `==` |
+| `ab` statt `a b` | Leerzeichen oder `*` |
+| `Plot` bleibt leer | Zahlenwerte fehlen: `/. data`, oft mit `Evaluate` |
+| `Solve` liefert `{}` | Gleichungen widersprüchlich oder Variable falsch geschrieben |
+| Ergebnis voller `1.*^-17` | `Chop[...]` |
+| Indizes uneinheitlich (`p1` / `Subscript[p, 1]`) | eine Schreibweise beibehalten |
+::::
+
+:::::

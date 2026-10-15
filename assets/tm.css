@@ -1,0 +1,175 @@
+/* HTWK-Hausschrift (Source Sans Pro) für Text, Latin Modern für Formelzeichen in Grafiken */
+@font-face { font-family: "Source Sans Pro"; src: url("fonts/SourceSansPro-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Source Sans Pro"; src: url("fonts/SourceSansPro-Italic.ttf") format("truetype"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Source Sans Pro"; src: url("fonts/SourceSansPro-SemiBold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Source Sans Pro"; src: url("fonts/SourceSansPro-SemiBoldItalic.ttf") format("truetype"); font-weight: 600; font-style: italic; font-display: swap; }
+@font-face { font-family: "Source Sans Pro"; src: url("fonts/SourceSansPro-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Source Sans Pro"; src: url("fonts/SourceSansPro-Light.ttf") format("truetype"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "Latin Modern Roman"; src: url("fonts/lmroman10-regular.otf") format("opentype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Latin Modern Roman"; src: url("fonts/lmroman10-italic.otf") format("opentype"); font-weight: 400; font-style: italic; font-display: swap; }
+
+:root {
+  --bs-body-font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  --bs-font-sans-serif: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  --tm-last: #ff0000;
+  --tm-reaktion: #0050b4;
+  --tm-mass: #006414;
+  --tm-karte: #ffffff;
+  --tm-rand: #d8dde3;
+}
+
+/* Farbige Formelzeichen im Text passend zu den Grafiken */
+.last { color: var(--tm-last); }
+.reaktion { color: var(--tm-reaktion); }
+.mass { color: var(--tm-mass); }
+
+/* ------------------------------------------------ Scrollytelling */
+.scrolly {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 2.5rem;
+  margin: 2rem 0 4rem;
+}
+.scrolly-grafik { position: relative; }
+.scrolly-sticky {
+  position: sticky;
+  top: 4.5rem;
+  height: calc(100vh - 6rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scrolly-sticky svg { width: 100%; height: 100%; max-height: 100%; }
+.scrolly-zaehler {
+  position: absolute; right: 0; bottom: 0.25rem;
+  font-size: 0.8rem; color: #8a8f96;
+}
+
+.scrolly svg > g[data-ebene] { opacity: 0; transition: opacity 0.6s ease; }
+.scrolly svg > g[data-ebene].sichtbar { opacity: 1; }
+.scrolly svg > g[data-ebene].gedimmt { opacity: 0.22; }
+.scrolly svg > g[data-ebene].neu { animation: tm-auftauchen 0.9s ease; }
+@keyframes tm-auftauchen {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.scrolly-schritte { padding: 30vh 0 45vh; }
+.schritt {
+  min-height: 55vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0.35;
+  transition: opacity 0.4s ease;
+}
+.schritt.aktiv { opacity: 1; }
+.schritt > * { max-width: 34rem; }
+.schritt mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; }
+.schritt h3, .schritt h4 { margin-top: 0; }
+
+/* Smartphone / schmale Fenster: Grafik oben fixiert, Text darunter */
+@media (max-width: 900px) {
+  .scrolly { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .scrolly-grafik {
+    position: sticky; top: 0; z-index: 2; height: 40vh;
+    background: var(--bs-body-bg, #fff);
+    border-bottom: 1px solid var(--tm-rand);
+  }
+  .scrolly-sticky { position: relative; top: 0; height: 100%; }
+  .scrolly-schritte { padding: 2rem 0 30vh; }
+  .schritt { min-height: 50vh; justify-content: flex-start; }
+  .schritt > * { max-width: 100%; }
+}
+
+/* ------------------------------------------------ Beamer-Modus */
+.beamer-schalter {
+  position: fixed; right: 1rem; bottom: 1rem; z-index: 50;
+  border: 1px solid var(--tm-rand); background: #fff; color: #555;
+  border-radius: 0.4rem; padding: 0.25rem 0.7rem; font-size: 0.8rem;
+  opacity: 0.6;
+}
+.beamer-schalter:hover { opacity: 1; }
+html.beamer { font-size: 125%; }
+.hilfe-schalter {
+  position: fixed; right: 1rem; bottom: 1rem; z-index: 60;
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  background: #0050b4; color: #fff !important; text-decoration: none;
+  border-radius: 2rem; padding: 0.4rem 0.9rem 0.4rem 0.45rem;
+  font-size: 0.9rem; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+.hilfe-schalter:hover { background: #003d8a; }
+.hilfe-zeichen {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.5rem; height: 1.5rem; border-radius: 50%; background: #fff; color: #0050b4; font-weight: 700;
+}
+html.mit-hilfe .beamer-schalter { bottom: 3.8rem; }
+@media (max-width: 700px) {
+  .hilfe-text { display: none; }
+  .hilfe-schalter { padding: 0.4rem; }
+}
+@media print { .hilfe-schalter, .beamer-schalter { display: none; } }
+html.beamer .beamer-schalter { background: #0050b4; color: #fff; }
+html.beamer .scrolly-sticky { top: 3.6rem; height: calc(100vh - 4.5rem); }
+html.beamer #quarto-header { opacity: 0.25; }
+html.beamer .schritt:not(.aktiv) { opacity: 0.12; }
+html.beamer .scrolly { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 1.5rem; }
+html.beamer .schritt > * { max-width: 100%; }
+
+/* ------------------------------------------------ Aufgaben */
+.aufgabe {
+  border-left: 4px solid var(--tm-reaktion);
+  padding: 0.2rem 0 0.2rem 1rem;
+  margin: 2rem 0;
+}
+.aufgabe img { max-width: 100%; }
+.merke {
+  border: 1px solid var(--tm-rand);
+  border-radius: 0.4rem;
+  padding: 0.6rem 1rem;
+  background: #f6f8fb;
+}
+
+/* ------------------------------------------------ Corporate Design */
+body, .navbar, h1, h2, h3, h4, h5, h6, .title, .subtitle {
+  font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+}
+h1, h2, h3, .title { font-weight: 600; }
+.navbar-brand img { max-height: 28px; margin-right: 0.4rem; }
+.tm-dozent { font-size: 0.95rem; color: #555; }
+.tm-fusszeile { display: flex; align-items: center; gap: 1.5rem; justify-content: center; flex-wrap: wrap; }
+.tm-fusszeile img { height: 34px; }
+
+/* Formeln linksbündig (MathJax) */
+mjx-container[display="true"] { text-align: left !important; margin-left: 0 !important; }
+
+/* ------------------------------------------------ Vertiefung („Ausführlicher“) */
+details.vertiefung {
+  border-left: 3px solid #b8c4d6;
+  background: #f6f8fb;
+  padding: 0.3rem 0.9rem;
+  margin: 0.8rem 0;
+  border-radius: 0 0.3rem 0.3rem 0;
+}
+details.vertiefung > summary {
+  cursor: pointer; color: #0050b4; font-weight: 600; font-size: 0.92rem;
+}
+details.vertiefung[open] > summary { margin-bottom: 0.4rem; }
+details.vertiefung p:last-child { margin-bottom: 0.2rem; }
+
+/* ------------------------------------------------ Spickzettel */
+.spick { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 30rem), 1fr)); gap: 1.2rem; margin: 1.5rem 0 2rem; align-items: start; }
+.spick-block { border: 1px solid var(--tm-rand, #d9dde2); border-radius: 10px; padding: 0.9rem 1.1rem 0.4rem; background: #fafbfc; break-inside: avoid; }
+.spick-block h3 { margin-top: 0; font-size: 1.15rem; color: #0050b4; border-bottom: 2px solid #0050b4; padding-bottom: 0.25rem; }
+.spick-block table { font-size: 0.88rem; margin-bottom: 0.6rem; }
+.spick-block td:first-child code { white-space: nowrap; }
+.spick-block pre { font-size: 0.82rem; }
+.spick-warnung { background: #fff7f5; border-color: #f1c3bb; }
+.spick-warnung h3 { color: #b42318; border-bottom-color: #b42318; }
+@media print { .spick { display: block; } .spick-block { margin-bottom: 0.8rem; } #quarto-header, .tm-fusszeile { display: none; } }
+
+/* ------------------------------------------------ Hinweis zur KI-Nutzung (Startseite) */
+.ki-hinweis {
+  margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--tm-rand, #dee2e6);
+  font-size: 0.9rem; color: #555;
+}

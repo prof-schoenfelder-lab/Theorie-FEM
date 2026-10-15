@@ -1,0 +1,30 @@
+(* Gemeinsame Bausteine für die Übungsnotebooks (task/solved aus einer Quelle).
+   Wird von mathematica_<thema>.wl mit Get geladen. *)
+
+kursordner = FileNameJoin[{DirectoryName[$InputFileName], ".."}];
+nbziel = FileNameJoin[{kursordner, "mathematica"}];
+
+(* Eingabezelle aus Quelltext: hübsch formatiert (2D-Brüche usw.) *)
+ein[s_String] := Cell[BoxData[
+    ToExpression[s, InputForm, HoldComplete] /. HoldComplete[e_] :> MakeBoxes[e, StandardForm]], "Input"];
+leer[hinweis_String] := Cell[BoxData[RowBox[{"(*", " ", hinweis, " ", "*)"}]], "Input"];
+txt[s_String] := Cell[s, "Text"];
+(* Grafik aus dem Kurs (SVG wird über rsvg-convert als PNG eingebettet) *)
+bild[svg_String, breite_:500] := Module[{png = FileNameJoin[{$TemporaryDirectory, "kursbild.png"}]},
+  Run["rsvg-convert -z 2 -b white -o '" <> png <> "' '" <> FileNameJoin[{kursordner, svg}] <> "'"];
+  Cell[BoxData[ToBoxes[Image[Import[png], ImageSize -> breite]]], "Text"]];
+
+(* Aufgabenschritt: {Überschrift, Erklärung, {Code ...}, Hinweis für die Aufgabe} *)
+schrittzellen[s_List, geloest_] := Join[
+  {Cell[s[[1]], "Subsection"]},
+  If[s[[2]] =!= "", {txt[s[[2]]]}, {}],
+  If[geloest, ein /@ s[[3]], {txt["Gesucht: " <> s[[4]]], leer["Ihre Eingabe"]}]];
+
+speichereNB[name_String, zellen_List] := Module[{pfad = FileNameJoin[{nbziel, name}]},
+  Export[pfad, Notebook[zellen, StyleDefinitions -> "Default.nb"], "NB"];
+  Print["geschrieben: ", pfad]];
+
+(* Lösungscode im Kernel ausführen und Ergebnisse ausgeben (Kontrolle) *)
+pruefeCode[code_List] := Do[With[{r = ToExpression[c]},
+    If[!StringEndsQ[c, ";"] && FreeQ[r, Graphics | Legended | Image],
+      Print[c, "  =>  ", ToString[r /. m_MatrixForm :> First[m], InputForm]]]], {c, code}];
