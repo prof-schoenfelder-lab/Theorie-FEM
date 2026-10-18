@@ -15,3 +15,6 @@ werkzeuge/mathematica_*.wl
 grafiken/uebernommen/
 
 /.quarto/
+
+# Einstellungen für Claude (über Synology synchronisiert, nicht veröffentlichen)
+.claude/
