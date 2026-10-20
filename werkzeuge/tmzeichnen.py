@@ -37,6 +37,7 @@ FARBE = {
     "hinweis": "#7a7a7a",       # Hilfslinien
 }
 SCHRIFT = "'Latin Modern Roman','LM Roman 10','CMU Serif',serif"
+TEXTSCHRIFT = "'Source Sans Pro','Helvetica Neue',Arial,sans-serif"   # Wörter wie auf der Webseite
 GROESSE = 19          # Schriftgröße Formelzeichen
 STRICH = {"duenn": 0.8, "normal": 1.25, "dick": 1.9}
 
@@ -66,14 +67,31 @@ def _tspans(label: str, italic: bool = True) -> str:
     return "".join(out)
 
 
+_WORT = re.compile(r"[A-Za-zÄÖÜäöüß]*[a-zäöüß]{2}[A-Za-zÄÖÜäöüß]*")
+_FUNKTION = {"sin", "cos", "tan", "exp", "log", "det"}
+
+
+def ist_wort(label: str) -> bool:
+    """True, wenn die Beschriftung geschriebenen Text enthält (ein Wort mit mindestens drei Buchstaben,
+    davon zwei klein, z. B. „Bereich I“, „Freischnitt“, „Max (…)“). Indizes (M_{max}) und Einheiten (MPa)
+    zählen nicht; reine Formelzeichen bleiben in der Formelschrift."""
+    ohne_index = re.sub(r"[_^](\{[^}]*\}|.)", "", label)
+    return any(len(w) >= 3 and w.lower() not in _FUNKTION for w in _WORT.findall(ohne_index))
+
+
 def text(x, y, label, farbe="#000000", groesse=GROESSE, anker="middle", italic=True, id_=None, halo=True):
     """Text mit Referenzpunkt (x, y) = Mitte der Zeile (vertikal zentriert).
-    halo: weißer Rand, damit Beschriftungen über Linien und Flächen lesbar bleiben."""
+    halo: weißer Rand, damit Beschriftungen über Linien und Flächen lesbar bleiben.
+    Geschriebene Wörter erscheinen automatisch aufrecht in der Textschrift der Webseite (Source Sans Pro),
+    Formelzeichen in Latin Modern."""
+    wort = ist_wort(label)
+    if wort:
+        italic, groesse = False, groesse * 0.85
     style = "italic" if italic else "normal"
     idattr = f' id="{id_}"' if id_ else ""
     h = ' stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke"' if halo else ""
     return (f'<text{idattr} x="{f(x)}" y="{f(y + 0.34 * groesse)}" fill="{farbe}"{h} '
-            f'font-family="{SCHRIFT}" font-size="{f(groesse)}" font-style="{style}" '
+            f'font-family="{TEXTSCHRIFT if wort else SCHRIFT}" font-size="{f(groesse)}" font-style="{style}" '
             f'text-anchor="{anker}" xml:space="preserve">{_tspans(label, italic)}</text>')
 
 

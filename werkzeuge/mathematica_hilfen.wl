@@ -9,6 +9,8 @@ ein[s_String] := Cell[BoxData[
     ToExpression[s, InputForm, HoldComplete] /. HoldComplete[e_] :> MakeBoxes[e, StandardForm]], "Input"];
 leer[hinweis_String] := Cell[BoxData[RowBox[{"(*", " ", hinweis, " ", "*)"}]], "Input"];
 txt[s_String] := Cell[s, "Text"];
+(* Aufgabenstellung: Einleitung, darunter die Teilaufgaben a), b), ... je in einer eigenen Zeile *)
+aufgabe[einleitung_String, teile_List] := txt[StringRiffle[Prepend[teile, einleitung], "\n"]];
 (* Grafik aus dem Kurs (SVG wird über rsvg-convert als PNG eingebettet) *)
 bild[svg_String, breite_:500] := Module[{png = FileNameJoin[{$TemporaryDirectory, "kursbild.png"}]},
   Run["rsvg-convert -z 2 -b white -o '" <> png <> "' '" <> FileNameJoin[{kursordner, svg}] <> "'"];
@@ -21,7 +23,7 @@ schrittzellen[s_List, geloest_] := Join[
   If[geloest, ein /@ s[[3]], {txt["Gesucht: " <> s[[4]]], leer["Ihre Eingabe"]}]];
 
 speichereNB[name_String, zellen_List] := Module[{pfad = FileNameJoin[{nbziel, name}]},
-  Export[pfad, Notebook[zellen, StyleDefinitions -> "Default.nb"], "NB"];
+  Export[pfad, Notebook[zellen, StyleDefinitions -> "Default.nb", Magnification :> 1.25 Inherited], "NB"];
   Print["geschrieben: ", pfad]];
 
 (* Lösungscode im Kernel ausführen und Ergebnisse ausgeben (Kontrolle) *)

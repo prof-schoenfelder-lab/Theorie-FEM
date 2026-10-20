@@ -14,6 +14,7 @@
     if (!svg) return;
     svg.removeAttribute("width");
     svg.removeAttribute("height");
+    svg.setAttribute("preserveAspectRatio", "xMidYMin meet");   // Grafik direkt unter der Überschrift
     // Ebenen = oberste Gruppen (aus dem Baukasten mit data-ebene, aus Inkscape mit groupmode="layer")
     const ebenen = Array.from(svg.children).filter(g => g.tagName.toLowerCase() === "g" &&
       (g.dataset.ebene || g.getAttribute("inkscape:groupmode") === "layer"));
@@ -21,7 +22,52 @@
     const schritte = Array.from(sc.querySelectorAll(".schritt"));
     const zaehler = sc.querySelector(".scrolly-zaehler");
     const vb0 = zahlen(svg.getAttribute("viewBox"));
+    // Überschrift des Themas (übergeordneter Abschnitt, h2) über der Grafik einblenden;
+    // sie bleibt stehen, solange man in diesem Abschnitt scrollt
+    const titel = document.createElement("div");
+    titel.className = "scrolly-titel";
+    svg.parentNode.insertBefore(titel, svg);
+    const abschnitt = sc.closest("section.level2");
+    const h2 = abschnitt ? abschnitt.querySelector(":scope > h2") : null;
+    titel.innerHTML = h2 ? h2.innerHTML : "";
+    titel.querySelectorAll(".anchorjs-link").forEach(a => a.remove());
+    if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+      MathJax.startup.promise.then(() => MathJax.typesetPromise ? MathJax.typesetPromise([titel]) : null)
+        .catch(() => {});
+    }
     let vb = vb0.slice(), anim = null, aktiv = null;
+
+    // Linke Spalte unter der Grafik: Inhalte aus ::: {.links} (Mathematica-Code, längere Herleitungen)
+    // des aktiven Schritts. Auf breiten Bildschirmen werden sie hierher verschoben, auf schmalen
+    // (Grafik oben, Text darunter) bleiben sie an ihrem Platz im Text.
+    const tafel = document.createElement("div");
+    tafel.className = "scrolly-links leer";
+    svg.parentNode.insertBefore(tafel, svg.nextSibling);
+    schritte.forEach(s => {
+      const teile = Array.from(s.querySelectorAll(":scope > .links"));
+      if (!teile.length) return;
+      const huelle = document.createElement("div");
+      huelle.className = "links-inhalt";
+      const platz = document.createElement("div");
+      platz.className = "links-platz";
+      teile[0].before(platz);
+      teile.forEach(t => huelle.appendChild(t));
+      s._links = huelle; s._platz = platz;
+    });
+    const breit = window.matchMedia("(min-width: 901px)");
+    function linksZeigen() {
+      schritte.forEach(s => { if (s._links) s._links.classList.toggle("aktiv", s === aktiv); });
+      tafel.classList.toggle("leer", !(breit.matches && aktiv && aktiv._links));
+    }
+    function linksPlatzieren() {
+      schritte.forEach(s => {
+        if (!s._links) return;
+        if (breit.matches) tafel.appendChild(s._links); else s._platz.after(s._links);
+      });
+      linksZeigen();
+    }
+    linksPlatzieren();
+    breit.addEventListener("change", linksPlatzieren);
 
     function zoom(ziel) {
       if (anim) cancelAnimationFrame(anim);
@@ -32,7 +78,26 @@
         svg.setAttribute("viewBox", vb.join(" "));
         if (t < 1) anim = requestAnimationFrame(schritt);
       };
+      svg.dataset.ziel = ziel.join(" ");          // Endausschnitt, für den Bild-Export
       anim = requestAnimationFrame(schritt);
+    }
+
+    // Bildausschnitt eines Schritts: zoom-Angabe (oder ganze Grafik), mindestens aber so groß,
+    // dass alle sichtbaren (nicht gedimmten) Ebenen vollständig hineinpassen
+    function ausschnitt(s) {
+      let [x, y, w, h] = s.dataset.zoom ? zahlen(s.dataset.zoom) : vb0;
+      let x2 = x + w, y2 = y + h;
+      const rand = 12;
+      liste(s.dataset.zeige).forEach(n => {
+        const l = ebenen.find(g => g.dataset.ebene === n);
+        if (!l) return;
+        let b;
+        try { b = l.getBBox(); } catch (e) { return; }
+        if (!b.width && !b.height) return;
+        x = Math.min(x, b.x - rand); y = Math.min(y, b.y - rand);
+        x2 = Math.max(x2, b.x + b.width + rand); y2 = Math.max(y2, b.y + b.height + rand);
+      });
+      return [x, y, x2 - x, y2 - y];
     }
 
     function aktiviere(s) {
@@ -48,7 +113,8 @@
         l.classList.toggle("gedimmt", dimmen.includes(n));
         l.classList.toggle("neu", sichtbar && !war && !dimmen.includes(n));
       });
-      zoom(s.dataset.zoom ? zahlen(s.dataset.zoom) : vb0);
+      linksZeigen();
+      zoom(ausschnitt(s));
       if (zaehler) zaehler.textContent = (schritte.indexOf(s) + 1) + " / " + schritte.length;
     }
 
@@ -60,10 +126,123 @@
       // Startzustand ohne Animation
       aktiviere(schritte[0]);
       if (anim) cancelAnimationFrame(anim);
-      vb = schritte[0].dataset.zoom ? zahlen(schritte[0].dataset.zoom) : vb0;
+      vb = ausschnitt(schritte[0]);
       svg.setAttribute("viewBox", vb.join(" "));
+      svg.dataset.ziel = vb.join(" ");
     }
+
+    // Knopf: aktuellen Schritt als Bild (für eigene Notizen)
+    const knopfBild = document.createElement("button");
+    knopfBild.type = "button";
+    knopfBild.className = "scrolly-bild";
+    knopfBild.title = "Diesen Schritt als Bild kopieren oder speichern (für eigene Notizen)";
+    knopfBild.textContent = "Bild";
+    knopfBild.addEventListener("click", () => window.tmBildDialog && window.tmBildDialog(sc, svg));
+    svg.parentNode.appendChild(knopfBild);
   });
+
+  // ---------------------------------------------------------------- Bild-Export
+  // Klont die Grafik im aktuellen Zustand (nur sichtbare Ebenen, Endausschnitt), bettet die
+  // Schriften ein und rendert sie als PNG. Der Dialog zeigt das fertige Bild, damit Kopieren und
+  // Speichern direkt im Klick passieren (Safari verlangt das).
+  let schriftCSS = null;
+  async function schriften() {
+    if (schriftCSS !== null) return schriftCSS;
+    const css = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find(l => l.href.includes("tm.css"));
+    const basis = css ? css.href : location.href;
+    const dateien = [["Latin Modern Roman", "normal", "lmroman10-regular.otf"],
+                     ["Latin Modern Roman", "italic", "lmroman10-italic.otf"],
+                     ["Latin Modern Math", "normal", "latinmodern-math.otf"],
+                     ["Source Sans Pro", "normal", "SourceSansPro-Regular.ttf"]];
+    const teile = await Promise.all(dateien.map(async ([fam, stil, datei]) => {
+      try {
+        const blob = await (await fetch(new URL("fonts/" + datei, basis))).blob();
+        const url = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+        const format = datei.endsWith(".ttf") ? "truetype" : "opentype";
+        return `@font-face{font-family:"${fam}";font-style:${stil};src:url(${url}) format("${format}");}`;
+      } catch (e) { return ""; }
+    }));
+    schriftCSS = teile.join("");
+    return schriftCSS;
+  }
+
+  async function alsPNG(svg) {
+    const vb = zahlen(svg.dataset.ziel || svg.getAttribute("viewBox"));
+    const kopie = svg.cloneNode(true);
+    Array.from(kopie.children).forEach(g => {
+      if (!g.dataset || !g.dataset.ebene) return;
+      if (!g.classList.contains("sichtbar")) { g.remove(); return; }
+      g.setAttribute("opacity", g.classList.contains("gedimmt") ? "0.22" : "1");
+      g.removeAttribute("class");
+    });
+    const skala = Math.min(4, 1800 / vb[2]);
+    const B = Math.round(vb[2] * skala), H = Math.round(vb[3] * skala);
+    kopie.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    kopie.setAttribute("viewBox", vb.join(" "));
+    kopie.setAttribute("width", B);
+    kopie.setAttribute("height", H);
+    const stil = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    stil.textContent = await schriften();
+    kopie.insertBefore(stil, kopie.firstChild);
+    const text = new XMLSerializer().serializeToString(kopie);
+    const url = URL.createObjectURL(new Blob([text], { type: "image/svg+xml" }));
+    try {
+      const img = new Image();
+      await new Promise((ok, fehler) => { img.onload = ok; img.onerror = fehler; img.src = url; });
+      const c = document.createElement("canvas");
+      c.width = B; c.height = H;
+      const ctx = c.getContext("2d");
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, B, H);
+      ctx.drawImage(img, 0, 0, B, H);
+      return await new Promise(r => c.toBlob(r, "image/png"));
+    } finally { URL.revokeObjectURL(url); }
+  }
+
+  function dateiname(sc) {
+    const seite = location.pathname.split("/").pop().replace(/\.html$/, "") || "seite";
+    const alle = Array.from(document.querySelectorAll(".scrolly"));
+    const s = sc.querySelector(".schritt.aktiv");
+    const nr = s ? Array.from(sc.querySelectorAll(".schritt")).indexOf(s) + 1 : 1;
+    return `FEM-${seite}-grafik${alle.indexOf(sc) + 1}-schritt${nr}.png`;
+  }
+
+  window.tmBildDialog = async function (sc, svg) {
+    const dlg = document.createElement("div");
+    dlg.className = "bild-dialog";
+    dlg.innerHTML = '<div class="bild-karte"><div class="bild-status">Bild wird erstellt …</div></div>';
+    document.body.appendChild(dlg);
+    const schliessen = () => { dlg.remove(); document.removeEventListener("keydown", esc); };
+    const esc = e => { if (e.key === "Escape") schliessen(); };
+    document.addEventListener("keydown", esc);
+    dlg.addEventListener("click", e => { if (e.target === dlg) schliessen(); });
+    let blob;
+    try { blob = await alsPNG(svg); } catch (e) { blob = null; }
+    const karte = dlg.querySelector(".bild-karte");
+    if (!blob) { karte.querySelector(".bild-status").textContent = "Das Bild konnte nicht erstellt werden."; return; }
+    const name = dateiname(sc);
+    const url = URL.createObjectURL(blob);
+    karte.innerHTML = `
+      <img src="${url}" alt="Grafik des aktuellen Schritts" draggable="true">
+      <p class="bild-hinweis">Kopieren und in Ihre Notizen einfügen, als Datei speichern oder das Bild
+        mit dem Finger bzw. der Maus direkt in die Notizen ziehen.</p>
+      <div class="bild-knoepfe">
+        <button type="button" data-aktion="kopieren">Kopieren</button>
+        <a href="${url}" download="${name}">Speichern</a>
+        <button type="button" data-aktion="zu">Schließen</button>
+      </div>
+      <div class="bild-status" aria-live="polite"></div>`;
+    const status = karte.querySelector(".bild-status");
+    karte.addEventListener("click", async e => {
+      const a = e.target.dataset && e.target.dataset.aktion;
+      if (a === "zu") schliessen();
+      if (a === "kopieren") {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+          status.textContent = "Kopiert. Jetzt in Ihre Notizen einfügen.";
+        } catch (err) { status.textContent = "Kopieren ist hier nicht möglich. Bitte „Speichern“ oder Ziehen verwenden."; }
+      }
+    });
+  };
 
   // Tastatur / Presenter: Bild↓, Bild↑, →, ← springen von Schritt zu Schritt
   function naechster(richtung) {
@@ -93,8 +272,8 @@
   const knopf = document.querySelector(".beamer-schalter");
   if (knopf) knopf.addEventListener("click", () => document.documentElement.classList.toggle("beamer"));
 
-  // Hilfe-Schaltfläche (ARSnova Q&A) auf den Vorlesungsseiten
-  if (/\/vorlesung\//.test(location.pathname)) {
+  // Hilfe-Schaltfläche (ARSnova Q&A) auf Vorlesungs- und Seminarseiten
+  if (/\/(vorlesung|seminar)\//.test(location.pathname)) {
     const hilfe = document.createElement("a");
     hilfe.className = "hilfe-schalter";
     hilfe.href = "https://arsnova.imn.htwk-leipzig.de/p/62264415";

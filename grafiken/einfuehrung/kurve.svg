@@ -26,7 +26,7 @@
 <circle cx="192.76" cy="75.42" r="4.4" fill="#ffffff" stroke="#006414" stroke-width="1.4"/>
 <g><path d="M 408.72,295.7 L 408.72,142.5" fill="none" stroke="#7a7a7a" stroke-width="0.9" stroke-linecap="butt" stroke-dasharray="4 3"/><path d="M 408.72,295.7 L 393.33,295.7" fill="none" stroke="#7a7a7a" stroke-width="0.9" stroke-linecap="butt" stroke-dasharray="4 3"/></g>
 <circle cx="408.72" cy="295.7" r="4.4" fill="#ffffff" stroke="#006414" stroke-width="1.4"/>
-<text x="192.76" y="64.18" fill="#006414" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="'Latin Modern Roman','LM Roman 10','CMU Serif',serif" font-size="14" font-style="normal" text-anchor="middle" xml:space="preserve"><tspan>Max (−3,61 | 8,94)</tspan></text>
-<text x="408.72" y="318.46" fill="#006414" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="'Latin Modern Roman','LM Roman 10','CMU Serif',serif" font-size="14" font-style="normal" text-anchor="middle" xml:space="preserve"><tspan>Min (0,28 | −20,43)</tspan></text>
+<text x="192.76" y="63.46" fill="#006414" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="'Source Sans Pro','Helvetica Neue',Arial,sans-serif" font-size="11.9" font-style="normal" text-anchor="middle" xml:space="preserve"><tspan>Max (−3,61 | 8,94)</tspan></text>
+<text x="408.72" y="317.74" fill="#006414" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="'Source Sans Pro','Helvetica Neue',Arial,sans-serif" font-size="11.9" font-style="normal" text-anchor="middle" xml:space="preserve"><tspan>Min (0,28 | −20,43)</tspan></text>
 </g>
 </svg>

@@ -10,77 +10,25 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     57731,       1026]
-NotebookOptionsPosition[     53885,        976]
-NotebookOutlinePosition[     54147,        989]
-CellTagsIndexPosition[     54104,        986]
+NotebookDataLength[     56055,        989]
+NotebookOptionsPosition[     53184,        949]
+NotebookOutlinePosition[     53477,        963]
+CellTagsIndexPosition[     53434,        960]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
-Cell["Erste Schritte mit Mathematica", "Title"],
+Cell["Federsystem", "Title"],
 
 Cell["Theorie der Finite-Elemente-Methode \[CenterDot] Vorlesung 0 \
 \[CenterDot] \[CapitalUDoubleDot]bung", "Subtitle"],
 
-Cell["Aufgabe 1: Kurvendiskussion", "Section"],
+Cell["Aufgabe: Federsystem mit drei Freiheitsgraden", "Section"],
 
 Cell["\<\
-Gegeben ist die Funktion f(x) = x\.b3 \[Minus] 6x\.b2 + 4x + 8. Bestimmen Sie \
-a) den Verlauf im Diagramm, b) die Nullstellen, c) die Extrema und d) die Fl\
-\[ADoubleDot]che zwischen der mittleren und der gr\[ODoubleDot]\[SZ]ten \
-Nullstelle.\
-\>", "Text"],
-
-Cell["a) Funktion definieren und darstellen", "Subsection"],
-
-Cell["Gesucht: Ausdruck fkt und Diagramm", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["b) Nullstellen", "Subsection"],
-
-Cell["Gesucht: alle reellen Nullstellen, exakt und numerisch", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["c) Extrema", "Subsection"],
-
-Cell["Notwendige Bedingung: erste Ableitung gleich null.", "Text"],
-
-Cell["\<\
-Gesucht: Lage und Funktionswerte der Extrema, Art \[UDoubleDot]ber die zweite \
-Ableitung\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["d) Fl\[ADoubleDot]che", "Subsection"],
-
-Cell["Fl\[ADoubleDot]che zwischen der mittleren und der \
-gr\[ODoubleDot]\[SZ]ten Nullstelle.", "Text"],
-
-Cell["\<\
-Gesucht: bestimmtes Integral (exakt und numerisch) und Diagramm mit gef\
-\[UDoubleDot]llter Fl\[ADoubleDot]che\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["Aufgabe 2: Federsystem mit drei Freiheitsgraden", "Section"],
-
-Cell["\<\
-Drei horizontal verschiebliche Platten sind \[UDoubleDot]ber vier Federn \
-miteinander und mit der Wand verbunden. Die Platten 1 und 3 werden durch F \
-und 3F belastet.\
+Drei horizontal verschiebliche, starre Balken sind \[UDoubleDot]ber vier \
+Federn miteinander und mit der Wand verbunden. Die Balken 1 und 3 werden \
+durch F und 3F belastet.\
 \>", "Text"],
 
 Cell[BoxData[
@@ -904,9 +852,21 @@ AAAAAAAAADr8P/OJFXw=
   PlotRange->{{0, 1440.}, {0, 800.}}]], "Text"],
 
 Cell["\<\
-Gegeben: c1 = c2 = k, c3 = c4 = 3k. Gesucht: Verschiebungen p1, p2, p3 und \
-Federkr\[ADoubleDot]fte N1 bis N4. Stellen Sie das Gleichungssystem in der \
-Form K p = q auf (ohne Energiemethoden).\
+Gegeben: c1 = c2 = k, c3 = c4 = 3k
+Gesucht: Verschiebungen p1, p2, p3 und Federkr\[ADoubleDot]fte N1 bis N4\
+\>", "Text"],
+
+Cell["\<\
+L\[ODoubleDot]sen Sie die Aufgabe ohne Energiemethoden:
+a) Legen Sie die gegebenen Gr\[ODoubleDot]\[SZ]en und die Freiheitsgrade \
+fest.
+b) Schneiden Sie die Balken frei und stellen Sie die \
+Gleichgewichtsbedingungen auf.
+c) Stellen Sie Kinematik und Federgesetz auf.
+d) Bestimmen Sie die Verschiebungen.
+e) Bringen Sie das Gleichungssystem in die Form K p = q.
+f) Bestimmen Sie die Federkr\[ADoubleDot]fte und kontrollieren Sie das \
+Gleichgewicht.\
 \>", "Text"],
 
 Cell["a) Gegebene Gr\[ODoubleDot]\[SZ]en und Freiheitsgrade", "Subsection"],
@@ -920,7 +880,20 @@ Cell[BoxData[
  RowBox[{"(*", " ", 
   RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
 
-Cell["b) Kinematik und Federgesetz", "Subsection"],
+Cell["b) Freischnitt und Gleichgewicht", "Subsection"],
+
+Cell["\<\
+Schneiden Sie die drei Balken frei. Zugkr\[ADoubleDot]fte ziehen den Balken \
+in Richtung Feder.\
+\>", "Text"],
+
+Cell["Gesucht: drei Gleichgewichtsbedingungen glgw", "Text"],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
+
+Cell["c) Kinematik und Federgesetz", "Subsection"],
 
 Cell["\<\
 Verl\[ADoubleDot]ngerung einer Feder = Verschiebung des rechten minus des \
@@ -935,25 +908,25 @@ Cell[BoxData[
  RowBox[{"(*", " ", 
   RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
 
-Cell["c) Gleichgewicht", "Subsection"],
+Cell["d) Verschiebungen", "Subsection"],
 
 Cell["\<\
-Schneiden Sie die drei Platten frei. Zugkr\[ADoubleDot]fte ziehen die Platte \
-in Richtung Feder.\
+Setzen Sie Federgesetz und Kinematik in das Gleichgewicht ein. Es bleiben \
+drei Gleichungen f\[UDoubleDot]r p1, p2, p3.\
 \>", "Text"],
 
 Cell["\<\
-Gesucht: drei Gleichgewichtsbedingungen glgw und deren L\[ODoubleDot]sung\
+Gesucht: Gleichgewicht in den Verschiebungen und deren L\[ODoubleDot]sung\
 \>", "Text"],
 
 Cell[BoxData[
  RowBox[{"(*", " ", 
   RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
 
-Cell["d) Steifigkeitsmatrix", "Subsection"],
+Cell["e) Steifigkeitsmatrix", "Subsection"],
 
 Cell["\<\
-Innere Kr\[ADoubleDot]fte je Platte (Gleichgewicht umgestellt auf innen = q), \
+Innere Kr\[ADoubleDot]fte je Balken (Gleichgewicht umgestellt auf innen = q), \
 abgeleitet nach den Freiheitsgraden.\
 \>", "Text"],
 
@@ -963,7 +936,7 @@ Cell[BoxData[
  RowBox[{"(*", " ", 
   RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
 
-Cell["e) L\[ODoubleDot]sung und Federkr\[ADoubleDot]fte", "Subsection"],
+Cell["f) L\[ODoubleDot]sung und Federkr\[ADoubleDot]fte", "Subsection"],
 
 Cell["\<\
 Gesucht: Verschiebungen plsg, Federkr\[ADoubleDot]fte Nlsg und Kontrolle des \
@@ -974,6 +947,7 @@ Cell[BoxData[
  RowBox[{"(*", " ", 
   RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"]
 },
+Magnification:>1.25 Inherited,
 FrontEndVersion->"13.1 for Mac OS X ARM (64-bit) (June 16, 2022)",
 StyleDefinitions->"Default.nb"
 ]
@@ -988,46 +962,35 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 47, 0, 70, "Title",ExpressionUUID->"80926a2f-4ff0-40e4-9846-b9686684c712"],
-Cell[608, 22, 120, 1, 70, "Subtitle",ExpressionUUID->"2db781e0-3847-4b33-840f-9ada98f9c892"],
-Cell[731, 25, 46, 0, 70, "Section",ExpressionUUID->"9c2d4531-c365-4436-b63a-d239f9019123"],
-Cell[780, 27, 267, 5, 70, "Text",ExpressionUUID->"2c988c41-014f-4c4e-bcf5-fe3ef70ce777"],
-Cell[1050, 34, 59, 0, 70, "Subsection",ExpressionUUID->"fed89d07-9f5f-4543-b4ec-917dabb67c5f"],
-Cell[1112, 36, 50, 0, 70, "Text",ExpressionUUID->"b3ac867a-0a39-43fa-b11a-0fd080511a14"],
-Cell[1165, 38, 93, 2, 70, "Input",ExpressionUUID->"c296a164-fa4e-4a25-b154-6812bfb759c1"],
-Cell[1261, 42, 36, 0, 70, "Subsection",ExpressionUUID->"f142816d-2c4f-435d-98e6-1f1748bde5fe"],
-Cell[1300, 44, 70, 0, 70, "Text",ExpressionUUID->"d24d0d80-95db-4b13-a378-d74f17fea7c6"],
-Cell[1373, 46, 93, 2, 70, "Input",ExpressionUUID->"0bf5a64a-9176-4fca-ad67-84a7ae91b5c8"],
-Cell[1469, 50, 32, 0, 70, "Subsection",ExpressionUUID->"bbef0cdb-518d-4745-877f-58d899381c5f"],
-Cell[1504, 52, 66, 0, 70, "Text",ExpressionUUID->"5c6a6e27-1813-46c6-9a4f-600f937035ba"],
-Cell[1573, 54, 113, 3, 70, "Text",ExpressionUUID->"245f9c2f-1ecc-49e4-bc0f-30f9ddaa815c"],
-Cell[1689, 59, 93, 2, 70, "Input",ExpressionUUID->"851aea40-22cc-42c4-9046-7324655275b1"],
-Cell[1785, 63, 43, 0, 70, "Subsection",ExpressionUUID->"3a3a19ef-ed77-4e86-b98d-385d4249decf"],
-Cell[1831, 65, 103, 1, 70, "Text",ExpressionUUID->"fd09ff4f-5ae1-4f47-9498-65c8073ada56"],
-Cell[1937, 68, 134, 3, 70, "Text",ExpressionUUID->"27899d44-5e40-44f5-8d76-01fc25658ec0"],
-Cell[2074, 73, 93, 2, 70, "Input",ExpressionUUID->"f0ca3b33-ab76-41c5-b182-4786f99e9181"],
-Cell[2170, 77, 66, 0, 70, "Section",ExpressionUUID->"d35451f7-9b52-4c54-8f6c-a6505f014b88"],
-Cell[2239, 79, 192, 4, 70, "Text",ExpressionUUID->"fec6663e-a4be-46ba-94e1-44c309d13b43"],
-Cell[2434, 85, 49530, 818, 70, "Text",ExpressionUUID->"a5a0518a-50b8-4b19-8bb3-5cb450806f50"],
-Cell[51967, 905, 218, 4, 70, "Text",ExpressionUUID->"69dbcec9-271f-4956-bd2b-2f4a30d45196"],
-Cell[52188, 911, 75, 0, 70, "Subsection",ExpressionUUID->"ea53c024-3c95-4487-b56e-a14866ca0a15"],
-Cell[52266, 913, 114, 3, 70, "Text",ExpressionUUID->"d91632ac-4c92-4861-b63b-4c99652dd3d7"],
-Cell[52383, 918, 93, 2, 70, "Input",ExpressionUUID->"4acfb008-7c9c-432e-9707-a75c23eed230"],
-Cell[52479, 922, 50, 0, 70, "Subsection",ExpressionUUID->"0f245970-6ba2-4227-90f1-b612a2647455"],
-Cell[52532, 924, 141, 3, 70, "Text",ExpressionUUID->"d30212eb-b81c-4f09-aa86-889502761760"],
-Cell[52676, 929, 94, 2, 70, "Text",ExpressionUUID->"b3a3b519-edb4-43f3-a4fc-982ecf0a0280"],
-Cell[52773, 933, 93, 2, 70, "Input",ExpressionUUID->"20df09a2-1b79-412d-bbbe-5a1b35245195"],
-Cell[52869, 937, 38, 0, 70, "Subsection",ExpressionUUID->"297c0135-c506-454d-b21b-6804ffddc3ae"],
-Cell[52910, 939, 121, 3, 70, "Text",ExpressionUUID->"12ac2b49-cb38-4ace-b935-c4b83a4e4e5f"],
-Cell[53034, 944, 97, 2, 70, "Text",ExpressionUUID->"3ed281dc-74c6-48c9-addb-cf3d3370617f"],
-Cell[53134, 948, 93, 2, 70, "Input",ExpressionUUID->"79f5ce7a-2b6e-4e74-8033-8abe3a15bf1a"],
-Cell[53230, 952, 43, 0, 70, "Subsection",ExpressionUUID->"a8e47f35-b583-4c67-b00c-5667d0943037"],
-Cell[53276, 954, 140, 3, 70, "Text",ExpressionUUID->"f7a107f3-b156-4a51-8a33-fdaa450d00bf"],
-Cell[53419, 959, 76, 0, 70, "Text",ExpressionUUID->"e825bb57-5832-4313-b295-bf6e22e9c79e"],
-Cell[53498, 961, 93, 2, 70, "Input",ExpressionUUID->"a2b876c2-8280-42da-8a39-d5986835991a"],
-Cell[53594, 965, 71, 0, 70, "Subsection",ExpressionUUID->"02159cc1-6330-478b-b762-07a7d65bce20"],
-Cell[53668, 967, 117, 3, 70, "Text",ExpressionUUID->"1a7f68d8-b065-445d-9b06-71cdcff84d69"],
-Cell[53788, 972, 93, 2, 70, "Input",ExpressionUUID->"9300afb3-fea5-4831-aa01-45664005f63d"]
+Cell[558, 20, 28, 0, 87, "Title",ExpressionUUID->"513b0513-8e25-43f4-a28c-e24fad38c503"],
+Cell[589, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"b5acdbab-170d-4d30-afc7-bc7dc18517d9"],
+Cell[712, 25, 64, 0, 87, "Section",ExpressionUUID->"ba95f6b7-441b-4dcd-aeeb-5d8bcf7fdb1c"],
+Cell[779, 27, 198, 4, 87, "Text",ExpressionUUID->"071bbd85-b612-4b9b-952a-c2e04968f394"],
+Cell[980, 33, 49530, 818, 87, "Text",ExpressionUUID->"b3d4f970-ba44-463e-af2a-9bf03c8f41dd"],
+Cell[50513, 853, 131, 3, 87, "Text",ExpressionUUID->"58be35f4-4fc3-46e7-b2b0-33e1afdf9622"],
+Cell[50647, 858, 474, 11, 87, "Text",ExpressionUUID->"6c4925da-c76e-44ee-a4c7-fd1d874fd661"],
+Cell[51124, 871, 75, 0, 87, "Subsection",ExpressionUUID->"f4702963-9918-4b4b-9b04-1ca631e1d094"],
+Cell[51202, 873, 114, 3, 87, "Text",ExpressionUUID->"41d23e16-f46c-4557-8b54-f80047a3a42a"],
+Cell[51319, 878, 93, 2, 87, "Input",ExpressionUUID->"ece35986-b60f-4a95-ab19-0a6684fc502c"],
+Cell[51415, 882, 54, 0, 87, "Subsection",ExpressionUUID->"20720751-f1ff-475a-8b20-eef65ede412e"],
+Cell[51472, 884, 120, 3, 87, "Text",ExpressionUUID->"51dc4225-581d-4eed-9017-31c6cb7adce0"],
+Cell[51595, 889, 60, 0, 87, "Text",ExpressionUUID->"eb4a1ab7-38eb-4f40-b72c-e7b14a3793bf"],
+Cell[51658, 891, 93, 2, 87, "Input",ExpressionUUID->"ad3a0e3a-61ad-43b9-9b14-a36ebf5b6382"],
+Cell[51754, 895, 50, 0, 87, "Subsection",ExpressionUUID->"75a53ba3-10e1-4983-ba95-671f6dfeccf2"],
+Cell[51807, 897, 141, 3, 87, "Text",ExpressionUUID->"65a89d62-c00e-4934-b56e-7f74ea618280"],
+Cell[51951, 902, 94, 2, 87, "Text",ExpressionUUID->"d4d63651-58b8-48dd-adc5-b61d37bcfbf5"],
+Cell[52048, 906, 93, 2, 87, "Input",ExpressionUUID->"f178a27e-cabb-4dab-a963-14700277aa94"],
+Cell[52144, 910, 39, 0, 87, "Subsection",ExpressionUUID->"b91a24cb-834c-400a-9390-43291b2fcbd7"],
+Cell[52186, 912, 144, 3, 87, "Text",ExpressionUUID->"608c0f03-b2d5-4b11-96d6-780ac5b90ac4"],
+Cell[52333, 917, 97, 2, 87, "Text",ExpressionUUID->"2c26bfcd-fa40-45a7-9435-5a96686dc809"],
+Cell[52433, 921, 93, 2, 87, "Input",ExpressionUUID->"aee413e1-2a59-4780-87de-81a6ca371e84"],
+Cell[52529, 925, 43, 0, 87, "Subsection",ExpressionUUID->"2778a107-b5f8-4a2f-8486-ff00cab5efd3"],
+Cell[52575, 927, 140, 3, 87, "Text",ExpressionUUID->"c2630949-c866-4808-9c24-4c5893432682"],
+Cell[52718, 932, 76, 0, 87, "Text",ExpressionUUID->"34d97b7d-964f-4367-8c45-4f41506fcad2"],
+Cell[52797, 934, 93, 2, 87, "Input",ExpressionUUID->"17f723e4-ede4-4dcb-96ec-a1fc11df58ce"],
+Cell[52893, 938, 71, 0, 87, "Subsection",ExpressionUUID->"20ff78dd-8b24-42a1-b54a-dc0e44b0bc4a"],
+Cell[52967, 940, 117, 3, 87, "Text",ExpressionUUID->"9aef7cbf-dc80-4ede-a58a-157c9f5fb944"],
+Cell[53087, 945, 93, 2, 87, "Input",ExpressionUUID->"005a02c0-9b90-47a6-84bc-0706714ba56d"]
 }
 ]
 *)

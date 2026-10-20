@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     25590,        476]
-NotebookOptionsPosition[     23499,        445]
-NotebookOutlinePosition[     23761,        458]
-CellTagsIndexPosition[     23718,        455]
+NotebookDataLength[     25827,        482]
+NotebookOptionsPosition[     23707,        450]
+NotebookOutlinePosition[     24000,        464]
+CellTagsIndexPosition[     23957,        461]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -25,7 +25,7 @@ Theorie der Finite-Elemente-Methode \[CenterDot] Vorlesung 0 \[CenterDot] \
 \[CapitalUDoubleDot]bung zur Infinitesimalrechnung\
 \>", "Subtitle"],
 
-Cell["Aufgabenstellung", "Section"],
+Cell["Aufgabe: Konischer Zugstab", "Section"],
 
 Cell[BoxData[
  GraphicsBox[
@@ -380,18 +380,23 @@ AAAAAABAq/D/AYOHid0=
   PlotRange->{{0, 1280.}, {0, 500.}}]], "Text"],
 
 Cell["\<\
-L\[ODoubleDot]sen Sie f\[UDoubleDot]r den dargestellten Stab mit linear ver\
-\[ADoubleDot]nderlichem Querschnitt die Differentialgleichung des \
-Normalkraftstabes. Bestimmen Sie den Verschiebungsverlauf u(x), die \
-Normalkraft N(x) und die Spannung \[Sigma](x).\
+Ein Stab mit linear ver\[ADoubleDot]nderlichem Querschnitt ist links \
+eingespannt und wird rechts durch die Kraft F auf Zug belastet.\
 \>", "Text"],
 
 Cell["\<\
 Gegeben: E = 70000 MPa, L = 1000 mm, F = 5000 N, A0 = 100 mm\.b2, A1 = A0/5 = \
-20 mm\.b2\
+20 mm\.b2
+Gesucht: u(x), N(x), \[Sigma](x)\
 \>", "Text"],
 
-Cell["L\[ODoubleDot]sung", "Section"],
+Cell["\<\
+L\[ODoubleDot]sen Sie die Differentialgleichung des Normalkraftstabes:
+a) Beschreiben Sie den Querschnittsverlauf A(x).
+b) Stellen Sie die Differentialgleichung und die Randbedingungen auf.
+c) Bestimmen Sie den Verschiebungsverlauf u(x).
+d) Bestimmen Sie die Normalkraft N(x) und die Spannung \[Sigma](x).\
+\>", "Text"],
 
 Cell["a) Gegebene Gr\[ODoubleDot]\[SZ]en und Querschnittsverlauf", \
 "Subsection"],
@@ -443,6 +448,7 @@ Cell[BoxData[
  RowBox[{"(*", " ", 
   RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"]
 },
+Magnification:>1.25 Inherited,
 FrontEndVersion->"13.1 for Mac OS X ARM (64-bit) (June 16, 2022)",
 StyleDefinitions->"Default.nb"
 ]
@@ -457,27 +463,27 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 57, 0, 70, "Title",ExpressionUUID->"b087c7d8-8742-46c3-886d-4d183afd7915"],
-Cell[618, 22, 154, 3, 70, "Subtitle",ExpressionUUID->"5e1c6864-8b37-4bed-a512-97dddecd8460"],
-Cell[775, 27, 35, 0, 70, "Section",ExpressionUUID->"96fa866e-6741-4786-aa4a-83a1da70e10d"],
-Cell[813, 29, 20982, 350, 70, "Text",ExpressionUUID->"f4f1edeb-79eb-4402-bd9c-c6d7352effb6"],
-Cell[21798, 381, 285, 5, 70, "Text",ExpressionUUID->"860a2f1e-7a6c-4180-9103-91baa1a2b374"],
-Cell[22086, 388, 113, 3, 70, "Text",ExpressionUUID->"75841793-361e-459b-ab75-d36d9d532a18"],
-Cell[22202, 393, 37, 0, 70, "Section",ExpressionUUID->"bf0f8744-58ed-4e0f-aadb-c013d72534ca"],
-Cell[22242, 395, 82, 1, 70, "Subsection",ExpressionUUID->"5a522f0c-87a8-44a4-b8a0-7bd395d1e91b"],
-Cell[22327, 398, 98, 2, 70, "Text",ExpressionUUID->"29e407bc-5318-4ce5-be8a-630c9a605596"],
-Cell[22428, 402, 93, 2, 70, "Input",ExpressionUUID->"e47ff9e6-5cd5-44aa-bad6-11329f12c2b0"],
-Cell[22524, 406, 66, 0, 70, "Subsection",ExpressionUUID->"b6db005c-0ccd-4472-bd76-7e8ac7777a79"],
-Cell[22593, 408, 108, 3, 70, "Text",ExpressionUUID->"a58bbc26-4f03-4538-ae8a-9feb8b089fbb"],
-Cell[22704, 413, 87, 2, 70, "Text",ExpressionUUID->"d41b6fea-5464-4647-ba30-2d4d6bb25bf0"],
-Cell[22794, 417, 93, 2, 70, "Input",ExpressionUUID->"ff244462-0983-4ee5-bb1a-a1e54aac6630"],
-Cell[22890, 421, 37, 0, 70, "Subsection",ExpressionUUID->"a1c09dd4-e536-4516-a78a-a6f39b4cc09f"],
-Cell[22930, 423, 108, 3, 70, "Text",ExpressionUUID->"ebb74b83-5ee7-4b22-b0e8-23a7506f205a"],
-Cell[23041, 428, 93, 2, 70, "Input",ExpressionUUID->"e7b69963-8e0d-4e10-a5ee-0c429928a94d"],
-Cell[23137, 432, 49, 0, 70, "Subsection",ExpressionUUID->"3964355e-e8d0-4991-bfa9-0f405e29e847"],
-Cell[23189, 434, 51, 0, 70, "Text",ExpressionUUID->"f2b55545-95a6-429a-a11f-a5e68eff7be5"],
-Cell[23243, 436, 156, 3, 70, "Text",ExpressionUUID->"43a45307-edc0-468c-af55-e21b8f804ba8"],
-Cell[23402, 441, 93, 2, 70, "Input",ExpressionUUID->"b488a849-5b94-42b6-a5b4-5838907ddf19"]
+Cell[558, 20, 57, 0, 87, "Title",ExpressionUUID->"8af06482-e211-4a44-b89b-6a1ee924bd37"],
+Cell[618, 22, 154, 3, 87, "Subtitle",ExpressionUUID->"a5cccc58-2332-4087-bbb4-e78148b8a225"],
+Cell[775, 27, 45, 0, 87, "Section",ExpressionUUID->"74cbaab3-4ebe-4ecf-964b-3914821f8518"],
+Cell[823, 29, 20982, 350, 87, "Text",ExpressionUUID->"84fd2107-8f18-4f26-be80-a872f01835a4"],
+Cell[21808, 381, 158, 3, 87, "Text",ExpressionUUID->"ea8a80e8-e99a-4996-a821-a6704c53b8c4"],
+Cell[21969, 386, 146, 4, 87, "Text",ExpressionUUID->"e1a4d273-f1c9-4d30-b930-e83f5b737a28"],
+Cell[22118, 392, 329, 6, 87, "Text",ExpressionUUID->"04f48680-ff06-43a5-a867-356d4c60fa7f"],
+Cell[22450, 400, 82, 1, 87, "Subsection",ExpressionUUID->"57317872-1892-455e-9700-668bf3773750"],
+Cell[22535, 403, 98, 2, 87, "Text",ExpressionUUID->"70f185d9-b4bd-4181-961d-ffd6889f1e89"],
+Cell[22636, 407, 93, 2, 87, "Input",ExpressionUUID->"e77f7ac3-65b6-4a3e-8370-4217347ca0da"],
+Cell[22732, 411, 66, 0, 87, "Subsection",ExpressionUUID->"34aff2f0-b606-4536-9b7d-9bf8d79f5f77"],
+Cell[22801, 413, 108, 3, 87, "Text",ExpressionUUID->"3fa2ab6b-9700-41ce-99b0-96dea2abe6f9"],
+Cell[22912, 418, 87, 2, 87, "Text",ExpressionUUID->"a2fad123-189d-47d2-aa7f-f0fadc1370fa"],
+Cell[23002, 422, 93, 2, 87, "Input",ExpressionUUID->"1288da3b-09a2-4a62-ad9b-c4e8165cd90f"],
+Cell[23098, 426, 37, 0, 87, "Subsection",ExpressionUUID->"5f3378da-eb9a-4448-913e-c8ed3ac08123"],
+Cell[23138, 428, 108, 3, 87, "Text",ExpressionUUID->"3f42745c-c86f-42c5-9d67-1396e071dd3b"],
+Cell[23249, 433, 93, 2, 87, "Input",ExpressionUUID->"3d2c80e2-b6e6-42a5-897c-b591a5d52ac7"],
+Cell[23345, 437, 49, 0, 87, "Subsection",ExpressionUUID->"79b02a67-f15e-4c22-a546-21f7fb328055"],
+Cell[23397, 439, 51, 0, 87, "Text",ExpressionUUID->"5eaec08d-a683-4595-b14f-286f240459d4"],
+Cell[23451, 441, 156, 3, 87, "Text",ExpressionUUID->"c38813f5-4fcf-49a2-8589-e03f63450ced"],
+Cell[23610, 446, 93, 2, 87, "Input",ExpressionUUID->"6edcfd1a-940f-4454-86f8-5174b7cfcdc9"]
 }
 ]
 *)

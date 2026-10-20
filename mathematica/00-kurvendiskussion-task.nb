@@ -1,0 +1,117 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      3960,        108]
+NotebookOptionsPosition[      2151,         79]
+NotebookOutlinePosition[      2444,         93]
+CellTagsIndexPosition[      2401,         90]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell["Kurvendiskussion", "Title"],
+
+Cell["Theorie der Finite-Elemente-Methode \[CenterDot] Vorlesung 0 \
+\[CenterDot] \[CapitalUDoubleDot]bung", "Subtitle"],
+
+Cell["Aufgabe: Kurvendiskussion", "Section"],
+
+Cell["\<\
+Gegeben ist die Funktion f(x) = x\.b3 \[Minus] 6x\.b2 + 4x + 8. Bestimmen Sie
+a) den Verlauf im Diagramm,
+b) die Nullstellen,
+c) die Extrema und
+d) die Fl\[ADoubleDot]che zwischen der mittleren und der \
+gr\[ODoubleDot]\[SZ]ten Nullstelle.\
+\>", "Text"],
+
+Cell["a) Funktion definieren und darstellen", "Subsection"],
+
+Cell["Gesucht: Ausdruck fkt und Diagramm", "Text"],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
+
+Cell["b) Nullstellen", "Subsection"],
+
+Cell["Gesucht: alle reellen Nullstellen, exakt und numerisch", "Text"],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
+
+Cell["c) Extrema", "Subsection"],
+
+Cell["Notwendige Bedingung: erste Ableitung gleich null.", "Text"],
+
+Cell["\<\
+Gesucht: Lage und Funktionswerte der Extrema, Art \[UDoubleDot]ber die zweite \
+Ableitung\
+\>", "Text"],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
+
+Cell["d) Fl\[ADoubleDot]che", "Subsection"],
+
+Cell["Fl\[ADoubleDot]che zwischen der mittleren und der \
+gr\[ODoubleDot]\[SZ]ten Nullstelle.", "Text"],
+
+Cell["\<\
+Gesucht: bestimmtes Integral (exakt und numerisch) und Diagramm mit gef\
+\[UDoubleDot]llter Fl\[ADoubleDot]che\
+\>", "Text"],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"]
+},
+Magnification:>1.25 Inherited,
+FrontEndVersion->"13.1 for Mac OS X ARM (64-bit) (June 16, 2022)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 33, 0, 87, "Title",ExpressionUUID->"d7a17b5e-bf60-4c31-a156-1f4ac0f5283f"],
+Cell[594, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"db655ef5-be10-4bec-9fc3-90724059e62c"],
+Cell[717, 25, 44, 0, 87, "Section",ExpressionUUID->"c8e5297f-40ca-4128-b589-57e84bfae3d2"],
+Cell[764, 27, 263, 7, 87, "Text",ExpressionUUID->"eca4d7fb-537c-4c62-9300-18045a909640"],
+Cell[1030, 36, 59, 0, 87, "Subsection",ExpressionUUID->"583e9242-11bf-40f1-a8bc-8482e3a66bfa"],
+Cell[1092, 38, 50, 0, 87, "Text",ExpressionUUID->"655d8407-f473-4351-bea3-47477379e243"],
+Cell[1145, 40, 93, 2, 87, "Input",ExpressionUUID->"5cba34e9-8581-4d33-a199-587d6798a52d"],
+Cell[1241, 44, 36, 0, 87, "Subsection",ExpressionUUID->"fe015da7-34d9-4ea7-9116-49bea48bc22e"],
+Cell[1280, 46, 70, 0, 87, "Text",ExpressionUUID->"feccd93f-b5e5-466d-aece-a57565d4b1ae"],
+Cell[1353, 48, 93, 2, 87, "Input",ExpressionUUID->"bb959529-5e03-44e6-af40-bed892b4aca1"],
+Cell[1449, 52, 32, 0, 87, "Subsection",ExpressionUUID->"9d635325-1b77-4f27-945c-c5c9fc14d5e1"],
+Cell[1484, 54, 66, 0, 87, "Text",ExpressionUUID->"3de16dbb-3468-4ced-bfa7-a40fc9876438"],
+Cell[1553, 56, 113, 3, 87, "Text",ExpressionUUID->"b1c1be18-ac39-43ab-963f-e874874c6772"],
+Cell[1669, 61, 93, 2, 87, "Input",ExpressionUUID->"d60cc850-2089-43b9-a5a1-24431b079e11"],
+Cell[1765, 65, 43, 0, 87, "Subsection",ExpressionUUID->"672cffaf-86d7-447b-8890-7acb679d3747"],
+Cell[1811, 67, 103, 1, 87, "Text",ExpressionUUID->"edfe6435-e25c-4d3d-92b5-6cfc9741f160"],
+Cell[1917, 70, 134, 3, 87, "Text",ExpressionUUID->"c807dc8d-5bd5-4287-b238-92d0a980acf8"],
+Cell[2054, 75, 93, 2, 87, "Input",ExpressionUUID->"1687d1de-4e29-4977-b42c-c198e1a3e84e"]
+}
+]
+*)
+
+(* End of internal cache information *)

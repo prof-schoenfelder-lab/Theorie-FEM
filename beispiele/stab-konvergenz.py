@@ -11,8 +11,24 @@ def _():
     import matplotlib.pyplot as plt
 
     ROT, BLAU, GRUEN, GRAU = "#d40000", "#0050b4", "#006414", "#9a9a9a"
-    plt.rcParams.update({"font.family": "serif", "mathtext.fontset": "stix", "font.size": 11})
-    return BLAU, GRAU, ROT, mo, np, plt
+    plt.rcParams.update({"font.family": "serif", "mathtext.fontset": "stix", "font.size": 14})
+
+    from matplotlib.ticker import FuncFormatter
+    # Achsenbeschriftung mit deutschem Komma
+    KOMMA = FuncFormatter(lambda v, _: f"{v:g}".replace(".", ","))
+    return BLAU, GRAU, KOMMA, ROT, mo, np, plt
+
+
+@app.cell
+def _(mo):
+    # Größere Schrift für Hörsaal und Beamer (Text, Tabellen, Regler)
+    mo.Html("""<style>
+      .markdown.prose { font-size: 1.25rem; }
+      .markdown.prose table { font-size: 1.15rem; }
+      marimo-slider { zoom: 1.3; }
+      .marimo-cell img { max-width: 100%; height: auto; }
+    </style>""")
+    return
 
 
 @app.cell
@@ -21,7 +37,7 @@ def _(mo):
     # Konischer Stab: Elementanzahl und Konvergenz
 
     Beispiel aus Vorlesung 3: Stab mit $A(x) = A_0 - (A_0 - A_1)\,x/L$, links gelagert, rechts Zugkraft $F$.
-    $E = 70\,000$ MPa, $L = 1000$ mm, $F = 5000$ N, $A_0 = 100$ mm².
+    $E = 70\,000\,\text{MPa}$, $L = 1000\,\text{mm}$, $F = 5000\,\text{N}$, $A_0 = 100\,\text{mm}^2$.
     Jedes lineare Element bekommt die Querschnittsfläche in seiner Mitte.
 
     > Wie viele Elemente brauchen Sie, damit die **maximale Spannung** auf 5 % genau ist?
@@ -73,12 +89,12 @@ def _(np, verh):
 
 
 @app.cell
-def _(A, BLAU, F, L, ROT, fem, n, np, plt, u_exakt):
+def _(A, BLAU, F, KOMMA, L, ROT, fem, n, np, plt, u_exakt):
     Le, Ksys, p, sig = fem(n.value)
     x = np.linspace(0, L, 400)
     xk = np.arange(n.value + 1) * Le
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 3.8))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
     ax1.plot(x, u_exakt(x), color=BLAU, lw=2, label="exakt")
     ax1.plot(xk, p, "-o", color=ROT, lw=1.6, ms=4, label=f"FEM, {n.value} Elemente")
     ax1.set_xlabel("$x$ in mm"); ax1.set_ylabel("$u$ in mm"); ax1.grid(alpha=0.3); ax1.legend(loc="upper left")
@@ -88,6 +104,8 @@ def _(A, BLAU, F, L, ROT, fem, n, np, plt, u_exakt):
     ax2.fill_between(np.repeat(xk, 2)[1:-1], np.repeat(sig, 2), color=ROT, alpha=0.08, lw=0)
     ax2.set_xlabel("$x$ in mm"); ax2.set_ylabel(r"$\sigma$ in MPa"); ax2.set_ylim(0, None)
     ax2.grid(alpha=0.3); ax2.legend(loc="upper left")
+    for _ax in (ax1, ax2):
+        _ax.xaxis.set_major_formatter(KOMMA); _ax.yaxis.set_major_formatter(KOMMA)
     fig.tight_layout()
     fig
     return Ksys, p, sig
@@ -97,28 +115,34 @@ def _(A, BLAU, F, L, ROT, fem, n, np, plt, u_exakt):
 def _(A, F, L, mo, p, sig, u_exakt):
     fu = (p[-1] - u_exakt(L)) / u_exakt(L) * 100
     fs = (sig.max() - F / A(L)) / (F / A(L)) * 100
+
+    def k(v, fmt):
+        """Zahl mit deutschem Komma (Tabelle außerhalb von Formeln)."""
+        return format(v, fmt).replace(".", ",")
+
     mo.md(
         f"| | FEM | exakt | Fehler |\n|:--|:-:|:-:|:-:|\n"
-        f"| Verschiebung am Stabende $u(L)$ in mm | {p[-1]:.4f} | {u_exakt(L):.4f} | {fu:+.2f} % |\n"
-        f"| maximale Spannung in MPa | {sig.max():.1f} | {F / A(L):.1f} | {fs:+.2f} % |\n"
+        f"| Verschiebung am Stabende $u(L)$ in mm | {k(p[-1], '.4f')} | {k(u_exakt(L), '.4f')} | {k(fu, '+.2f')} % |\n"
+        f"| maximale Spannung in MPa | {k(sig.max(), '.1f')} | {k(F / A(L), '.1f')} | {k(fs, '+.2f')} % |\n"
     )
     return
 
 
 @app.cell
-def _(A, BLAU, F, L, ROT, fem, n, np, plt, u_exakt):
+def _(A, BLAU, F, KOMMA, L, ROT, fem, n, np, plt, u_exakt):
     ns = np.arange(1, 61)
     eu = np.array([abs(fem(k)[2][-1] - u_exakt(L)) / u_exakt(L) * 100 for k in ns])
     es = np.array([abs(fem(k)[3].max() - F / A(L)) / (F / A(L)) * 100 for k in ns])
-    figk, axk = plt.subplots(figsize=(7.5, 3.6))
+    figk, axk = plt.subplots(figsize=(8, 4))
     axk.loglog(ns, eu, color=BLAU, lw=1.8, label="Verschiebung $u(L)$")
     axk.loglog(ns, es, color=ROT, lw=1.8, label=r"max. Spannung $\sigma(L)$")
     axk.axhline(5, color="#9a9a9a", ls="--", lw=1)
     axk.text(1.05, 5.5, "5 %", color="#666666")
     axk.plot([n.value, n.value], [eu[n.value - 1], es[n.value - 1]], "o", color="k", ms=5)
     axk.set_xlabel("Anzahl Elemente $n$"); axk.set_ylabel("Fehler in %")
-    axk.set_title("Konvergenz: Fehler über der Elementanzahl", fontsize=11)
+    axk.set_title("Konvergenz: Fehler über der Elementanzahl", fontsize=14)
     axk.grid(alpha=0.3, which="both"); axk.legend()
+    axk.yaxis.set_major_formatter(KOMMA)
     figk.tight_layout()
     figk
     return

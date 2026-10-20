@@ -3,14 +3,17 @@
 - Kurvendiskussion f(x) = x³ + 5x² − 3x − 20 (Übung „erste Schritte“)
 - Schnittgrößen am Träger (TM-Aufgabe 7.1), Normalkraftstab unter Eigengewicht
 - Federsystem aus dem Vorlesungsbeispiel 2025: c1 = 2k, c2 = 4k, c3 = k, f1 = 3F, f2 = −F
+- Umformung der Gleichungen des Federsystems zu K p = q (Formeln als Ebenen, eine je Schritt)
 """
 
 import math
+import re
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 from nlzeichnen import Diagramm, feder
 from nlzeichnen import notiz
-from tmzeichnen import (FARBE, Abbildung, balken, balkenzug, einspannung, festlager, kraft, kreis, linie, loslager, mass,
+from tmzeichnen import (FARBE, SCHRIFT, Abbildung, balken, balkenzug, einspannung, festlager, kraft, kreis, linie, loslager, mass,
                         pfeil, streckenlast, text, verlauf, winkelbogen)
 
 ZIEL = Path(__file__).resolve().parent.parent / "grafiken" / "einfuehrung"
@@ -75,7 +78,7 @@ def kurve():
 
 # ---------------------------------------------------------------- Federsystem
 def _platte(x, y0, y1, breite=16):
-    """Verschiebliche Platte mit Führungen oben und unten (wie Tafelbild)."""
+    """Verschieblicher starrer Balken mit Führungen oben und unten (wie Tafelbild)."""
     t = [f'<rect x="{x}" y="{y0}" width="{breite}" height="{y1 - y0}" fill="#a6a6a6" stroke="#000" stroke-width="1.25"/>']
     for yy, s in ((y0 - 5, -1), (y1 + 5, 1)):
         t.append(f'<rect x="{x - 9}" y="{yy + (0 if s > 0 else -7)}" width="{breite + 18}" height="7" fill="{FARBE["lager"]}"/>')
@@ -89,9 +92,9 @@ def _knoten_nr(x, y, n, dx=-10, dy=-12):
 
 def federsystem():
     abb = Abbildung(720, 575, "Federsystem mit drei Federn")
-    xw, xm, xr, b = 70, 330, 560, 16          # Wand, mittlere Platte (p2), rechte Platte (p1)
+    xw, xm, xr, b = 70, 330, 560, 16          # Wand, mittlerer Balken (p2), rechter Balken (p1)
     y3, y12 = 85, 225                          # Höhen der Federn
-    ym0, ym1, yr0, yr1 = 150, 262, 50, 262     # Plattenausdehnung
+    ym0, ym1, yr0, yr1 = 150, 262, 50, 262     # Ausdehnung der Balken
     yf2, yf1, yp1 = 178, 130, 190
     dy = 280                                   # Versatz Freischnitt
 
@@ -123,7 +126,7 @@ def federsystem():
     e.append(text((xm + b + xr) / 2, y12 + 34, "u_2 = p_1 − p_2", GR, 17))
     e.append(text((xw + xr) / 2 - 60, y3 + 30, "u_3 = p_1", GR, 17))
 
-    # Freischnitte der beiden Platten: Federkräfte als Zugkräfte (positiv), Kräfte rot
+    # Freischnitte der beiden Balken: Federkräfte als Zugkräfte (positiv), Kräfte rot
     e = abb.ebene("freischnitt", "Freischnitt")
     e.append(_platte(xm, ym0 + dy, ym1 + dy))
     e.append(_platte(xr, yr0 + dy, yr1 + dy))
@@ -139,7 +142,7 @@ def federsystem():
 
 
 def federsystem_3dof():
-    """Übungsaufgabe: drei Platten, vier Federn (statisch, eine Ebene)."""
+    """Übungsaufgabe: drei starre Balken, vier Federn (statisch, eine Ebene)."""
     abb = Abbildung(720, 400, "Federsystem mit drei Freiheitsgraden")
     xl, xm, xr, xw, b = 70, 330, 600, 470, 16
     y1, y3, y2, y4 = 70, 210, 280, 330
@@ -165,6 +168,153 @@ def federsystem_3dof():
         e.append(text(x + 50, y, f"p_{n}", GR, anker="start"))
     return abb.speichern(ZIEL / "federsystem-3dof.svg")
 
+
+# ---------------------------------------------------------------- Umformung zu K p = q
+_FTOKEN = re.compile(r"\*\*(\w)\*\*|([A-Za-zα-ωΠ]+)(?:_(\{[^}]*\}|\w))?|(\s+)|([^A-Za-zα-ωΠ\s*]+|\*)")
+_FFARBE = {"p": GR, "f": ROT}
+
+
+def formel(x, y, s, farbe="#000000", groesse=20, anker="start", faerben=True):
+    """Formel als SVG-Text: Buchstaben kursiv, Ziffern und Operatoren aufrecht, **K** fett aufrecht.
+    p_i (Freiheitsgrade) grün, f_i (Lasten) rot, damit man sie beim Umformen verfolgen kann."""
+    t = []
+    for fett, name, index, leer, rest in _FTOKEN.findall(s):
+        if fett:
+            t.append(f'<tspan font-style="normal" font-weight="bold">{escape(fett)}</tspan>')
+        elif name:
+            fa = _FFARBE.get(name, farbe) if faerben and index else farbe
+            t.append(f'<tspan font-style="italic" fill="{fa}">{escape(name)}</tspan>')
+            if index:
+                index = index.strip("{}")
+                t.append(f'<tspan font-style="normal" fill="{fa}" font-size="70%" baseline-shift="sub">{escape(index)}</tspan>')
+        elif leer:
+            t.append(f"<tspan> </tspan>")
+        else:
+            t.append(f'<tspan font-style="normal">{escape(rest.replace("-", "−"))}</tspan>')
+    return (f'<text x="{x}" y="{y + 0.34 * groesse:.1f}" fill="{farbe}" font-family="{SCHRIFT}" font-size="{groesse}" '
+            f'text-anchor="{anker}" xml:space="preserve">{"".join(t)}</text>')
+
+
+def _klammer(x, y0, y1, links=True, farbe="#000000"):
+    """Runde Klammer für Matrizen und Vektoren."""
+    w = 7 if links else -7
+    return (f'<path d="M {x + w},{y0} Q {x - w * 0.6},{(y0 + y1) / 2} {x + w},{y1}" fill="none" '
+            f'stroke="{farbe}" stroke-width="1.4"/>')
+
+
+def _matrix(x, y, zeilen, spalten_x, dy=34, groesse=20):
+    """Matrix/Vektor: zeilen = Listen von Formeln, spalten_x = Mitten der Spalten relativ zu x."""
+    out = []
+    for i, z in enumerate(zeilen):
+        for j, e in enumerate(z):
+            out.append(formel(x + spalten_x[j], y + i * dy, e, groesse=groesse, anker="middle"))
+    y0, y1 = y - 20, y + (len(zeilen) - 1) * dy + 20
+    out.append(_klammer(x, y0, y1, True))
+    out.append(_klammer(x + spalten_x[-1] + spalten_x[0], y0, y1, False))
+    return "".join(out)
+
+
+def _unterklammer(x0, x1, y, label):
+    """Geschweifte Klammer unter einem Ausdruck mit Bezeichnung (z. B. K, p, q)."""
+    m = (x0 + x1) / 2
+    d = (f"M {x0},{y} Q {x0},{y + 7} {x0 + 8},{y + 7} L {m - 8},{y + 7} Q {m},{y + 7} {m},{y + 14} "
+         f"Q {m},{y + 7} {m + 8},{y + 7} L {x1 - 8},{y + 7} Q {x1},{y + 7} {x1},{y}")
+    return (f'<path d="{d}" fill="none" stroke="#555555" stroke-width="1.1"/>'
+            + formel(m, y + 30, label, groesse=20, anker="middle"))
+
+
+def _rahmen(x, y, b, h, titel, farbe="#8a8f96"):
+    return (f'<rect x="{x}" y="{y}" width="{b}" height="{h}" rx="6" fill="#f6f8fb" stroke="{farbe}" stroke-width="1"/>'
+            + notiz(x + 10, y + 16, [titel], "#444444", 14))
+
+
+def _schrittpfeil(x, y0, y1, label=""):
+    t = [pfeil(x, y0, x, y1, "#555555", 1.3, (9, 6))]
+    if label:
+        t.append(notiz(x + 12, (y0 + y1) / 2, [label], "#555555", 14))
+    return "".join(t)
+
+
+def kpq():
+    """Vom Gleichungssatz des Federsystems (Gleichgewicht, Federgesetz, Kinematik) zu K p = q.
+    Schmal und hoch angelegt, damit die Formeln in der Bildspalte groß genug erscheinen."""
+    abb = Abbildung(560, 1000, "Umformung zu K p = q")
+    G = 19                                       # Schriftgröße der Formeln
+    xg, xf, xk, y0 = 10, 214, 382, 18            # Spalten: Gleichgewicht, Federgesetz, Kinematik
+
+    e = abb.ebene("gleichungen", "Unbekannte und Gleichungen")
+    e.append(notiz(xg, y0, ["Unbekannte (8):"], "#444444", 15))
+    e.append(formel(xg + 112, y0, "N_1, N_2, N_3,  u_1, u_2, u_3,  p_1, p_2", groesse=G))
+    yb = y0 + 28
+    e.append(_rahmen(xg, yb, 196, 124, "Gleichgewicht (2)"))
+    e.append(formel(xg + 10, yb + 52, "−N_2 − N_3 + f_1 = 0", groesse=G))
+    e.append(formel(xg + 10, yb + 92, "−N_1 + N_2 + f_2 = 0", groesse=G))
+    e.append(_rahmen(xf, yb, 160, 124, "Federgesetz (3)"))
+    for i, g in enumerate(("N_1 = c_1 u_1", "N_2 = c_2 u_2", "N_3 = c_3 u_3")):
+        e.append(formel(xf + 12, yb + 46 + 30 * i, g, groesse=G))
+    e.append(_rahmen(xk, yb, 168, 124, "Kinematik (3)"))
+    for i, g in enumerate(("u_1 = p_2", "u_2 = p_1 − p_2", "u_3 = p_1")):
+        e.append(formel(xk + 12, yb + 46 + 30 * i, g, groesse=G))
+
+    # Kinematik in das Federgesetz
+    y2 = yb + 196
+    e = abb.ebene("schritt_federn", "Kinematik in Federgesetz")
+    e.append(pfeil(xf + 80, yb + 128, xf + 110, y2 - 10, "#555555", 1.3, (9, 6)))
+    e.append(pfeil(xk + 84, yb + 128, xf + 210, y2 - 10, "#555555", 1.3, (9, 6)))
+    e.append(_rahmen(xf, y2 - 8, 336, 130, "Federkräfte in den Verschiebungen"))
+    for i, g in enumerate(("N_1 = c_1 p_2", "N_2 = c_2 (p_1 − p_2)", "N_3 = c_3 p_1")):
+        e.append(formel(xf + 12, y2 + 38 + 30 * i, g, groesse=G))
+
+    # in das Gleichgewicht
+    y3 = y2 + 186
+    e = abb.ebene("schritt_glgw", "In das Gleichgewicht")
+    e.append(pfeil(xg + 98, yb + 128, xg + 98, y3 - 10, "#555555", 1.3, (9, 6)))
+    e.append(pfeil(xf + 150, y2 + 126, xg + 300, y3 - 10, "#555555", 1.3, (9, 6)))
+    e.append(_rahmen(xg, y3 - 8, 540, 104, "Gleichgewicht in den Verschiebungen: 2 Gleichungen, 2 Unbekannte"))
+    e.append(formel(xg + 14, y3 + 38, "−c_2 (p_1 − p_2) − c_3 p_1 + f_1 = 0", groesse=G))
+    e.append(formel(xg + 14, y3 + 72, "−c_1 p_2 + c_2 (p_1 − p_2) + f_2 = 0", groesse=G))
+
+    # sortieren
+    y4 = y3 + 158
+    e = abb.ebene("schritt_sortiert", "Nach den Freiheitsgraden sortiert")
+    e.append(_schrittpfeil(xg + 98, y3 + 100, y4 - 10, "ausmultiplizieren, nach p_1, p_2 sortieren, f_i nach rechts"))
+    e.append(_rahmen(xg, y4 - 8, 540, 104, "innere Kräfte = äußere Lasten"))
+    # in Spalten gesetzt: p_1-Terme rechtsbündig, p_2-Terme rechtsbündig, dann = f_i
+    for yy, a, b, c in ((y4 + 38, "(c_2 + c_3) p_1", "− c_2 p_2", "f_1"), (y4 + 72, "−c_2 p_1", "+ (c_1 + c_2) p_2", "f_2")):
+        e.append(formel(xg + 150, yy, a, groesse=G, anker="end"))
+        e.append(formel(xg + 290, yy, b, groesse=G, anker="end"))
+        e.append(formel(xg + 300, yy, "= " + c, groesse=G))
+
+    # Matrixform
+    y5 = y4 + 160
+    e = abb.ebene("schritt_matrix", "Matrixform")
+    e.append(_schrittpfeil(xg + 98, y4 + 100, y5 - 30, "Koeffizienten von p_1, p_2 in eine Matrix"))
+    e.append(_matrix(xg + 10, y5, [["c_2 + c_3", "−c_2"], ["−c_2", "c_1 + c_2"]], [52, 140], groesse=G))
+    e.append(_matrix(xg + 210, y5, [["p_1"], ["p_2"]], [26], groesse=G))
+    e.append(formel(xg + 278, y5 + 17, "=", groesse=22, anker="middle"))
+    e.append(_matrix(xg + 300, y5, [["f_1"], ["f_2"]], [26], groesse=G))
+    e.append(_unterklammer(xg + 12, xg + 200, y5 + 62, "**K**"))
+    e.append(_unterklammer(xg + 212, xg + 258, y5 + 62, "**p**"))
+    e.append(_unterklammer(xg + 302, xg + 348, y5 + 62, "**q**"))
+    e.append(notiz(xg + 380, y5 + 6, ["Steifigkeitsmatrix", "mal Freiheitsgrade", "= Lasten"], "#444444", 15))
+
+    # Zahlenwerte und Lösung
+    y6 = y5 + 160
+    e = abb.ebene("schritt_zahlen", "Zahlenwerte und Lösung")
+    e.append(notiz(xg, y6 - 40, ["mit c_1 = 2k, c_2 = 4k, c_3 = k, f_1 = 3F, f_2 = −F:"], "#444444", 15))
+    e.append(formel(xg + 4, y6 + 17, "k", groesse=G))
+    e.append(_matrix(xg + 20, y6, [["5", "−4"], ["−4", "6"]], [26, 76], groesse=G))
+    e.append(_matrix(xg + 128, y6, [["p_1"], ["p_2"]], [26], groesse=G))
+    e.append(formel(xg + 196, y6 + 17, "=", groesse=22, anker="middle"))
+    e.append(_matrix(xg + 218, y6, [["3F"], ["−F"]], [28], groesse=G))
+    e.append(formel(xg + 300, y6 + 17, "⇒", groesse=22, anker="middle"))
+    for i, (lhs, z, n) in enumerate((("p_1 =", "F", "k"), ("p_2 =", "F", "2k"))):
+        xx, yy = xg + 326, y6 + i * 60 - 8
+        e.append(formel(xx, yy + 17, lhs, groesse=G))
+        e.append(formel(xx + 62, yy + 3, z, groesse=G, anker="middle", faerben=False))
+        e.append(linie(xx + 49, yy + 17, xx + 75, yy + 17, "#000000", 1.0))
+        e.append(formel(xx + 62, yy + 33, n, groesse=G, anker="middle", faerben=False))
+    return abb.speichern(ZIEL / "kpq.svg")
 
 # ---------------------------------------------------------------- TM-Aufgabe 7.1
 def traeger71():
@@ -337,6 +487,6 @@ def federsystem_beispiel():
 
 
 if __name__ == "__main__":
-    for fn in (kurve, traeger71, eigengewicht, federsystem, federsystem_3dof, aufgabe73, aufgabe_konisch,
+    for fn in (kurve, traeger71, eigengewicht, federsystem, kpq, federsystem_3dof, aufgabe73, aufgabe_konisch,
                federsystem_beispiel):
         print(fn())

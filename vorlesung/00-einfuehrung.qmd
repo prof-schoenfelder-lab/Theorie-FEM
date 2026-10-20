@@ -14,6 +14,16 @@ in die Form $\mathbf{K}\,\mathbf{p} = \mathbf{q}$ bringen lassen: **Steifigkeits
 Genau diese Form erzeugt später die Finite-Elemente-Methode für jedes Bauteil.
 :::
 
+::: {.merke}
+**Zwei Hürden.** In diesem Semester kann es an zwei verschiedenen Stellen haken: Haben Sie die **Mathematik**
+verstanden, die hinter dem Verfahren steckt? Und wissen Sie, wie Sie diese Mathematik **in Mathematica umsetzen**?
+Fragen Sie sich bei Problemen zuerst, welche der beiden Hürden es ist. Heute halten wir die Mathematik bewusst
+einfach, damit wir uns auf das Werkzeug konzentrieren können.
+
+**Fehlermeldungen gehören dazu.** Lesen Sie sie und versuchen Sie, sie zu verstehen. Wer eine Meldung schon
+fünfmal gesehen hat, weiß beim sechsten Mal sofort, wo das Problem liegt, spätestens in der Prüfung.
+:::
+
 ## Mathematica in fünf Regeln
 
 | Regel | Beispiel | Bedeutung |
@@ -26,6 +36,34 @@ Genau diese Form erzeugt später die Finite-Elemente-Methode für jedes Bauteil.
 
 : {.striped}
 
+::: {.vertiefung titel="Ausführlicher: kleine Helfer und typische Stolpersteine"}
+- **Groß- und Kleinschreibung:** Eingebaute Befehle beginnen immer groß. `solve[fkt == 0, x]` (klein) erzeugt
+  **keine** Fehlermeldung: Mathematica kennt `solve` nicht und gibt den Ausdruck einfach unverändert zurück.
+- **Farben:** Bekannte Befehle und belegte Variablen erscheinen schwarz, noch unbekannte Symbole blau. Ein blaues
+  `Solve` ist also ein Tippfehler, ein schwarzes `a` ist schon mit einem Wert belegt.
+- **Nachgestelltes `//`:** `ausdruck // N` ist dasselbe wie `N[ausdruck]`. Praktisch für Befehle, die man schnell
+  hinten anhängt: `// N` (Zahlenwert), `// Simplify` (vereinfachen), `// MatrixForm` (nur zur Anzeige).
+- **Semikolon:** `;` am Zeilenende unterdrückt die Ausgabe. Sinnvoll bei Definitionen, nicht bei `Plot`.
+- **Winkel:** Mathematica rechnet im Bogenmaß. `45 Degree` ist 45°.
+:::
+
+## Notebook und Kernel
+
+Ein Mathematica-Notebook besteht aus **Zellen**: Eingabezellen (`In[n]`), Ausgabezellen (`Out[n]`) und Textzellen
+für Überschriften und Erklärungen (*Format → Style*, z. B. *Text* oder *Subsection*). `Enter` beginnt nur eine neue
+Zeile in derselben Zelle, erst `Shift + Enter` (oder `Enter` auf dem Ziffernblock) rechnet.
+
+Gerechnet wird aber nicht im Notebook, sondern im **Kernel** im Hintergrund. Daraus folgen drei Dinge:
+
+- Die Nummern `In[n]` zählen in der Reihenfolge, in der Sie auswerten, nicht von oben nach unten. Wer im
+  Notebook hin und her springt, verwendet oben vielleicht einen Wert, der erst weiter unten definiert wird.
+  Das fällt erst nach einem Neustart auf.
+- Ein Kernel gilt für **alle** offenen Notebooks. Ist `a` in einem Notebook belegt, ist es das auch im anderen.
+- Nach einem Neustart ist alles vergessen. Dann muss das Notebook von oben neu ausgewertet werden.
+
+Einzelne Variablen setzen Sie mit `a =.` (oder `Clear[a]`) zurück. Wird es unübersichtlich, starten Sie den
+Kernel neu: *Evaluation → Quit Kernel → Local* und danach alles von oben auswerten (*Evaluation → Evaluate Notebook*).
+
 ::: {.vertiefung titel="Ausführlicher: das Muster mit Regellisten"}
 Wir legen Zahlenwerte nie fest, sondern sammeln sie in einer Regelliste und setzen sie erst am Ende ein:
 
@@ -36,7 +74,11 @@ ausdruck /. data
 
 So bleiben alle Rechnungen **symbolisch** und lassen sich jederzeit mit anderen Werten wiederholen. Wird eine
 Variable dagegen mit `=` belegt, ersetzt Mathematica sie überall, auch in späteren Rechnungen. Das ist eine
-häufige Fehlerquelle. Im Zweifel hilft `Clear[x]` oder ein Neustart des Kernels (*Auswertung → Kernel beenden*).
+häufige Fehlerquelle.
+
+Zuweisungen sind trotzdem nicht falsch. Für die Integrationsgrenzen der Kurvendiskussion geht zum Beispiel auch
+`ug = x /. nst[[2]]; og = x /. nst[[3]];` und dann `Integrate[fkt, {x, ug, og}]`. Finden Sie Ihren Weg, achten Sie
+nur darauf, welche Namen schon belegt sind.
 :::
 
 ## Beispiel 1: Kurvendiskussion
@@ -46,10 +88,12 @@ häufige Fehlerquelle. Im Zweifel hilft `Clear[x]` oder ein Neustart des Kernels
 ::: {.schritt zeige="achsen kurve"}
 ### Funktion definieren und zeichnen
 
+::: {.links}
 ```mathematica
 fkt = x^3 + 5 x^2 - 3 x - 20;
 Plot[fkt, {x, -6, 3}]
 ```
+:::
 
 `fkt` ist ein Ausdruck in `x`, keine Funktion im Sinne der Programmierung. Das reicht für fast alles,
 was wir brauchen.
@@ -58,23 +102,31 @@ was wir brauchen.
 ::: {.schritt zeige="achsen kurve nullstellen"}
 ### Nullstellen
 
+::: {.links}
 ```mathematica
 nst = Solve[fkt == 0, x, Reals]
 N[nst]
+fkt /. nst // Simplify
 ```
+:::
 
-`Solve` liefert eine **Liste von Regeln**, z. B. `{{x -> -4.74}, {x -> -2.19}, {x -> 1.93}}`.
-Mit `x /. nst[[2]]` holen wir einen einzelnen Wert heraus. `N[...]` rechnet numerisch.
+`Solve` braucht eine Gleichung mit `==`. Es liefert eine **Liste von Regeln**, z. B.
+`{{x -> -4.74}, {x -> -2.19}, {x -> 1.93}}`. Mit `x /. nst[[2]]` holen wir einen einzelnen Wert heraus.
+`N[...]` rechnet numerisch.
+
+**Probe:** In `fkt` eingesetzt und vereinfacht ergibt jede Nullstelle `{0, 0, 0}`.
 :::
 
 ::: {.schritt zeige="achsen kurve nullstellen extrema"}
 ### Extrema
 
+::: {.links}
 ```mathematica
 dfkt = D[fkt, x]
 ext = Solve[dfkt == 0, x]
 N[{x, fkt} /. ext]
 ```
+:::
 
 `D` leitet ab. Eingesetzt in `{x, fkt}` erhalten wir die Koordinaten von Maximum und Minimum.
 :::
@@ -82,12 +134,17 @@ N[{x, fkt} /. ext]
 ::: {.schritt zeige="achsen flaeche kurve nullstellen"}
 ### Fläche zwischen zwei Nullstellen
 
+::: {.links}
 ```mathematica
 Integrate[fkt, {x, x /. nst[[2]], x /. nst[[3]]}] // N
 Plot[fkt, {x, -6, 3}, Filling -> Axis]
 ```
+:::
 
 Das bestimmte Integral ist $-53{,}6$: Die Fläche liegt unterhalb der $x$-Achse.
+
+Die Grenzen tippen wir nicht ab, sondern nehmen sie mit `x /. nst[[2]]` direkt aus der Lösung. Das angehängte
+`// N` liefert den Zahlenwert.
 :::
 
 ::::
@@ -102,18 +159,40 @@ Das bestimmte Integral ist $-53{,}6$: Die Fläche liegt unterhalb der $x$-Achse.
 Für den Träger sind die Schnittgrößen zu berechnen und grafisch darzustellen. Außerdem sind die
 lokalen Extrema zu ermitteln.
 
-**Gegeben:** $F = 5$ kN, $q = 30$ kN/m, $a = 0{,}1$ m, $\alpha = 45°$
+**Gegeben:** $F = 5\,\text{kN}$, $q = 30\,\text{kN/m}$, $a = 0{,}1\,\text{m}$, $\alpha = 45°$
 
+`45 Degree` rechnet den Winkel ins Bogenmaß um.
+
+**Vorsicht:** Ist `a` von vorher noch belegt (z. B. `a = 3`), macht Mathematica aus `a -> 0.1` ohne
+Fehlermeldung `3 -> 0.1`. Das `a` erscheint dann schwarz statt blau. Abhilfe: `a =.` und `data` neu auswerten.
+
+::: {.links}
 ```mathematica
 data = {F -> 5, q -> 30, a -> 0.1, α -> 45 Degree};
 ```
+:::
 :::
 
 ::: {.schritt zeige="traeger lasten reaktionen" dimmen="mass" zoom="40 20 700 205"}
 ### Lagerkräfte aus dem Gleichgewicht
 
 Jede Gleichgewichtsbedingung bekommt einen Namen, `Solve` löst alle zusammen:
+`Solve[{Gleichungen}, {Unbekannte}]`.
 
+Das `[[1]]` nimmt die erste Lösung aus der Lösungsliste.
+
+::: {.vertiefung titel="Ausführlicher: Warum [[1]]?"}
+`Solve` gibt immer eine **Liste von Lösungen** zurück, jede Lösung wieder als Liste von Regeln, also doppelte
+geschweifte Klammern: `{{A -> …, Bv -> …, Bh -> …}}`. Bei der Kurvendiskussion gab es drei Lösungen für `x`.
+In der Mechanik ist die Lösung meist eindeutig, die äußere Klammer bleibt aber. Mit `[[1]]` nehmen wir die
+erste (einzige) Lösung und erhalten eine einfache Regelliste, die sich sauber weiterverwenden lässt.
+Ohne `[[1]]` geht es oft auch, später bei Vektoren und Matrizen stört die doppelte Klammer aber.
+
+Man kann `[[1]]` auch erst beim Einsetzen schreiben (`… /. lsg[[1]]`). Dann sieht man vorher, ob `Solve`
+wirklich nur eine Lösung gefunden hat.
+:::
+
+::: {.links}
 ```mathematica
 gh  = Bh - F Cos[α] == 0;
 gv  = A + Bv - 3 a q - F Sin[α] == 0;
@@ -121,38 +200,65 @@ gmb = -A 3 a + 3 a q (3/2) a - F Sin[α] a == 0;
 lager = Solve[{gh, gv, gmb}, {A, Bv, Bh}][[1]];
 lager /. data
 ```
+:::
 
-$A = 3{,}32$ kN, $B_v = 9{,}21$ kN, $B_h = 3{,}54$ kN
+$$
+\begin{aligned}
+A &= 3{,}32\,\text{kN} \\
+B_v &= 9{,}21\,\text{kN} \\
+B_h &= 3{,}54\,\text{kN}
+\end{aligned}
+$$
 :::
 
 ::: {.schritt zeige="traeger lager lasten bereiche" zoom="40 20 700 205"}
 ### Bereich I: $0 \le x_1 \le 3a$
 
-Gleichgewicht am linken Teil, nach den Schnittgrößen aufgelöst. Die Lagerkräfte setzen wir als Regeln ein:
+Gleichgewicht am linken Teil, nach den Schnittgrößen aufgelöst. Die Lagerkräfte setzen wir als Regeln ein.
 
+::: {.links}
 ```mathematica
 lsg1 = Solve[{Nx1 == 0,
               A - q x1 - Qx1 == 0,
               Mx1 - A x1 + q x1^2/2 == 0},
              {Nx1, Qx1, Mx1}][[1]] /. lager /. data
 ```
+:::
 
-$Q(x_1) = 3{,}32 - 30\,x_1$, $\quad M(x_1) = 3{,}32\,x_1 - 15\,x_1^2$
+$$
+\begin{aligned}
+N(x_1) &= 0 \\
+Q(x_1) &= 3{,}32 - 30\,x_1 \\
+M(x_1) &= 3{,}32\,x_1 - 15\,x_1^2
+\end{aligned}
+$$
+
+$x_1$ in m, $Q$ in kN, $M$ in kNm.
 :::
 
 ::: {.schritt zeige="traeger lager lasten bereiche" zoom="40 20 700 205"}
 ### Bereich II: $0 \le x_2 \le a$
 
-Am Kragarm schneiden wir den rechten Teil frei. Dort wirkt nur $F$:
+Am Kragarm schneiden wir den rechten Teil frei. Dort wirkt nur $F$.
 
+::: {.links}
 ```mathematica
 lsg2 = Solve[{-Nx2 - F Cos[α] == 0,
               Qx2 - F Sin[α] == 0,
               -Mx2 - F Sin[α] (a - x2) == 0},
              {Nx2, Qx2, Mx2}][[1]] /. data
 ```
+:::
 
-$N = -3{,}54$ kN (Druck), $Q = 3{,}54$ kN, $M$ linear von $-0{,}354$ kNm auf null.
+$$
+\begin{aligned}
+N(x_2) &= -3{,}54 \quad \text{(Druck)} \\
+Q(x_2) &= 3{,}54 \\
+M(x_2) &= -3{,}54\,(0{,}1 - x_2)
+\end{aligned}
+$$
+
+$M$ steigt linear von $-0{,}354\,\text{kNm}$ am Lager $B$ auf null am Kragende.
 :::
 
 ::: {.schritt zeige="traeger lager lasten verlauf_n verlauf_q verlauf_m"}
@@ -161,12 +267,15 @@ $N = -3{,}54$ kN (Druck), $Q = 3{,}54$ kN, $M$ linear von $-0{,}354$ kNm auf nul
 Die Bereiche werden mit `Piecewise` zu einer Funktion über die ganze Länge zusammengesetzt:
 
 ```mathematica
-M = Piecewise[{{Mx1 /. lsg1 /. x1 -> x,       0 <= x <= 0.3},
-               {Mx2 /. lsg2 /. x2 -> x - 0.3, 0.3 < x <= 0.4}}];
+M = Piecewise[{
+  {Mx1 /. lsg1 /. x1 -> x,       x <= 0.3},
+  {Mx2 /. lsg2 /. x2 -> x - 0.3, x > 0.3}}];
 Plot[M, {x, 0, 0.4}, Filling -> Axis]
+Q = D[M, x]
 ```
 
-$N$ und $Q$ genauso.
+$N$ und $Q$ genauso. Mit `Piecewise` lässt sich rechnen wie mit einer durchgehenden Funktion:
+`D[M, x]` liefert zur Kontrolle die Querkraft $Q = M'$ (an der Sprungstelle `Indeterminate`).
 :::
 
 ::: {.schritt zeige="traeger lager lasten verlauf_n verlauf_q verlauf_m"}
@@ -179,8 +288,8 @@ xm = Solve[(Qx1 /. lsg1) == 0, x1]
 Mx1 /. lsg1 /. xm
 ```
 
-$x_1 = 0{,}111$ m, $\;M_{max} = 0{,}184$ kNm. Das betragsmäßig größte Moment ist
-$M(3a) = -0{,}354$ kNm über dem Lager $B$.
+$x_1 = 0{,}111\,\text{m}$, $\;M_{max} = 0{,}184\,\text{kNm}$. Das betragsmäßig größte Moment ist
+$M(3a) = -0{,}354\,\text{kNm}$ über dem Lager $B$.
 :::
 
 ::::
@@ -189,17 +298,49 @@ $M(3a) = -0{,}354$ kNm über dem Lager $B$.
 
 :::: {.scrolly svg="../grafiken/einfuehrung/eigengewicht.svg"}
 
-::: {.schritt zeige="stab_a"}
+::: {.schritt zeige="stab_a" zoom="0 30 380 420"}
 ### Der hängende Stab
 
 Ein Stab mit konstanter Dehnsteifigkeit $EA$ hängt oben im Lager und wird durch sein Eigengewicht
 $q_0 = \rho\,g\,A$ belastet. Die Differentialgleichung des Normalkraftstabes lautet
 
 $$
-\big(EA\,u'(x)\big)' = -q_x(x) \qquad\Rightarrow\qquad EA\,u''(x) = -q_0
+\big(EA\,u'(x)\big)' = -q_x(x)
 $$
 
-**Randbedingungen:** oben fest $u(0) = 0$, unten frei $N(L) = EA\,u'(L) = 0$.
+und mit konstantem $EA$ und $q_x = q_0$
+
+$$
+EA\,u''(x) = -q_0
+$$
+
+::: {.vertiefung titel="Ausführlicher: Herleitung der Differentialgleichung"}
+Wir schneiden ein Stabstück der Länge $\mathrm{d}x$ frei. Oben wirkt $-N(x)$, unten $N(x + \mathrm{d}x)$,
+dazu die Streckenlast $q_x\,\mathrm{d}x$ in Richtung $x$:
+
+$$
+-N(x) + N(x + \mathrm{d}x) + q_x\,\mathrm{d}x = 0
+\qquad\Rightarrow\qquad N'(x) = -q_x(x)
+$$
+
+Mit dem Werkstoffgesetz $\sigma = E\,\varepsilon$, also $N = \sigma A = EA\,\varepsilon$, und der Kinematik
+$\varepsilon = u'(x)$ folgt
+
+$$
+N(x) = EA\,u'(x) \qquad\Rightarrow\qquad \big(EA\,u'(x)\big)' = -q_x(x)
+$$
+
+Das sind dieselben drei Bausteine wie beim Federsystem: **Gleichgewicht, Werkstoffgesetz, Kinematik.**
+:::
+
+**Randbedingungen:**
+
+$$
+\begin{aligned}
+u(0) &= 0 && \text{oben fest} \\
+N(L) = EA\,u'(L) &= 0 && \text{unten frei}
+\end{aligned}
+$$
 :::
 
 ::: {.schritt zeige="stab_a achsen kurve_a marken_a"}
@@ -208,16 +349,26 @@ $$
 `u[x]` mit eckigen Klammern ist eine **unbekannte Funktion**. Mathematica kann sie ableiten, ohne sie zu kennen:
 `D[u[x], x]` ergibt `u'[x]`.
 
+::: {.links}
 ```mathematica
-dgl = Em A D[u[x], {x, 2}] == -q0;
-rb  = {u[0] == 0, u'[L] == 0};
-uex = u[x] /. DSolve[{dgl, Sequence @@ rb}, u[x], x][[1]]
+dgl = Em A D[u[x], {x, 2}] == -q0
+rb1 = u[0] == 0;
+rb2 = u'[L] == 0;
+dlsg = DSolve[{dgl, rb1, rb2}, u[x], x]
+uex = u[x] /. dlsg[[1]]
 Nex = Em A D[uex, x]
-Plot[uex /. {q0 -> 1, Em -> 1, A -> 1, L -> 1}, {x, 0, 1}]
+Plot[uex /. {q0 -> 1, Em -> 1, A -> 1, L -> 1},
+     {x, 0, 1}]
 ```
+:::
+
+`DSolve` liefert wie `Solve` eine Liste von Regeln. Mit `dlsg[[1]]` nehmen wir die erste (hier einzige) Lösung.
 
 $$
-u(x) = \frac{q_0}{2EA}\,x\,(2L - x), \qquad N(x) = q_0\,(L - x)
+\begin{aligned}
+u(x) &= \frac{q_0}{2EA}\,x\,(2L - x) \\
+N(x) &= q_0\,(L - x)
+\end{aligned}
 $$
 
 Die Normalkraft ist oben am größten: Dort hängt das ganze Gewicht $q_0 L$.
@@ -230,9 +381,9 @@ Nur die Randbedingungen ändern sich, der Rest der Rechnung bleibt gleich:
 
 | | Lagerung | Randbedingungen | $N(x)$ |
 |:-:|:--|:--|:--|
-| a) | hängend | $u(0) = 0$, $u'(L) = 0$ | $q_0 (L - x)$ |
-| b) | beidseitig fest | $u(0) = 0$, $u(L) = 0$ | $q_0 (L/2 - x)$ |
-| c) | stehend | $u'(0) = 0$, $u(L) = 0$ | $-q_0\,x$ |
+| a) | hängend | $u(0) = 0$<br>$u'(L) = 0$ | $q_0 (L - x)$ |
+| b) | beidseitig fest | $u(0) = 0$<br>$u(L) = 0$ | $q_0 (L/2 - x)$ |
+| c) | stehend | $u'(0) = 0$<br>$u(L) = 0$ | $-q_0\,x$ |
 
 Bei b) teilen sich beide Lager das Gewicht. Der stehende Stab c) ist überall gedrückt.
 :::
@@ -246,86 +397,175 @@ Bei b) teilen sich beide Lager das Gewicht. Der stehende Stab c) ist überall ge
 ::: {.schritt zeige="system last" zoom="40 20 680 265"}
 ### Das System
 
-Zwei Platten sind horizontal verschieblich geführt und über drei Federn mit der Wand und untereinander
-verbunden. Auf die Platten wirken die Kräfte $f_1$ und $f_2$.
+Zwei starre Balken sind horizontal verschieblich geführt und über drei Federn mit der Wand und untereinander
+verbunden. Auf die Balken wirken die Kräfte $f_1$ und $f_2$.
 
 **Gegeben:** $c_1 = 2k$, $c_2 = 4k$, $c_3 = k$, $f_1 = 3F$, $f_2 = -F$
 
-**Gesucht:** Verschiebungen der Platten und Federkräfte
+**Gesucht:** Verschiebungen der Balken und Federkräfte
 :::
 
 ::: {.schritt zeige="system last dof" zoom="40 20 680 265"}
 ### Freiheitsgrade
 
-Jede Platte kann sich nur in einer Richtung bewegen. Das System hat also zwei **Freiheitsgrade**:
+Jeder Balken kann sich nur in einer Richtung bewegen. Das System hat also zwei **Freiheitsgrade**:
 
 $$
 \mathbf{p} = \begin{pmatrix} p_1 \\ p_2 \end{pmatrix}
 $$
 
-$p_1$ ist die Verschiebung der rechten, $p_2$ die der mittleren Platte, beide positiv nach rechts.
-:::
+$p_1$ ist die Verschiebung des rechten, $p_2$ die des mittleren Balkens, beide positiv nach rechts.
 
-::: {.schritt zeige="system last dof dehnung" zoom="40 20 680 265"}
-### Kinematik und Federgesetz
-
-Die Verlängerung einer Feder ist die Verschiebung des rechten minus die des linken Endes:
-
-$$
-u_1 = p_2, \qquad u_2 = p_1 - p_2, \qquad u_3 = p_1
-$$
-
-Jede Feder ist linear, die Federkraft ist positiv bei Zug:
-
-$$
-N_1 = c_1 u_1, \qquad N_2 = c_2 u_2, \qquad N_3 = c_3 u_3
-$$
+Die Wand bewegt sich nicht: Dort ist die Verschiebung null. Genauso beschreibt ein FE-Programm später jedes
+Lager, nämlich als Freiheitsgrad mit vorgegebener Verschiebung $0$.
 :::
 
 ::: {.schritt zeige="system last dof freischnitt" dimmen="system"}
 ### Freischnitt und Gleichgewicht
 
-Wir schneiden beide Platten frei. Zugkräfte ziehen die Platte in Richtung Feder:
+Wir schneiden beide Balken frei. Zugkräfte ziehen den Balken in Richtung Feder:
 
 $$
 \begin{aligned}
-\text{mittlere Platte:} &\quad -N_1 + N_2 + f_2 = 0 \\
-\text{rechte Platte:}   &\quad -N_2 - N_3 + f_1 = 0
+\text{rechter Balken:}   &\quad -N_2 - N_3 + f_1 = 0 \\
+\text{mittlerer Balken:} &\quad -N_1 + N_2 + f_2 = 0
 \end{aligned}
 $$
 
-Das sind zwei Gleichungen. Mit Kinematik und Federgesetz bleiben nur $p_1$ und $p_2$ als Unbekannte.
+Das sind nur zwei Gleichungen für fünf Unbekannte: die Federkräfte $N_1, N_2, N_3$ und die Verschiebungen
+$p_1, p_2$. Das System ist **statisch unbestimmt**. Wir brauchen die Verformung.
+:::
+
+::: {.schritt zeige="system last dof dehnung" dimmen="freischnitt" zoom="40 20 680 265"}
+### Kinematik und Federgesetz
+
+Eine Feder „sieht“ nur ihre beiden Enden. Ihre Verlängerung ist die Verschiebung des rechten minus die des
+linken Endes:
+
+$$
+\begin{aligned}
+u_1 &= p_2 \\
+u_2 &= p_1 - p_2 \\
+u_3 &= p_1
+\end{aligned}
+$$
+
+Verschieben sich beide Enden gleich ($p_1 = p_2$), wird Feder 2 nur mitgenommen, aber nicht gedehnt: keine Kraft.
+
+Jede Feder ist linear, die Federkraft ist positiv bei Zug:
+
+$$
+\begin{aligned}
+N_1 &= c_1 u_1 \\
+N_2 &= c_2 u_2 \\
+N_3 &= c_3 u_3
+\end{aligned}
+$$
 :::
 
 ::::
 
 ## Die Struktur $\mathbf{K}\,\mathbf{p} = \mathbf{q}$
 
-Wir setzen Federgesetz und Kinematik in das Gleichgewicht ein und sortieren nach den Freiheitsgraden.
-Auf die linke Seite kommen die inneren Federkräfte, auf die rechte die äußeren Lasten:
+:::: {.scrolly svg="../grafiken/einfuehrung/kpq.svg"}
 
-$$
-\begin{aligned}
-(c_2 + c_3)\,p_1 - c_2\,p_2 &= f_1 \\
--c_2\,p_1 + (c_1 + c_2)\,p_2 &= f_2
-\end{aligned}
-\qquad\Longleftrightarrow\qquad
-\underbrace{\begin{pmatrix} c_2 + c_3 & -c_2 \\ -c_2 & c_1 + c_2 \end{pmatrix}}_{\mathbf{K}}
-\underbrace{\begin{pmatrix} p_1 \\ p_2 \end{pmatrix}}_{\mathbf{p}}
-=
-\underbrace{\begin{pmatrix} f_1 \\ f_2 \end{pmatrix}}_{\mathbf{q}}
-$$
+::: {.schritt zeige="gleichungen" zoom="0 0 560 185"}
+### Unbekannte und Gleichungen
 
-Das ist das Federgesetz $F = c\,u$ für **alle Freiheitsgrade gleichzeitig**. Mit den Zahlenwerten:
+Aus Freischnitt, Federgesetz und Kinematik haben wir **8 Gleichungen für 8 Unbekannte**. In Mathematica
+bekommt jede Gruppe einen Namen. Gleichungen mit `==`, Beziehungen zum Einsetzen als Regeln mit `->`.
 
-$$
-k \begin{pmatrix} 5 & -4 \\ -4 & 6 \end{pmatrix} \begin{pmatrix} p_1 \\ p_2 \end{pmatrix}
-= \begin{pmatrix} 3F \\ -F \end{pmatrix}
-\quad\Rightarrow\quad
-p_1 = \frac{F}{k}, \qquad p_2 = \frac{F}{2k}
-$$
+::: {.links}
+```mathematica
+glgw        = {-N2 - N3 + f1 == 0,
+               -N1 + N2 + f2 == 0};
+federgesetz = {N1 -> c1 u1, N2 -> c2 u2, N3 -> c3 u3};
+kinematik   = {u1 -> p2, u2 -> p1 - p2, u3 -> p1};
+```
+:::
+:::
 
-Rückwärts eingesetzt erhalten wir die Federkräfte $N_1 = F$, $N_2 = 2F$, $N_3 = F$.
+::: {.schritt zeige="schritt_federn" dimmen="gleichungen" zoom="0 0 560 375"}
+### Kinematik in das Federgesetz
+
+Setzen wir die Kinematik in das Federgesetz ein, hängen die Federkräfte nur noch von den Verschiebungen ab.
+
+::: {.links}
+```mathematica
+federgesetz /. kinematik
+```
+:::
+
+`{N1 -> c1 p2, N2 -> c2 (p1 - p2), N3 -> c3 p1}`
+:::
+
+::: {.schritt zeige="schritt_glgw" dimmen="gleichungen schritt_federn" zoom="0 0 560 535"}
+### Einsetzen in das Gleichgewicht
+
+Nun ersetzen wir im Gleichgewicht die Federkräfte. Übrig bleiben **2 Gleichungen für die 2 Freiheitsgrade**
+$p_1$ und $p_2$:
+
+```mathematica
+glgw /. federgesetz /. kinematik
+```
+
+Mathematica wendet die Regeln von links nach rechts an: erst $N_i \to c_i u_i$, dann $u_i \to p_j$.
+
+**Die Reihenfolge zählt:** `glgw /. kinematik /. federgesetz` ersetzt zuerst $u_i$, die im Gleichgewicht noch gar
+nicht vorkommen. Danach stehen dort $u_i$ statt $p_j$, ohne Fehlermeldung.
+:::
+
+::: {.schritt zeige="schritt_sortiert" dimmen="schritt_glgw" zoom="0 410 560 285"}
+### Nach den Freiheitsgraden sortieren
+
+Wir multiplizieren aus und sortieren nach $p_1$ und $p_2$. Die Lasten $f_i$ bringen wir auf die rechte Seite.
+Links stehen dann die **inneren** Kräfte, rechts die **äußeren**.
+
+::: {.links}
+```mathematica
+innen = {N2 + N3, N1 - N2} /. federgesetz /. kinematik;
+Collect[innen, {p1, p2}]
+```
+:::
+:::
+
+::: {.schritt zeige="schritt_matrix" dimmen="schritt_sortiert" zoom="0 570 560 290"}
+### Matrixform
+
+Die Koeffizienten vor $p_1$ und $p_2$ bilden die **Steifigkeitsmatrix** $\mathbf{K}$. Mathematica erhält sie
+als Ableitung der inneren Kräfte nach den Freiheitsgraden.
+
+::: {.links}
+```mathematica
+psys = {p1, p2};
+qsys = {f1, f2};
+Ksys = D[innen, {psys}];
+Ksys // MatrixForm
+```
+:::
+
+Das ist das Federgesetz $F = c\,u$ für **alle Freiheitsgrade gleichzeitig**.
+:::
+
+::: {.schritt zeige="schritt_matrix schritt_zahlen" zoom="0 700 560 300"}
+### Lösung
+
+Erst jetzt setzen wir die Zahlenwerte ein und lösen das Gleichungssystem.
+
+::: {.links}
+```mathematica
+data = {c1 -> 2 k, c2 -> 4 k, c3 -> k,
+        f1 -> 3 F, f2 -> -F};
+plsg = LinearSolve[Ksys, qsys] /. data // Simplify
+{N1, N2, N3} /. federgesetz /. kinematik /.
+  Thread[psys -> plsg] /. data
+```
+:::
+
+$p_1 = F/k$, $p_2 = F/(2k)$. Rückwärts eingesetzt erhalten wir die Federkräfte $N_1 = F$, $N_2 = 2F$, $N_3 = F$.
+:::
+
+::::
 
 ::: {.merke}
 **Was in $\mathbf{K}$ steckt:**
@@ -338,42 +578,55 @@ Rückwärts eingesetzt erhalten wir die Federkräfte $N_1 = F$, $N_2 = 2F$, $N_3
 - Ohne Wand ($c_1 = c_3 = 0$) wird $\mathbf{K}$ **singulär**: Das System kann als Ganzes wegrutschen.
 :::
 
-::: {.aufgabe}
-**Ausprobieren:** Im Beispiel [Federsystem: Steifigkeitsmatrix](../beispiele/federsystem/index.html) können Sie
-Federsteifigkeiten und Kräfte verändern und sehen sofort $\mathbf{K}$, die Verschiebungen und die Federkräfte.
-Was passiert, wenn Sie $c_1$ und $c_3$ gegen null gehen lassen? Wann ist $N_2 = 0$?
-:::
-
-## Das Lösungsmuster in Mathematica
-
-Die Rechnung lässt sich fast wörtlich in Mathematica übertragen. Jede Beziehung bekommt einen Namen:
-
-```mathematica
-data        = {c1 -> 2 k, c2 -> 4 k, c3 -> k, f1 -> 3 F, f2 -> -F};
-kinematik   = {u1 -> p2, u2 -> p1 - p2, u3 -> p1};
-federgesetz = {N1 -> c1 u1, N2 -> c2 u2, N3 -> c3 u3};
-glgw        = {-N1 + N2 + f2 == 0, -N2 - N3 + f1 == 0};
-
-lsg = Solve[glgw /. federgesetz /. kinematik /. data, {p1, p2}]
-{N1, N2, N3} /. federgesetz /. kinematik /. lsg[[1]] /. data
-```
-
-Die Steifigkeitsmatrix entsteht als **Ableitung der inneren Kräfte nach den Freiheitsgraden**:
-
-```mathematica
-psys  = {p1, p2};
-qsys  = {f1, f2};
-innen = {N2 + N3, N1 - N2} /. federgesetz /. kinematik;
-Ksys  = D[innen, {psys}];  Ksys // MatrixForm
-LinearSolve[Ksys, qsys] /. data
-```
-
 ::: {.vertiefung titel="Ausführlicher: Warum die Ableitung die Matrix liefert"}
 `innen` ist ein Vektor, dessen Einträge linear in $p_1$ und $p_2$ sind. Die Ableitung des $i$-ten Eintrags
 nach $p_j$ ist genau der Koeffizient $K_{ij}$. `D[innen, {psys}]` bildet alle diese Ableitungen auf
 einmal (Jacobi-Matrix). Für lineare Systeme ist das eine bequeme Art, $\mathbf{K}$ aus den Gleichungen
 herauszulösen, ohne von Hand zu sortieren.
 :::
+
+## Was macht ein FE-Programm?
+
+Genau dasselbe, nur größer:
+
+1. **Preprocessing:** Aus dem Netz entstehen die Freiheitsgrade. Ein 2D-Netz mit 1000 Knoten und zwei
+   Verschiebungen je Knoten hat 2000 Freiheitsgrade, $\mathbf{K}$ ist dann eine $2000 \times 2000$-Matrix.
+   Lager sind Freiheitsgrade mit vorgegebener Verschiebung $0$, Lasten stehen in $\mathbf{q}$.
+2. **Solution:** Ein Klick auf *Solve* löst $\mathbf{K}\,\mathbf{p} = \mathbf{q}$. $\mathbf{K}$ wird dabei nicht
+   invertiert, das wäre viel zu aufwendig. Stattdessen nutzt man Verfahren wie die Gauß-Elimination, die auch
+   Gleichungssysteme mit Millionen Unbekannten effizient lösen.
+3. **Postprocessing:** Die Verschiebungen werden gezeichnet (das verformte Netz). Daraus berechnet das Programm
+   rückwärts die inneren Größen, beim Federsystem die Federkräfte, beim Bauteil Dehnungen und Spannungen.
+
+Hinter allem stecken die Gleichungen der Technischen Mechanik: Gleichgewicht, Werkstoffgesetz, Kinematik.
+
+::: {.aufgabe}
+**Ausprobieren:** Im Beispiel [Federsystem: Steifigkeitsmatrix](../beispiele/federsystem/index.html) können Sie
+Federsteifigkeiten und Kräfte verändern und sehen sofort $\mathbf{K}$, die Verschiebungen und die Federkräfte.
+Was passiert, wenn Sie $c_1$ und $c_3$ gegen null gehen lassen? Wann ist $N_2 = 0$?
+:::
+
+## Das Lösungsmuster auf einen Blick
+
+Die ganze Rechnung zum Kopieren. Jede Beziehung hat einen Namen, Zahlenwerte kommen erst am Ende:
+
+```mathematica
+glgw        = {-N2 - N3 + f1 == 0, -N1 + N2 + f2 == 0};
+federgesetz = {N1 -> c1 u1, N2 -> c2 u2, N3 -> c3 u3};
+kinematik   = {u1 -> p2, u2 -> p1 - p2, u3 -> p1};
+data        = {c1 -> 2 k, c2 -> 4 k, c3 -> k, f1 -> 3 F, f2 -> -F};
+
+(* direkt lösen *)
+lsg = Solve[glgw /. federgesetz /. kinematik /. data, {p1, p2}]
+
+(* oder als K p = q *)
+psys  = {p1, p2};
+qsys  = {f1, f2};
+innen = {N2 + N3, N1 - N2} /. federgesetz /. kinematik;
+Ksys  = D[innen, {psys}];  Ksys // MatrixForm
+plsg  = LinearSolve[Ksys, qsys] /. data // Simplify
+{N1, N2, N3} /. federgesetz /. kinematik /. Thread[psys -> plsg] /. data
+```
 
 ## Matrizenrechnung kompakt
 
@@ -407,18 +660,26 @@ Skalarprodukt, `M . x` das Produkt Matrix mal Vektor.
 ## Ausblick
 
 Beim Federsystem haben wir $\mathbf{K}$ aus Gleichgewicht, Federgesetz und Kinematik von Hand aufgestellt.
-Für ein Bauteil mit tausenden Freiheitsgraden geht das nicht mehr. In den nächsten Vorlesungen leiten wir
-dieselbe Gleichung aus der **potentiellen Energie** her (Vorlesung 1 und 2). Daraus entsteht ein Verfahren,
+Es ist mühsam herauszufinden, welche Formeln das System korrekt abbilden. Für ein Bauteil mit
+tausenden Freiheitsgraden geht das so nicht mehr. In der nächsten Vorlesung rechnen wir **dasselbe Federsystem**
+noch einmal, aber über die **potentielle Energie**. Das ist formaler, führt zum selben Ergebnis und wieder auf
+$\mathbf{K}\,\mathbf{p} = \mathbf{q}$ (Vorlesung 1 und 2). Daraus entsteht ein Verfahren,
 das $\mathbf{K}$ automatisch aus vielen kleinen Elementen zusammensetzt: die
 [Finite-Elemente-Methode](03-stab.qmd).
 
 ## Übung mit Mathematica
 
 ::: {.aufgabe}
-**Erste Schritte.** Kurvendiskussion einer Funktion dritten Grades und Federsystem mit drei Freiheitsgraden.
-Bringen Sie beim Federsystem das Gleichungssystem in die Form $\mathbf{K}\,\mathbf{p} = \mathbf{q}$.
+**Kurvendiskussion.** Verlauf, Nullstellen, Extrema und Fläche einer Funktion dritten Grades.
 
-[Aufgabe herunterladen (Mathematica)](../mathematica/00-einfuehrung-task.nb){download="00-einfuehrung-task.nb"}
+[Aufgabe herunterladen (Mathematica)](../mathematica/00-kurvendiskussion-task.nb){download="00-kurvendiskussion-task.nb"}
+:::
+
+::: {.aufgabe}
+**Federsystem mit drei Freiheitsgraden.** Gleichgewicht, Kinematik und Federgesetz aufstellen und das
+Gleichungssystem in die Form $\mathbf{K}\,\mathbf{p} = \mathbf{q}$ bringen.
+
+[Aufgabe herunterladen (Mathematica)](../mathematica/00-federsystem-task.nb){download="00-federsystem-task.nb"}
 :::
 
 ::: {.aufgabe}
