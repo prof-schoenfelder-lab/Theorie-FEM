@@ -320,7 +320,7 @@ def kpq():
 def traeger71():
     """Träger mit Streckenlast q über 3a und schräger Kraft F am Kragende.
     F = 5 kN, q = 30 kN/m, a = 0,1 m, α = 45°; Ergebnisse aus Mathematica (Lösungsnotebook 7.1)."""
-    abb = Abbildung(760, 620, "Schnittgrößen am Träger (Aufgabe 7.1)")
+    abb = Abbildung(760, 620, "Schnittgrößen am Träger")
     F, q, a, c = 5.0, 30.0, 0.1, math.cos(math.radians(45))
     A = 3 * a * q * 1.5 * a / (3 * a) - F * c * a / (3 * a)
     Bv = 3 * a * q + F * c - A
@@ -438,7 +438,7 @@ def eigengewicht():
 # ---------------------------------------------------------------- Übungsaufgaben (statisch)
 def aufgabe73():
     """Abgewinkelter Träger (TM, Aufgabe 7.3): Dreieckslast 0 … q0 über 3a, F oben am Arm."""
-    abb = Abbildung(640, 300, "Abgewinkelter Träger (Aufgabe 7.3)")
+    abb = Abbildung(640, 300, "Abgewinkelter Träger")
     x0, y, s = 70, 220, 140                      # s = px je a
     xB, xE = x0 + 2 * s, x0 + 3 * s
     e = abb.ebene("system", "System")

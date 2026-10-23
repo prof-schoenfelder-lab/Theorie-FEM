@@ -154,7 +154,7 @@ Die Grenzen tippen wir nicht ab, sondern nehmen sie mit `x /. nst[[2]]` direkt a
 :::: {.scrolly svg="../grafiken/einfuehrung/traeger71.svg"}
 
 ::: {.schritt zeige="traeger lager lasten mass" zoom="40 20 700 205"}
-### Die Aufgabe (TM, Aufgabe 7.1)
+### Die Aufgabe
 
 Für den Träger sind die Schnittgrößen zu berechnen und grafisch darzustellen. Außerdem sind die
 lokalen Extrema zu ermitteln.
@@ -676,17 +676,17 @@ das $\mathbf{K}$ automatisch aus vielen kleinen Elementen zusammensetzt: die
 :::
 
 ::: {.aufgabe}
+**Schnittgrößen am abgewinkelten Träger.** Lagerkräfte, Schnittgrößen in drei Bereichen,
+Verläufe und lokale Extrema bei linear ansteigender Streckenlast.
+
+[Aufgabe herunterladen (Mathematica)](../mathematica/00-schnittgroessen-task.nb){download="00-schnittgroessen-task.nb"}
+:::
+
+::: {.aufgabe}
 **Federsystem mit drei Freiheitsgraden.** Gleichgewicht, Kinematik und Federgesetz aufstellen und das
 Gleichungssystem in die Form $\mathbf{K}\,\mathbf{p} = \mathbf{q}$ bringen.
 
 [Aufgabe herunterladen (Mathematica)](../mathematica/00-federsystem-task.nb){download="00-federsystem-task.nb"}
-:::
-
-::: {.aufgabe}
-**Schnittgrößen am abgewinkelten Träger (TM, Aufgabe 7.3).** Lagerkräfte, Schnittgrößen in drei Bereichen,
-Verläufe und lokale Extrema bei linear ansteigender Streckenlast.
-
-[Aufgabe herunterladen (Mathematica)](../mathematica/00-schnittgroessen-7-3-task.nb){download="00-schnittgroessen-7-3-task.nb"}
 :::
 
 ::: {.aufgabe}

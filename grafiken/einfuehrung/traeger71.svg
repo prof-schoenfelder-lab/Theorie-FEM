@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" width="760" height="620" viewBox="0 0 760 620" class="tm-grafik">
-<title>Schnittgrößen am Träger (Aufgabe 7.1)</title>
+<title>Schnittgrößen am Träger</title>
 <g inkscape:groupmode="layer" id="traeger" inkscape:label="01 Träger" data-ebene="traeger">
 <g><path d="M 110,133.5 L 630,133.5 L 630,126.5 L 110,126.5 Z" fill="#e6e6e6" stroke="#000000" stroke-width="1.25" stroke-linejoin="round"/></g>
 </g>
