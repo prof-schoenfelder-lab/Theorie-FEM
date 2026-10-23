@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- App-Symbol der Kursseite (Offline-Fassung); daraus die PNGs mit rsvg-convert -->
+  <rect width="512" height="512" fill="#0050b4"/>
+  <text x="256" y="292" text-anchor="middle" font-family="Source Sans Pro, Helvetica, Arial, sans-serif"
+        font-weight="700" font-size="190" fill="#ffffff">FEM</text>
+  <rect x="136" y="352" width="240" height="14" fill="#ffffff"/>
+  <text x="256" y="420" text-anchor="middle" font-family="Source Sans Pro, Helvetica, Arial, sans-serif"
+        font-weight="600" font-size="52" fill="#ffffff">HTWK</text>
+</svg>

@@ -304,5 +304,47 @@
   window.addEventListener("load", () => mjBereit().then(formelnEinpassen));
   window.addEventListener("resize", () => { clearTimeout(window.__tmFit); window.__tmFit = setTimeout(formelnEinpassen, 200); });
   new MutationObserver(formelnEinpassen).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
+  // Offline-Fassung: Service Worker (erzeugt von werkzeuge/offline.py) anmelden
+  function meldung(text, knopfText, aktion) {
+    let m = document.querySelector(".offline-meldung");
+    if (!m) { m = document.createElement("div"); m.className = "offline-meldung"; m.setAttribute("role", "status"); document.body.appendChild(m); }
+    m.innerHTML = "<span></span>";
+    m.firstChild.textContent = text;
+    if (knopfText) {
+      const b = document.createElement("button"); b.textContent = knopfText;
+      b.addEventListener("click", aktion); m.appendChild(b);
+    } else {
+      setTimeout(() => m.remove(), 6000);
+    }
+  }
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+    const offset = document.querySelector('meta[name="quarto:offset"]')?.content || "./";
+    const ersterBesuch = !navigator.serviceWorker.controller;
+    let neuGeladen = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (ersterBesuch) return;                       // erste Anmeldung: nichts neu laden
+      if (!neuGeladen) { neuGeladen = true; location.reload(); }
+    });
+    const neueFassung = sw => meldung("Neue Fassung der Kursseite verfügbar.", "Neu laden",
+      () => sw.postMessage("aktualisieren"));
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register(offset + "sw.js").then(reg => {
+        if (reg.waiting && navigator.serviceWorker.controller) neueFassung(reg.waiting);
+        reg.addEventListener("updatefound", () => {
+          const neu = reg.installing;
+          neu.addEventListener("statechange", () => {
+            if (neu.state !== "installed") return;
+            if (navigator.serviceWorker.controller) neueFassung(neu);
+            else meldung("Die Kursseite ist jetzt auch offline verfügbar.");
+          });
+        });
+        // MathJax wurde beim ersten Besuch vor dem Service Worker geladen: Dateien nachträglich speichern
+        navigator.serviceWorker.ready.then(r => r.active && r.active.postMessage({
+          typ: "nachladen", urls: performance.getEntriesByType("resource").map(e => e.name)
+        }));
+      }).catch(() => {});
+    });
+  }
 })();
 </script>

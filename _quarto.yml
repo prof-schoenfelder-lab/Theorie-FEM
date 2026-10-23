@@ -11,12 +11,14 @@ project:
   resources:
     - assets/fonts/
     - assets/logos/
+    - assets/app/
     - mathematica/*-task.nb
 
 lang: de
 
 website:
   title: "Theorie der Finite-Elemente-Methode"
+  favicon: assets/app/symbol-192.png
   page-navigation: true
   navbar:
     logo: assets/logos/htwk-schwarz.svg

@@ -274,3 +274,16 @@ iframe.notebook-rahmen {
 /* Sicherheitsnetz: Code in der Textspalte (rechts bzw. auf dem Handy) bricht um, statt waagerecht zu
    scrollen. Zeilen trotzdem kurz halten (≤ 45 Zeichen); kopiert wird immer der Originaltext. */
 .scrolly-schritte pre code { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ------------------------------------------------ Offline-Fassung: Hinweise (neue Fassung, offline verfügbar) */
+.offline-meldung {
+  position: fixed; left: 50%; bottom: 1rem; transform: translateX(-50%); z-index: 70;
+  display: flex; align-items: center; gap: 0.8rem; max-width: calc(100vw - 2rem);
+  background: #222; color: #fff; border-radius: 0.5rem; padding: 0.5rem 0.6rem 0.5rem 1rem;
+  font-size: 0.95rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+.offline-meldung button {
+  border: 0; border-radius: 0.35rem; background: #0050b4; color: #fff; font-weight: 600;
+  padding: 0.3rem 0.8rem; cursor: pointer;
+}
+@media print { .offline-meldung { display: none; } }

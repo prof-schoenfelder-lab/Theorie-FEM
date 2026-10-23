@@ -40,6 +40,21 @@ Alle wichtigen Befehle auf einen Blick: **[Mathematica-Spickzettel](spickzettel.
 <span style="color:#0050b4">**Blau**</span>: exakte (analytische) Lösung ·
 <span class="mass">**Grün**</span>: Bemaßung, Koordinaten, Freiheitsgrade.
 
+## Offline nutzen
+
+Vorlesungen, Spickzettel und Mathematica-Aufgaben funktionieren auch ohne Internet. Öffnen Sie die Seite
+einmal mit Internet, danach speichert Ihr Browser sie automatisch. Bequemer ist es, die Seite als App zu
+installieren:
+
+- **iPad/iPhone** (Safari): Teilen → „Zum Home-Bildschirm“. Bitte so, sonst löscht Safari die
+  gespeicherte Seite nach einigen Tagen ohne Nutzung.
+- **Windows, Linux, macOS** (Chrome, Edge): Symbol „Installieren“ rechts in der Adressleiste.
+  Safari am Mac: Ablage → „Zum Dock hinzufügen“.
+- **Android** (Chrome): Menü → „App installieren“.
+
+Sobald Sie wieder online sind, holt sich die Seite neue Inhalte selbst und meldet „Neue Fassung“.
+Die Beispiele rechnen mit Python im Browser und brauchen weiterhin Internet.
+
 ::: {#ki-hinweis .ki-hinweis}
 **Hinweis zur KI-Nutzung:** Bei der didaktischen Gestaltung dieser Lehrinhalte wurden Methoden der
 generativen künstlichen Intelligenz eingesetzt. Der Lehrende hat die Inhalte anschließend geprüft,
