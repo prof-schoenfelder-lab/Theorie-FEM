@@ -43,6 +43,29 @@ MANIFEST = {
     ],
 }
 
+# MathJax 4 lädt seine Schrift aus einem eigenen Paket (@mathjax/mathjax-newcm-font@<Version>), je nach Formeln
+# einer Seite unterschiedliche Teile. Damit auch Seiten, die nie online geöffnet wurden, offline ihre Formeln zeigen,
+# speichert der Service Worker das ganze Paket (ca. 2,2 MB), sobald er die Version an einer geladenen Datei erkennt.
+# Dateinamen aus dem Paket 4.1.3 (data.jsdelivr.com); fehlt eine Datei in einer späteren Version, wird sie übersprungen.
+SCHRIFT_WOFF2 = [
+    "ab", "abi", "ai", "ar", "arl", "b-a", "b", "bi", "br", "brd", "brk", "c", "cb", "ch", "chb", "chbi",
+    "chi", "cy", "cyb", "cybi", "cyi", "cyss", "cyssb", "cyssbi", "cyssi", "ds", "dv", "em", "f", "fb", "gk",
+    "gkb", "gkbi", "gki", "gkss", "gkssb", "gkssbi", "gkssi", "he", "heb", "hebi", "hei", "i", "lb", "li",
+    "lib", "lo", "lr", "lt", "m", "mar", "mi", "ml", "mm", "msh", "mx", "n", "ob", "os", "ph", "phb", "phbi",
+    "phi", "phss", "phssb", "phssbi", "phssi", "pu", "pub", "pubi", "pui", "rb", "s", "s3", "s4", "s5", "s6",
+    "s7", "sb", "sh", "shb", "shbi", "shi", "so", "ss", "ssb", "ssbi", "ssbix", "ssbx", "ssi", "ssix", "sslb",
+    "ssli", "sslib", "sslr", "ssx", "sy", "syb", "sybi", "syi", "u-a", "u", "v", "vx", "zero"
+]
+SCHRIFT_DYNAMIC = [
+    "PUA", "accents-b-i", "accents", "arabic", "arrows", "braille-d", "braille", "calligraphic", "cherokee",
+    "cyrillic-ss", "cyrillic", "devanagari", "double-struck", "fraktur", "greek-ss", "greek", "hebrew",
+    "latin-b", "latin-bi", "latin-i", "latin", "marrows", "math", "monospace-ex", "monospace-l", "monospace",
+    "mshapes", "phonetics-ss", "phonetics", "sans-serif-b", "sans-serif-bi", "sans-serif-ex", "sans-serif-i",
+    "sans-serif-r", "sans-serif", "script", "shapes", "symbols-b-i", "symbols", "variants"
+]
+SCHRIFT_DATEIEN = ([f"chtml/woff2/mjx-ncm-{n}.woff2" for n in SCHRIFT_WOFF2]
+                   + [f"chtml/dynamic/{n}.js" for n in SCHRIFT_DYNAMIC])
+
 KOPF = ('<link rel="manifest" href="{o}manifest.webmanifest">'
         '<meta name="theme-color" content="#0050b4">'
         '<link rel="apple-touch-icon" href="{o}assets/app/symbol-180.png">'
@@ -56,6 +79,19 @@ const CDN_CACHE = "fem-cdn";            // MathJax (bleibt über Fassungen hinwe
 const DATEIEN = __DATEIEN__;
 const SEITEN = new Set(__SEITEN__.map(p => new URL(p, self.registration.scope).href));
 const MATHJAX = "https://cdn.jsdelivr.net/npm/mathjax@4/";
+const MJ_PAKETE = "https://cdn.jsdelivr.net/npm/@mathjax/";   // Schrift von MathJax 4 (eigenes Paket)
+const SCHRIFT = __SCHRIFT__;
+const istMathJax = u => u.startsWith(MATHJAX) || u.startsWith(MJ_PAKETE);
+
+// Ganzes Schriftpaket speichern, sobald die Version bekannt ist (an einer geladenen Datei erkennbar)
+let schriftLaeuft = null;
+function schriftSpeichern(urls) {
+  const m = urls.map(u => u.match(/^(https:\/\/cdn\.jsdelivr\.net\/npm\/@mathjax\/mathjax-newcm-font@[^/]+\/)/)).find(Boolean);
+  if (!m || schriftLaeuft) return schriftLaeuft || Promise.resolve();
+  schriftLaeuft = caches.open(CDN_CACHE).then(c => Promise.all(SCHRIFT.map(f =>
+    c.match(m[1] + f).then(da => da || c.add(m[1] + f).catch(() => {})))));
+  return schriftLaeuft;
+}
 
 const html = (titel, text) => new Response(
   `<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -82,9 +118,10 @@ self.addEventListener("message", e => {
   if (e.data === "aktualisieren") self.skipWaiting();
   // Beim ersten Besuch lädt MathJax, bevor der Service Worker die Seite übernimmt: nachträglich speichern
   if (e.data && e.data.typ === "nachladen") {
+    const urls = e.data.urls.filter(istMathJax);
     e.waitUntil(caches.open(CDN_CACHE).then(c => Promise.all(
-      e.data.urls.filter(u => u.startsWith(MATHJAX)).map(u => c.match(u).then(m => m || c.add(u).catch(() => {})))
-    )));
+      urls.map(u => c.match(u).then(m => m || c.add(u).catch(() => {})))
+    )).then(() => schriftSpeichern(urls)));
   }
 });
 
@@ -116,7 +153,7 @@ self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  if (url.href.startsWith(MATHJAX)) { e.respondWith(datei(req, CDN_CACHE)); return; }
+  if (istMathJax(url.href)) { e.respondWith(datei(req, CDN_CACHE)); return; }
   if (url.origin !== location.origin) {
     // übrige externe Skripte (z. B. Polyfill) offline still auslassen
     if (req.destination === "script") e.respondWith(fetch(req).catch(() => new Response("", { headers: { "Content-Type": "text/javascript" } })));
@@ -166,7 +203,8 @@ def erzeugen(site: Path):
 
     sw = (SW.replace("__VERSION__", version)
             .replace("__DATEIEN__", json.dumps(dateien, ensure_ascii=False))
-            .replace("__SEITEN__", json.dumps(seiten, ensure_ascii=False)))
+            .replace("__SEITEN__", json.dumps(seiten, ensure_ascii=False))
+            .replace("__SCHRIFT__", json.dumps(SCHRIFT_DATEIEN)))
     (site / "sw.js").write_text(sw, encoding="utf-8")
     groesse = sum((site / d).stat().st_size for d in dateien) / 1e6
     print(f"Offline-Fassung: {len(seiten)} Seiten, {len(dateien)} Dateien, {groesse:.1f} MB, Version {version}")
