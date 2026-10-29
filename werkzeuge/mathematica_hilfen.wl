@@ -4,9 +4,13 @@
 kursordner = FileNameJoin[{DirectoryName[$InputFileName], ".."}];
 nbziel = FileNameJoin[{kursordner, "mathematica"}];
 
-(* Eingabezelle aus Quelltext: hübsch formatiert (2D-Brüche usw.) *)
+(* Eingabezelle aus Quelltext: hübsch formatiert (2D-Brüche, Potenzen usw.). Ableitungen und Integrale bleiben
+   aber als Befehle D[...] und Integrate[...] stehen (nicht als ∂ und ∫), damit man sie wiedererkennt und abtippen kann. *)
 ein[s_String] := Cell[BoxData[
-    ToExpression[s, InputForm, HoldComplete] /. HoldComplete[e_] :> MakeBoxes[e, StandardForm]], "Input"];
+    ToExpression[s, InputForm, HoldComplete] /. {D -> befehlD, Integrate -> befehlIntegrate} /.
+      HoldComplete[e_] :> MakeBoxes[e, StandardForm]] /. {"befehlD" -> "D", "befehlIntegrate" -> "Integrate"}, "Input"];
+(* Kurze Erklärung zu einem Rechenschritt, direkt unter der Eingabezelle (nur in der Musterlösung) *)
+erklaerung[s_String] := Cell[s, "Text", FontColor -> GrayLevel[0.35], CellMargins -> {{66, 10}, {10, 2}}];
 leer[hinweis_String] := Cell[BoxData[RowBox[{"(*", " ", hinweis, " ", "*)"}]], "Input"];
 txt[s_String] := Cell[s, "Text"];
 (* Aufgabenstellung: Einleitung, darunter die Teilaufgaben a), b), ... je in einer eigenen Zeile *)
@@ -16,17 +20,23 @@ bild[svg_String, breite_:500] := Module[{png = FileNameJoin[{$TemporaryDirectory
   Run["rsvg-convert -z 2 -b white -o '" <> png <> "' '" <> FileNameJoin[{kursordner, svg}] <> "'"];
   Cell[BoxData[ToBoxes[Image[Import[png], ImageSize -> breite]]], "Text"]];
 
-(* Aufgabenschritt: {Überschrift, Erklärung, {Code ...}, Hinweis für die Aufgabe} *)
+(* Aufgabenschritt: {Überschrift, Erklärung, {Code ...}, Hinweis für die Aufgabe}
+   Jeder Code-Eintrag ist ein String oder {Code, Erklärung}; die Erklärung steht nur in der Musterlösung,
+   kurz und für Anfänger:innen in Mathematica verständlich (was macht der Befehl, warum dieser Schritt). *)
+codeText[c_String] := c;
+codeText[{c_String, _String}] := c;
+codeZellen[c_String] := {ein[c]};
+codeZellen[{c_String, e_String}] := {ein[c], erklaerung[e]};
 schrittzellen[s_List, geloest_] := Join[
   {Cell[s[[1]], "Subsection"]},
   If[s[[2]] =!= "", {txt[s[[2]]]}, {}],
-  If[geloest, ein /@ s[[3]], {txt["Gesucht: " <> s[[4]]], leer["Ihre Eingabe"]}]];
+  If[geloest, Flatten[codeZellen /@ s[[3]]], {txt["Gesucht: " <> s[[4]]], leer["Ihre Eingabe"]}]];
 
 speichereNB[name_String, zellen_List] := Module[{pfad = FileNameJoin[{nbziel, name}]},
   Export[pfad, Notebook[zellen, StyleDefinitions -> "Default.nb", Magnification :> 1.25 Inherited], "NB"];
   Print["geschrieben: ", pfad]];
 
 (* Lösungscode im Kernel ausführen und Ergebnisse ausgeben (Kontrolle) *)
-pruefeCode[code_List] := Do[With[{r = ToExpression[c]},
-    If[!StringEndsQ[c, ";"] && FreeQ[r, Graphics | Legended | Image],
-      Print[c, "  =>  ", ToString[r /. m_MatrixForm :> First[m], InputForm]]]], {c, code}];
+pruefeCode[code_List] := Do[With[{c = codeText[cc]}, With[{r = ToExpression[c]},
+    If[!StringEndsQ[c, ";"] && FreeQ[r, Graphics | Graphics3D | Legended | Image],
+      Print[c, "  =>  ", ToString[r /. m_MatrixForm :> First[m], InputForm]]]]], {cc, code}];

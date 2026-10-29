@@ -1,0 +1,421 @@
+---
+title: "Energieprinzipien: Minimum der potentiellen Energie"
+subtitle: "Theorie der Finite-Elemente-Methode · Vorlesung 1"
+pagetitle: "Energieprinzipien: Minimum der potentiellen Energie"
+page-layout: full
+---
+
+::: {.merke}
+**Worum geht es?** In Vorlesung 0 haben wir das Federsystem mit Freischnitt, Gleichgewicht, Kinematik und
+Federgesetz gelöst und dabei die Struktur $\mathbf{K}\,\mathbf{p} = \mathbf{q}$ gefunden. Heute lösen wir
+**dasselbe System über die Energie**: Ein elastisches System stellt sich so ein, dass seine potentielle Energie
+minimal wird. Wir kommen ohne Freischnitt zum selben Gleichungssystem. Dieses Prinzip ist die Grundlage der
+Finite-Elemente-Methode.
+:::
+
+## Prinzipien der Mechanik
+
+Aus der Technischen Mechanik kennen Sie die Axiome (Linienflüchtigkeit, Kräfteparallelogramm,
+Gleichgewicht) und einige Prinzipien. Wir erweitern sie um ein weiteres:
+
+| | Prinzip | wofür |
+|:--|:--|:--|
+| bekannt | Reaktionsprinzip (Newton) | Wechselwirkung, actio = reactio |
+| bekannt | Schnittprinzip (Euler) | Schnittkräfte bestimmen |
+| bekannt | Superpositionsprinzip | Lastfälle überlagern (lineare Theorie) |
+| **neu** | **Prinzip vom Minimum der potentiellen Energie** | Gleichgewichtslage elastischer Systeme |
+
+: {.striped}
+
+Eng verwandt ist das **Prinzip der virtuellen Verschiebungen**. Beide führen auf dieselben Gleichungen.
+
+## Die Kugel rollt bergab
+
+:::: {.scrolly svg="../grafiken/energie/kugel.svg"}
+
+::: {.schritt zeige="gelaende kugel_oben"}
+### Potentielle Energie
+
+Eine Kugel liegt in Ruhe auf der Bergspitze. In der Höhe $h$ über dem Tal hat sie die potentielle Energie
+
+$$
+\Pi = m\,g\,h
+$$
+:::
+
+::: {.schritt zeige="gelaende rollen" dimmen="kugel_oben"}
+### Das Minimum ist die Gleichgewichtslage
+
+Die Kugel rollt ins Tal. Dort ist ihre potentielle Energie **minimal**, und dort bleibt sie liegen: Das Minimum
+der potentiellen Energie ist die (stabile) **Gleichgewichtslage**.
+:::
+
+::: {.schritt zeige="gelaende tangenten" dimmen="kugel_oben rollen"}
+### Gleichgewicht: Ableitung gleich null
+
+Rollt die Kugel entlang des Geländes, hängt ihre Höhe vom Ort $x$ ab und damit auch die potentielle Energie:
+
+$$
+\Pi(x) = m\,g\,h(x)
+$$
+
+Im Gleichgewicht verschwindet die erste Ableitung, das Gelände ist dort waagerecht:
+
+$$
+\frac{\mathrm{d}\Pi}{\mathrm{d}x} = m\,g\,h'(x) \overset{!}{=} 0
+$$
+
+Ob das Gleichgewicht stabil ist, zeigt die zweite Ableitung:
+
+$$
+\frac{\mathrm{d}^2\Pi}{\mathrm{d}x^2} = m\,g\,h''(x)
+\begin{cases}
+> 0: & \text{Minimum, stabil} \\
+< 0: & \text{Maximum, instabil}
+\end{cases}
+$$
+
+Auch die Kugel auf der Bergspitze ist im Gleichgewicht, aber im **instabilen**: Ein kleiner Stoß genügt, und sie
+rollt ins Tal. Nur das **Minimum** ist stabil. Deshalb suchen wir das Minimum der potentiellen Energie.
+:::
+
+::: {.schritt zeige="gelaende rollen bergauf"}
+### Bergauf geht es nicht von allein
+
+Ein Rollen bergauf würde die potentielle Energie erhöhen. Von allein passiert das nicht.
+:::
+
+::::
+
+## Die Feder – elastisches Potential
+
+:::: {.scrolly svg="../grafiken/energie/feder.svg"}
+
+::: {.schritt zeige="system kraft verschiebung" zoom="90 0 420 270"}
+### Das System
+
+Eine Feder mit der Steifigkeit $c$ hängt an der Decke. Unten hängt eine Masse $m$, ihre Gewichtskraft ist
+$F = m\,g$. Die Feder dehnt sich, die Masse senkt sich gegenüber der entspannten Lage um $u$.
+
+Aus der TM wissen wir: $F = c\,u$, also $u = F/c$. Dasselbe Ergebnis wollen wir jetzt über die Energie erhalten.
+:::
+
+::: {.schritt zeige="system kraft verschiebung arbeit achsen pi_i"}
+### Innere potentielle Energie
+
+Die **innere** potentielle Energie $\Pi_i$ ist die in der Feder gespeicherte **Formänderungsenergie**. Sie ist
+gleich der Arbeit, die beim Dehnen an der Feder verrichtet wird: **Arbeit = Kraft mal Weg**, bei veränderlicher
+Kraft als Integral
+
+$$
+W = \int F\,\mathrm{d}s
+$$
+
+Beim Dehnen legt das Federende den Weg $s$ von $0$ bis zur Endverlängerung $u$ zurück. Die Federkraft wächst
+dabei mit, $N(s) = c\,s$. Eingesetzt in den Arbeitssatz:
+
+$$
+\Pi_i = \int_0^u N(s)\,\mathrm{d}s = \int_0^u c\,s\,\mathrm{d}s = \frac{1}{2}\,c\,u^2
+$$
+
+Im Bild oben rechts ist das die Dreiecksfläche unter der Kraft-Weg-Linie: Jeder schmale Streifen $N\,\mathrm{d}s$
+ist die Arbeit auf einem kleinen Wegstück, alle Streifen zusammen ergeben $\Pi_i$. Die Energie ist nie negativ und
+wächst quadratisch mit der Verformung.
+:::
+
+::: {.schritt zeige="system kraft verschiebung haelfte achsen pi_i pi_a"}
+### Äußere potentielle Energie
+
+Die **äußere** potentielle Energie $\Pi_a$ ist das Potential der Last. Senkt sich die Masse um $u$, verliert sie die
+Lageenergie $m\,g\,u = F\,u$, wie die Kugel, die bergab rollt:
+
+$$
+\Pi_a = -F\,u = -m\,g\,u
+$$
+
+Kurz: **Kraft mal Weg, mit negativem Vorzeichen.**
+
+**Warum hier kein $\tfrac12$?** Die Gewichtskraft ist **konstant**, sie hängt nicht von $u$ ab. Die Lageenergie
+sinkt deshalb linear mit $u$: im Kraft-Weg-Bild oben rechts das ganze Rechteck $F\,u$. Die Federkraft dagegen
+wächst erst mit der Verlängerung an, daher das untere Dreieck und das $\tfrac12$ in $\Pi_i$.
+
+::: {.vertiefung titel="Wo ist die andere Hälfte der Energie?"}
+Die Masse verliert $F\,u$ (das ganze Rechteck). In der Feder gespeichert ist aber nur
+$\tfrac12\,c\,u^2 = \tfrac12\,F\,u$ (das untere Dreieck). Wohin die andere Hälfte (das obere Dreieck) geht,
+hängt davon ab, wie die Last aufgebracht wird:
+
+- **Schlagartig** (Masse wird an der entspannten Feder losgelassen): Bei $u = F/c$ steckt die zweite Hälfte als
+  **Bewegungsenergie** in der Masse. Sie schwingt bis $2u$ durch und pendelt um $u$. Die Dämpfung wandelt diese
+  Hälfte in **Wärme** um, danach ruht die Masse bei $u$.
+- **Langsam** (die Masse wird von Hand abgesenkt): Die Hand bremst und nimmt die andere Hälfte $\tfrac12\,F\,u$
+  auf, ebenso eine Prüfmaschine, die die Kraft langsam von $0$ auf $F$ steigert.
+
+Das Prinzip vom Minimum fragt nicht, **wie** die Last aufgebracht wurde. Es vergleicht alle möglichen Lagen $u$
+bei derselben, konstanten Last $F$. Darum ist $\Pi_a = -F\,u$ das Potential der Last und nicht die Arbeit beim
+Belasten. Im Minimum gilt $\Pi_i = -\tfrac12\,\Pi_a$.
+:::
+:::
+
+::: {.schritt zeige="system kraft verschiebung achsen pi_i pi_a pi_ges"}
+### Gesamte potentielle Energie
+
+Die gesamte potentielle Energie ist die Summe aus innerem und äußerem Anteil:
+
+$$
+\Pi_{ges} = \Pi_i + \Pi_a = \frac{1}{2}\,c\,u^2 - F\,u
+$$
+
+Die Kurve hat ein Minimum, genau wie das Tal für die Kugel.
+:::
+
+::: {.schritt zeige="system kraft achsen pi_ges minimum" dimmen="pi_i pi_a"}
+### Das Minimum
+
+Im Minimum verschwindet die Ableitung:
+
+$$
+\frac{\mathrm{d}\Pi_{ges}}{\mathrm{d}u} = c\,u - F \overset{!}{=} 0
+\qquad\Rightarrow\qquad F = c\,u
+$$
+
+Das ist das Federgesetz, also das **Gleichgewicht** zwischen äußerer Kraft und Federkraft. Im Minimum ist
+$\Pi_{ges} = -F^2/(2c)$.
+
+```mathematica
+Piges = 1/2 c u^2 - F u;
+Solve[D[Piges, u] == 0, u]
+```
+:::
+
+::::
+
+## Das Federsystem aus Vorlesung 0
+
+:::: {.scrolly svg="../grafiken/einfuehrung/federsystem.svg"}
+
+::: {.schritt zeige="system last dof dehnung" zoom="40 20 680 265"}
+### Dasselbe System wie in Vorlesung 0
+
+Zwei starre Balken, drei Federn, Kräfte $f_1$ und $f_2$, Freiheitsgrade $p_1$ und $p_2$.
+
+**Gegeben:** $c_1 = 2k$, $c_2 = 4k$, $c_3 = k$, $f_1 = 3F$, $f_2 = -F$
+
+Die Kinematik übernehmen wir unverändert: $u_1 = p_2$, $u_2 = p_1 - p_2$, $u_3 = p_1$.
+Einen **Freischnitt brauchen wir nicht.**
+
+::: {.links}
+```mathematica
+data      = {c1 -> 2 k, c2 -> 4 k, c3 -> k,
+             f1 -> 3 F, f2 -> -F};
+kinematik = {u1 -> p2, u2 -> p1 - p2, u3 -> p1};
+psys      = {p1, p2};
+```
+:::
+:::
+
+::: {.schritt zeige="system last dof dehnung" zoom="40 20 680 265"}
+### Innere potentielle Energie
+
+Jede Feder speichert die Formänderungsenergie $\frac12 c_i u_i^2$. Wir zählen einfach alle Federn zusammen und
+setzen die Kinematik ein:
+
+$$
+\begin{aligned}
+\Pi_i &= \tfrac12 c_1 u_1^2 + \tfrac12 c_2 u_2^2 + \tfrac12 c_3 u_3^2 \\
+      &= \tfrac12 c_1 p_2^2 + \tfrac12 c_2 (p_1 - p_2)^2 + \tfrac12 c_3 p_1^2
+\end{aligned}
+$$
+
+::: {.links}
+```mathematica
+Pii = 1/2 c1 u1^2 + 1/2 c2 u2^2 + 1/2 c3 u3^2 /.
+        kinematik
+```
+:::
+:::
+
+::: {.schritt zeige="system last dof" zoom="40 20 680 265"}
+### Äußere und gesamte potentielle Energie
+
+Jede Kraft leistet mit „ihrem“ Freiheitsgrad Arbeit, Kraft mal Weg mit negativem Vorzeichen:
+
+$$
+\Pi_a = -f_1\,p_1 - f_2\,p_2
+$$
+
+$$
+\Pi_{ges} = \Pi_i + \Pi_a
+$$
+
+::: {.links}
+```mathematica
+Pia   = -f1 p1 - f2 p2;
+Piges = Pii + Pia;
+```
+:::
+:::
+
+::: {.schritt zeige="system last dof" zoom="40 20 680 265"}
+### Minimum: Ableitungen gleich null
+
+Gesucht ist das Minimum von $\Pi_{ges}(p_1, p_2)$. Dort verschwinden beide partiellen Ableitungen:
+
+$$
+\begin{aligned}
+\frac{\partial \Pi_{ges}}{\partial p_1} &= (c_2 + c_3)\,p_1 - c_2\,p_2 - f_1 \overset{!}{=} 0 \\
+\frac{\partial \Pi_{ges}}{\partial p_2} &= -c_2\,p_1 + (c_1 + c_2)\,p_2 - f_2 \overset{!}{=} 0
+\end{aligned}
+$$
+
+Das sind **genau die Gleichungen aus Vorlesung 0**. Das Gleichgewicht ist im Minimum automatisch erfüllt.
+
+::: {.links}
+```mathematica
+D[Piges, {psys}] // Expand
+lsg = Solve[D[Piges, {psys}] == {0, 0} /. data, psys]
+```
+
+Beide Ableitungen werden auf einmal mit dem Nullvektor `{0, 0}` gleichgesetzt.
+:::
+:::
+
+::: {.schritt zeige="system last dof" zoom="40 20 680 265"}
+### $\mathbf{K}$ ist die zweite Ableitung
+
+Leiten wir ein zweites Mal ab, erhalten wir direkt die Steifigkeitsmatrix:
+
+$$
+\mathbf{K} = \frac{\partial^2 \Pi_{ges}}{\partial \mathbf{p}^2}
+= \begin{pmatrix} c_2 + c_3 & -c_2 \\ -c_2 & c_1 + c_2 \end{pmatrix}
+$$
+
+Mit den Zahlenwerten folgen wieder $p_1 = F/k$ und $p_2 = F/(2k)$. Im Minimum ist
+$\Pi_{ges} = -\tfrac54\,F^2/k$.
+
+::: {.links}
+```mathematica
+Ksys = D[Piges, {psys, 2}];
+Ksys // MatrixForm
+Ksys /. data // MatrixForm
+Piges /. data /. lsg[[1]]
+```
+:::
+:::
+
+::::
+
+## Das Minimum im Bild
+
+:::: {.scrolly svg="../grafiken/energie/hoehenlinien.svg"}
+
+::: {.schritt zeige="achsen konturen"}
+### Höhenlinien von $\Pi_{ges}$
+
+$\Pi_{ges}$ hängt von zwei Freiheitsgraden ab. Tragen wir $p_1$ und $p_2$ auf und zeichnen Linien gleicher Energie
+ein, entsteht ein Bild wie eine Wanderkarte mit **Höhenlinien**. Mit $F = k = 1$ ist
+
+$$
+\Pi_{ges} = \tfrac52\,p_1^2 - 4\,p_1 p_2 + 3\,p_2^2 - 3\,p_1 + p_2
+$$
+
+Die Höhenlinien sind **Ellipsen**: $\Pi_{ges}$ ist ein Tal, eine nach oben offene Schüssel.
+
+```mathematica
+ContourPlot[Piges /. data /. {k -> 1, F -> 1},
+  {p1, -0.5, 2.5}, {p2, -1, 2},
+  Contours -> 15]
+```
+:::
+
+::: {.schritt zeige="achsen konturen minimum"}
+### Der tiefste Punkt ist die Lösung
+
+Der tiefste Punkt des Tals liegt genau bei der Lösung
+
+$$
+p_1 = \frac{F}{k}, \qquad p_2 = \frac{F}{2k}, \qquad \Pi_{min} = -\frac54\,\frac{F^2}{k}
+$$
+
+Dort ist das Gelände in jeder Richtung waagerecht: Beide Ableitungen sind null. Die Kugel aus dem ersten Bild
+würde genau hier liegen bleiben.
+
+```mathematica
+ContourPlot[Piges /. data /. {k -> 1, F -> 1},
+  {p1, -0.5, 2.5}, {p2, -1, 2},
+  Contours -> 15,
+  Epilog -> {Red, PointSize[Large],
+    Point[psys /. lsg[[1]] /. {k -> 1, F -> 1}]}]
+```
+
+`Epilog` zeichnet zusätzlich den Punkt der Lösung ein.
+
+Im [Beispiel](../beispiele/federsystem-energie/index.html) können Sie Federn und Kräfte verändern und das
+Minimum wandern sehen.
+:::
+
+::::
+
+::: {.vertiefung titel="Ausführlicher: Warum die zweite Ableitung K liefert"}
+Für lineare Systeme lässt sich die gesamte potentielle Energie immer so schreiben:
+
+$$
+\Pi_{ges} = \tfrac12\,\mathbf{p}^\mathsf{T}\mathbf{K}\,\mathbf{p} - \mathbf{p}^\mathsf{T}\mathbf{q}
+$$
+
+Der erste Teil ist die Formänderungsenergie (quadratisch in $\mathbf{p}$), der zweite das Potential der Lasten
+(linear in $\mathbf{p}$). Die erste Ableitung nach $\mathbf{p}$ ist $\mathbf{K}\,\mathbf{p} - \mathbf{q}$, null gesetzt
+also $\mathbf{K}\,\mathbf{p} = \mathbf{q}$. Die zweite Ableitung ist $\mathbf{K}$ selbst. Weil $\mathbf{K}$
+symmetrisch ist (und bei ausreichender Lagerung positiv definit), ist der stationäre Punkt tatsächlich ein
+**Minimum**.
+
+Am Minimum gilt außerdem $\Pi_i = -\tfrac12\,\Pi_a$. Im Beispiel ist $\Pi_i = \tfrac54\,F^2/k$ und
+$\Pi_a = -\tfrac52\,F^2/k$.
+:::
+
+## Gleichgewicht oder Energie?
+
+| | Vorlesung 0: Gleichgewicht | Vorlesung 1: Energie |
+|:--|:--|:--|
+| Ausgangspunkt | Freischnitt jedes Balkens | Energie jeder Feder, Arbeit jeder Kraft |
+| Kinematik | nötig | nötig |
+| Werkstoffgesetz | Federgesetz $N = c\,u$ | steckt in $\Pi_i = \frac12 c\,u^2$ |
+| Gleichungen | Gleichgewicht je Balken | $\partial \Pi_{ges} / \partial p_i = 0$ |
+| Ergebnis | $\mathbf{K}\,\mathbf{p} = \mathbf{q}$ | dasselbe $\mathbf{K}\,\mathbf{p} = \mathbf{q}$ |
+
+: {.striped}
+
+::: {.merke}
+**Beide Methoden sind gleichwertig** und liefern dieselben Verschiebungen und Federkräfte. Der Energieweg ist aber
+**formaler**: Wir müssen nicht überlegen, welche Kraft an welchem Schnittufer in welche Richtung zeigt. Wir
+addieren nur die Energie aller Bauteile und die Arbeit aller Lasten. Genau so arbeitet die FEM: Sie berechnet die
+Energie jedes Elements und setzt sie zum Gesamtsystem zusammen.
+:::
+
+## Ausblick
+
+Eine Feder speichert $\frac12 c\,u^2$. Ein Normalkraftstab speichert Formänderungsenergie über seine ganze Länge:
+
+$$
+\Pi_i = \frac12 \int_0^L EA(x)\,u'(x)^2\,\mathrm{d}x
+$$
+
+Hier ist nicht mehr nur eine Zahl $u$ unbekannt, sondern eine ganze **Funktion** $u(x)$. Wie man dafür das
+Minimum findet, zeigt das **Verfahren nach Rayleigh-Ritz** in Vorlesung 2: Man setzt für $u(x)$ einen
+Ansatz mit wenigen Unbekannten an und sucht wieder das Minimum.
+
+## Beispiel und Übung
+
+::: {.aufgabe}
+**Ausprobieren:** Im Beispiel [Federsystem: Minimum der Energie](../beispiele/federsystem-energie/index.html)
+verändern Sie Federsteifigkeiten und Kräfte und sehen, wie sich das Tal von $\Pi_{ges}$ verformt und wohin das
+Minimum wandert. Was passiert, wenn $c_1$ und $c_3$ gegen null gehen?
+:::
+
+::: {.aufgabe}
+**Federsystem über die Energie.** Dasselbe System wie in der Übung zu Vorlesung 0 (drei Balken, vier Federn),
+jetzt über das Minimum der potentiellen Energie: $\Pi_i$, $\Pi_a$, Ableitungen gleich null, $\mathbf{K}$ als zweite
+Ableitung und das Minimum grafisch (Schnitt durch das Minimum, Flächen gleicher Energie in 3D). Vergleichen Sie
+mit Ihrer Lösung aus Vorlesung 0.
+
+[Aufgabe herunterladen (Mathematica)](../mathematica/01-federsystem-energie-task.nb){download="01-federsystem-energie-task.nb"}
+:::

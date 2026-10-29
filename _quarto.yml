@@ -30,12 +30,16 @@ website:
         menu:
           - href: vorlesung/00-einfuehrung.qmd
             text: "0 · Einführung: Mathematica und K p = q"
+          - href: vorlesung/01-energie.qmd
+            text: "1 · Energieprinzipien"
           - href: vorlesung/03-stab.qmd
             text: "3 · Normalkraftstab: von Ritz zur FEM"
       - text: Beispiele
         menu:
           - href: beispiele/federsystem/index.html
             text: "Federsystem: Steifigkeitsmatrix"
+          - href: beispiele/federsystem-energie/index.html
+            text: "Federsystem: Minimum der Energie"
           - href: beispiele/stab-konvergenz/index.html
             text: "Konischer Stab: Elementanzahl und Konvergenz"
       - href: spickzettel.qmd
