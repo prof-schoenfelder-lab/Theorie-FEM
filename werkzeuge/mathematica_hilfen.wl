@@ -4,11 +4,16 @@
 kursordner = FileNameJoin[{DirectoryName[$InputFileName], ".."}];
 nbziel = FileNameJoin[{kursordner, "mathematica"}];
 
-(* Eingabezelle aus Quelltext: hübsch formatiert (2D-Brüche, Potenzen usw.). Ableitungen und Integrale bleiben
-   aber als Befehle D[...] und Integrate[...] stehen (nicht als ∂ und ∫), damit man sie wiedererkennt und abtippen kann. *)
+(* Eingabezelle aus Quelltext: hübsch formatiert (2D-Brüche, Potenzen usw.). Einige Befehle bleiben aber als Text
+   stehen, damit man sie wiedererkennt und abtippen kann: D[...] und Integrate[...] (nicht ∂ und ∫), Reals (nicht ℝ)
+   und Graphics/Graphics3D (sonst würde die Eingabezelle schon eine fertige Grafik enthalten, z. B. aus Red und einem
+   noch unbekannten Punkt, und Mathematica meldet „Red is not a Graphics3D primitive or directive“). *)
+alsText = {D -> befehlD, Integrate -> befehlIntegrate, Reals -> befehlReals,
+           Graphics -> befehlGraphics, Graphics3D -> befehlGraphics3D};
 ein[s_String] := Cell[BoxData[
-    ToExpression[s, InputForm, HoldComplete] /. {D -> befehlD, Integrate -> befehlIntegrate} /.
-      HoldComplete[e_] :> MakeBoxes[e, StandardForm]] /. {"befehlD" -> "D", "befehlIntegrate" -> "Integrate"}, "Input"];
+    ToExpression[s, InputForm, HoldComplete] /. alsText /.
+      HoldComplete[e_] :> MakeBoxes[e, StandardForm]] /.
+    Thread[ToString /@ Values[alsText] -> ToString /@ Keys[alsText]], "Input"];
 (* Kurze Erklärung zu einem Rechenschritt, direkt unter der Eingabezelle (nur in der Musterlösung) *)
 erklaerung[s_String] := Cell[s, "Text", FontColor -> GrayLevel[0.35], CellMargins -> {{66, 10}, {10, 2}}];
 leer[hinweis_String] := Cell[BoxData[RowBox[{"(*", " ", hinweis, " ", "*)"}]], "Input"];
