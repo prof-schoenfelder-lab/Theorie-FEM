@@ -32,6 +32,8 @@ website:
             text: "0 · Einführung: Mathematica und K p = q"
           - href: vorlesung/01-energie.qmd
             text: "1 · Energieprinzipien"
+          - href: vorlesung/02-ritz.qmd
+            text: "2 · Verfahren nach Rayleigh-Ritz"
           - href: vorlesung/03-stab.qmd
             text: "3 · Normalkraftstab: von Ritz zur FEM"
       - text: Beispiele

@@ -287,3 +287,6 @@ iframe.notebook-rahmen {
   padding: 0.3rem 0.8rem; cursor: pointer;
 }
 @media print { .offline-meldung { display: none; } }
+
+/* Bildquellen (z. B. Porträts in Vorlesung 2) */
+.bildquelle { font-size: 0.8em; color: #666; }

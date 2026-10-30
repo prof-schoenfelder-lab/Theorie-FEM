@@ -1,0 +1,481 @@
+---
+title: "Das Verfahren nach Rayleigh-Ritz"
+subtitle: "Theorie der Finite-Elemente-Methode · Vorlesung 2"
+pagetitle: "Das Verfahren nach Rayleigh-Ritz"
+page-layout: full
+---
+
+::: {.merke}
+**Worum geht es?** In Vorlesung 1 haben wir Federsysteme über das Minimum der potentiellen Energie gelöst. Heute
+übertragen wir das auf den **Normalkraftstab**. Solange $EA$ konstant ist, ist ein Stab nichts anderes als eine
+Feder, und ganze Stabsysteme lassen sich wie Federsysteme berechnen. Beim **konischen Stab** reicht das nicht mehr:
+Gesucht ist dann eine ganze Funktion $u(x)$. Das **Verfahren nach Rayleigh-Ritz** macht daraus wieder ein Problem
+mit wenigen Unbekannten und führt auf $\mathbf{K}\,\mathbf{a} = \mathbf{q}$.
+:::
+
+## Der Stab ist eine Feder
+
+:::: {.scrolly svg="../grafiken/ritz/stab-feder.svg"}
+
+::: {.schritt zeige="stab last kraftweg_f" zoom="40 0 690 340"}
+### Formänderungsenergie: ½ Kraft mal Weg
+
+Aus Vorlesung 1: Eine Feder speichert $\Pi_i = \tfrac12\,c\,u^2 = \tfrac12\,F\,u$. Das ist die Fläche unter der
+Kraft-Weg-Linie, ein Dreieck, weil die Kraft beim Dehnen von $0$ auf $F$ anwächst.
+
+Für den ganzen Stab mit der Kraft $F$ am Ende und der Endverschiebung $u_L$ gilt dasselbe:
+
+$$
+\Pi_i = \frac12\,F\,u_L
+$$
+
+Das funktioniert aber nur, wenn alle Teile des Stabes gleich beansprucht sind. Für den allgemeinen Fall schauen wir
+uns ein kleines Stabstück an.
+:::
+
+::: {.schritt zeige="stab element kraftweg_n" zoom="40 0 690 340"}
+### Ein Stabstück ist eine kleine Feder
+
+Ein Stabstück der Länge $\mathrm{d}x$ wird von der Normalkraft $N$ gezogen und verlängert sich um $\mathrm{d}u$. Wie eine
+Feder speichert es
+
+$$
+\mathrm{d}\Pi_i = \frac12\,N\,\mathrm{d}u
+$$
+
+Kraft und Verlängerung drücken wir durch Spannung und Dehnung aus, $N = \sigma\,A$ und
+$\mathrm{d}u = \varepsilon\,\mathrm{d}x$:
+
+$$
+\mathrm{d}\Pi_i = \frac12\,\sigma A \cdot \varepsilon\,\mathrm{d}x
+= \frac12\,\sigma\,\varepsilon\,\underbrace{A\,\mathrm{d}x}_{\mathrm{d}V}
+$$
+
+$\tfrac12\,\sigma\,\varepsilon$ ist die **Formänderungsenergie je Volumen**.
+:::
+
+::: {.schritt zeige="stab element" zoom="40 0 690 340"}
+### Über die ganze Länge
+
+Alle Stabstücke zusammen ergeben das Integral über das Volumen:
+
+$$
+\Pi_i = \frac12 \int_V \sigma\,\varepsilon\,\mathrm{d}V
+$$
+
+Mit dem Hookeschen Gesetz $\sigma = E\,\varepsilon$, der Kinematik $\varepsilon = u'$ und
+$\mathrm{d}V = A\,\mathrm{d}x$:
+
+$$
+\Pi_i = \frac12 \int_0^L E\,\varepsilon^2\,A\,\mathrm{d}x
+= \frac12 \int_0^L EA\,u'(x)^2\,\mathrm{d}x
+$$
+
+Das ist die Verallgemeinerung von $\tfrac12\,c\,u^2$ für den Normalkraftstab. Sie gilt auch, wenn $EA$ sich längs
+des Stabes ändert.
+:::
+
+::: {.schritt zeige="stab last verlauf"}
+### Konstantes $EA$: $u(x)$ ist linear
+
+Ohne Streckenlast und mit $EA = \text{konst.}$ ist die Normalkraft konstant, also auch die Dehnung $u'$. Die
+Verschiebung wächst linear von $0$ bis $u_L$:
+
+$$
+u(x) = u_L\,\frac{x}{L}, \qquad u' = \frac{u_L}{L}
+$$
+
+Eingesetzt:
+
+$$
+\Pi_i = \frac12 \int_0^L EA \left(\frac{u_L}{L}\right)^2 \mathrm{d}x = \frac12\,\frac{EA}{L}\,u_L^2
+$$
+
+```mathematica
+uh = uL x/L;
+Pii = 1/2 Integrate[EA D[uh, x]^2,
+        {x, 0, L}]
+```
+:::
+
+::: {.schritt zeige="stab last verlauf feder"}
+### Die Ersatzfeder
+
+Das ist genau die Energie einer Feder mit der Steifigkeit
+
+$$
+c = \frac{EA}{L}
+$$
+
+Mit $\Pi_a = -F\,u_L$ liefert das Minimum $F = \frac{EA}{L}\,u_L$, das bekannte Ergebnis aus der Festigkeitslehre.
+**Ein Stab mit konstantem $EA$ ist eine Feder.**
+:::
+
+::::
+
+## Stabsystem über das Energieprinzip
+
+:::: {.scrolly svg="../grafiken/ritz/stabsystem.svg"}
+
+::: {.schritt zeige="system last" zoom="0 0 780 250"}
+### Das System
+
+Drei Stäbe zwischen zwei festen Wänden: Aluminium, Stahl, Aluminium. An den beiden Verbindungsstellen greifen
+die Kräfte $2F$ und $5F$ an.
+
+**Gegeben:** $E_{Al} = 70\,000$ MPa, $E_{St} = 210\,000$ MPa, $F = 10$ kN, Längen und Querschnitte im Bild.
+
+Jeder Stab hat konstantes $EA$, ist also eine Feder. Wir rechnen wie in Vorlesung 1 über die Energie, ohne
+Freischnitt.
+
+::: {.links}
+```mathematica
+data = {Ealu -> 70000, Estahl -> 210000,
+        F -> 10000};
+```
+:::
+:::
+
+::: {.schritt zeige="system last2 dof" zoom="0 0 780 250"}
+### Freiheitsgrade und Verlängerungen
+
+Unbekannt sind die Verschiebungen der beiden Verbindungsstellen, $p_1$ und $p_2$, auf der Mittellinie. Die Kraft
+$5F$ ist dafür längs ihrer Wirkungslinie verschoben, das ändert nichts an ihrer Wirkung. Die Verlängerung jedes Stabes ist
+die Differenz der Verschiebungen seiner Enden:
+
+$$
+\Delta u_1 = p_2, \qquad \Delta u_2 = p_1 - p_2, \qquad \Delta u_3 = 0 - p_1
+$$
+
+::: {.links}
+```mathematica
+du = {du1 -> p2, du2 -> p1 - p2,
+      du3 -> -p1};
+psys = {p1, p2};
+```
+:::
+:::
+
+::: {.schritt zeige="system last2 dof federn" zoom="0 0 780 380"}
+### Jeder Stab eine Feder
+
+Die Steifigkeiten folgen aus $c_e = E_e A_e / L_e$:
+
+$$
+c_1 = 126\,000\ \tfrac{\text{N}}{\text{mm}}, \quad
+c_2 = 2\,904\,000\ \tfrac{\text{N}}{\text{mm}}, \quad
+c_3 = 91\,636\ \tfrac{\text{N}}{\text{mm}}
+$$
+
+Der kurze, dicke Stahlstab ist mehr als zwanzigmal so steif wie die Aluminiumstäbe.
+
+::: {.links}
+```mathematica
+federn = {c1 -> Ealu 12^2/80,
+          c2 -> Estahl 22^2/35,
+          c3 -> Ealu 12^2/110};
+```
+:::
+:::
+
+::: {.schritt zeige="system last2 dof federn" zoom="0 0 780 380"}
+### Energie und Minimum
+
+Innere Energie aller Stäbe und Potential der beiden Kräfte ($5F$ zeigt gegen $p_1$):
+
+$$
+\begin{aligned}
+\Pi_i &= \tfrac12\,c_1\,\Delta u_1^2 + \tfrac12\,c_2\,\Delta u_2^2 + \tfrac12\,c_3\,\Delta u_3^2 \\
+\Pi_a &= -(-5F)\,p_1 - 2F\,p_2
+\end{aligned}
+$$
+
+Im Minimum verschwinden beide Ableitungen von $\Pi_{ges} = \Pi_i + \Pi_a$.
+
+::: {.links}
+```mathematica
+Pii = 1/2 (c1 du1^2 + c2 du2^2
+         + c3 du3^2) /. du;
+Pia = 5 F p1 - 2 F p2;
+Piges = Pii + Pia;
+lsg = Solve[D[Piges, {psys}] == {0, 0}
+        /. federn /. data, psys] // N
+```
+:::
+:::
+
+::: {.schritt zeige="system last2 dof ergebnis" dimmen="federn"}
+### Ergebnis
+
+$$
+p_1 = -0{,}145\ \text{mm}, \qquad p_2 = -0{,}133\ \text{mm}
+$$
+
+Beide Verbindungsstellen verschieben sich nach links. Die Spannungen folgen aus $\sigma_e = E_e\,\Delta u_e / L_e$:
+
+| Stab | 1 (Al) | 2 (St) | 3 (Al) |
+|:--|:-:|:-:|:-:|
+| $\sigma$ in MPa | $-116{,}0$ | $-75{,}8$ | $92{,}4$ |
+
+: {.striped}
+
+Stab 1 und 2 werden gedrückt, Stab 3 gezogen. Im Bild ist $u(x)$ in jedem Stab **linear**, wie bei der Ersatzfeder
+vorausgesetzt.
+
+```mathematica
+{Ealu du1/80, Estahl du2/35,
+ Ealu du3/110} /. du /. lsg[[1]] /. data
+```
+:::
+
+::::
+
+## Der konische Stab: Die Annahmen sind verletzt
+
+:::: {.scrolly svg="../grafiken/ritz/konisch-ritz.svg"}
+
+::: {.schritt zeige="system" zoom="40 0 740 190"}
+### Der Querschnitt ändert sich
+
+Der konische Stab aus Vorlesung 0: Der Querschnitt nimmt linear von $A_0$ auf $A_1$ ab, am Ende zieht $F$.
+
+$$
+A(x) = A_0 - (A_0 - A_1)\,\frac{x}{L}
+$$
+
+Jetzt ist $EA$ **nicht konstant**. Die Normalkraft ist zwar überall $F$, die Dehnung $u' = F/(E\,A(x))$ aber
+nicht: $u(x)$ ist **nicht linear**. Der Stab ist keine einfache Feder mehr.
+:::
+
+::: {.schritt zeige="system achsen exakt"}
+### Die Energie hängt von einer Funktion ab
+
+Die potentielle Energie lässt sich trotzdem hinschreiben:
+
+$$
+\Pi[u] = \frac12 \int_0^L E\,A(x)\,u'(x)^2\,\mathrm{d}x - F\,u(L)
+$$
+
+$\Pi$ hängt aber nicht mehr von einer oder zwei Zahlen ab, sondern von der **ganzen Funktion** $u(x)$. Eine solche
+„Funktion einer Funktion“ heißt **Funktional**. Gesucht ist die Funktion, die $\Pi$ minimiert. Das Bild zeigt sie:
+die exakte Lösung aus Vorlesung 0,
+
+$$
+u(x) = \frac{F\,L}{E\,(A_0 - A_1)} \ln\frac{A_0}{A(x)}
+$$
+
+Wie findet man das Minimum eines Funktionals, wenn man die exakte Lösung **nicht** kennt?
+:::
+
+::::
+
+## Rayleigh und Ritz
+
+:::: {.scrolly svg="../grafiken/ritz/portraets.svg"}
+
+::: {.schritt zeige="rayleigh"}
+### Lord Rayleigh (1842–1919)
+
+**John William Strutt, 3. Baron Rayleigh**, englischer Physiker, Professor in Cambridge als Nachfolger von Maxwell,
+Nobelpreis für Physik 1904 (Entdeckung des Argons).
+
+In seinem Werk *The Theory of Sound* (1877) schätzt er Eigenfrequenzen schwingender Saiten, Stäbe und Platten ab,
+indem er für die Schwingungsform eine **plausible Funktion annimmt** und die Energie damit auswertet.
+:::
+
+::: {.schritt zeige="rayleigh ritz" dimmen="rayleigh"}
+### Walther Ritz (1878–1909)
+
+Schweizer Physiker aus Sion (Wallis), studierte in Zürich und Göttingen und starb mit 31 Jahren an Tuberkulose.
+
+1908/09 veröffentlichte er „Über eine neue Methode zur Lösung gewisser Variationsprobleme der mathematischen
+Physik“: Der Ansatz besteht aus **mehreren Funktionen mit freien Koeffizienten**, die aus dem Minimum der Energie
+bestimmt werden. Mit mehr Funktionen nähert sich die Lösung systematisch der exakten.
+
+Beide Namen stehen heute für dasselbe Vorgehen: **Ansatz wählen, in die Energie einsetzen, Minimum suchen.**
+
+::: {.bildquelle}
+Bilder: gemeinfrei, über Wikimedia Commons (Rayleigh: Proceedings of the Royal Society A 98, 1921; Ritz: 1911).
+:::
+:::
+
+::::
+
+## Das Ritzsche Verfahren am konischen Stab
+
+:::: {.scrolly svg="../grafiken/ritz/konisch-ritz.svg"}
+
+::: {.schritt zeige="system achsen exakt"}
+### Die Idee: ein Ansatz
+
+Statt unter allen Funktionen zu suchen, wählen wir einige **Ansatzfunktionen** $\varphi_i(x)$ und suchen nur noch
+die besten Koeffizienten $a_i$:
+
+$$
+u(x) \approx \tilde u(x) = \sum_{i=1}^{n} a_i\,\varphi_i(x)
+$$
+
+Jede Ansatzfunktion muss die **geometrischen Randbedingungen** erfüllen, hier $u(0) = 0$. Für Polynome also
+$\varphi_i = x^i$, ohne Konstante.
+:::
+
+::: {.schritt zeige="system achsen exakt"}
+### Einsetzen und Minimum
+
+Eingesetzt wird aus dem Funktional $\Pi[u]$ eine gewöhnliche Funktion $\Pi(a_1, \dots, a_n)$. Im Minimum sind alle
+Ableitungen null, $\partial \Pi / \partial a_i = 0$. Das ergibt ein lineares Gleichungssystem
+
+$$
+\mathbf{K}\,\mathbf{a} = \mathbf{q}, \qquad
+K_{ij} = \int_0^L EA\,\varphi_i'\,\varphi_j'\,\mathrm{d}x, \qquad
+q_i = F\,\varphi_i(L)
+$$
+
+Das ist dieselbe Struktur wie beim Federsystem, nur sind die Unbekannten jetzt Koeffizienten eines Ansatzes.
+:::
+
+::: {.schritt zeige="system achsen exakt grad1"}
+### Linearer Ansatz
+
+Der einfachste Ansatz, der $u(0) = 0$ erfüllt: $\tilde u = a_1\,x$. Eingesetzt:
+
+$$
+\Pi(a_1) = \frac12\,a_1^2\,E\,L\,\frac{A_0 + A_1}{2} - F\,a_1\,L
+$$
+
+$$
+\frac{\mathrm{d}\Pi}{\mathrm{d}a_1} = 0
+\quad\Rightarrow\quad
+a_1 = \frac{2F}{E\,(A_0 + A_1)}
+$$
+
+Der Stab wird wie ein Stab mit **mittlerem** Querschnitt behandelt. $u(L)$ ist um 17 % zu klein, die Spannung ist
+konstant und am Ende nur ein Drittel der richtigen.
+
+```mathematica
+data = {Em -> 70000, L -> 1000, F -> 5000,
+        A0 -> 100, A1 -> 20};
+Ax = A0 - (A0 - A1)/L x;
+uh = a1 x;
+Pii = 1/2 Integrate[Em Ax D[uh, x]^2,
+        {x, 0, L}];
+Pia = -F (uh /. x -> L);
+Piges = Pii + Pia;
+lsg = Solve[D[Piges, a1] == 0, a1]
+```
+:::
+
+::: {.schritt zeige="system achsen exakt grad1 grad2 grad3" dimmen="grad1"}
+### Mehr Ansatzfunktionen
+
+Mit $\tilde u = a_1 x + a_2 x^2 + a_3 x^3$ wird die Lösung schnell besser
+($E = 70\,000$ MPa, $L = 1000$ mm, $F = 5$ kN, $A_0 = 100$ mm², $A_1 = 20$ mm²):
+
+| Grad | $u(L)$ in mm | Fehler | $\sigma(L)$ in MPa | Fehler | $\Pi$ in Nmm |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| 1 | 1,190 | −17,2 % | 83,3 | −66,7 % | −2976 |
+| 2 | 1,398 | −2,7 % | 163,0 | −34,8 % | −3494 |
+| 3 | 1,431 | −0,4 % | 209,6 | −16,2 % | −3577 |
+| 4 | 1,436 | −0,1 % | 232,3 | −7,1 % | −3590 |
+| exakt | 1,437 | | 250,0 | | −3592,5 |
+
+: {.striped}
+
+Die **Verschiebungen** konvergieren schnell, die **Spannungen** (Ableitungen!) deutlich langsamer.
+$\Pi$ nähert sich dem exakten Minimum **von oben**: Jeder Ansatz ist eine Einschränkung, das wahre Minimum liegt
+immer tiefer.
+:::
+
+::: {.schritt zeige="system achsen exakt grad1 grad2 grad3" dimmen="grad1"}
+### Mehr Ansatzfunktionen in Mathematica
+
+Der Ansatz wird als Skalarprodukt aus Koeffizienten und Ansatzfunktionen geschrieben. Abgeleitet wird nach allen
+Koeffizienten auf einmal, wie beim Federsystem nach `psys`:
+
+```mathematica
+a = {a1, a2, a3};
+uh = a . {x, x^2, x^3};
+Piges = 1/2 Integrate[Em Ax D[uh, x]^2,
+          {x, 0, L}] - F (uh /. x -> L);
+lsg = Solve[D[Piges, {a}] == {0, 0, 0}
+        /. data, a]
+```
+:::
+
+::::
+
+## Beispiel: Hängender Stab unter Eigengewicht
+
+:::: {.scrolly svg="../grafiken/ritz/haengestab.svg"}
+
+::: {.schritt zeige="system"}
+### Das System
+
+Ein Stab mit konstantem $EA$ hängt an der Decke und trägt sein Eigengewicht als Streckenlast $q_0 = \rho\,g\,A$.
+Die Streckenlast leistet auf ihrer ganzen Länge Arbeit:
+
+$$
+\Pi = \frac12 \int_0^L EA\,u'^2\,\mathrm{d}x - \int_0^L q_0\,u\,\mathrm{d}x
+$$
+:::
+
+::: {.schritt zeige="system achsen linear"}
+### Linearer Ansatz
+
+Mit $\tilde u = a_1 x$ folgt $a_1 = q_0 L / (2EA)$. Die Normalkraft $N = EA\,\tilde u'$ ist **konstant**
+$q_0 L / 2$. An der Einspannung ist sie nur halb so groß wie richtig, am freien Ende statt null ebenfalls
+$q_0 L / 2$. Die Verschiebung am Ende $u(L) = q_0 L^2 / (2EA)$ ist trotzdem exakt.
+
+```mathematica
+uh = a1 x;
+Pii = 1/2 Integrate[EA D[uh, x]^2,
+        {x, 0, L}];
+Pia = -Integrate[q0 uh, {x, 0, L}];
+Piges = Pii + Pia;
+Solve[D[Piges, a1] == 0, a1]
+```
+:::
+
+::: {.schritt zeige="system achsen exakt linear" dimmen="linear"}
+### Quadratischer Ansatz
+
+Mit $\tilde u = a_1 x + a_2 x^2$ liefert Ritz
+
+$$
+u(x) = \frac{q_0}{2EA}\,(2L - x)\,x, \qquad N(x) = q_0\,(L - x)
+$$
+
+Das ist die **exakte Lösung** (vgl. die DGL in Vorlesung 0): Liegt die exakte Lösung im Ansatz, findet Ritz sie.
+Die Energie sinkt von $-\tfrac18$ auf $-\tfrac16\,q_0^2 L^3/(EA)$.
+
+```mathematica
+uh = a1 x + a2 x^2;
+```
+:::
+
+::::
+
+::: {.merke}
+**Das Verfahren nach Rayleigh-Ritz**
+
+- Ansatz $\tilde u = \sum a_i\,\varphi_i$ für das **ganze Bauteil**, die Ansatzfunktionen erfüllen die
+  **geometrischen** Randbedingungen. Kraftrandbedingungen müssen nicht erfüllt werden, sie stecken in $\Pi_a$.
+- Einsetzen in $\Pi$, Ableitungen nach $a_i$ gleich null: $\mathbf{K}\,\mathbf{a} = \mathbf{q}$.
+- Mehr Ansatzfunktionen machen die Lösung nie schlechter; $\Pi$ nähert sich dem Minimum von oben.
+- Verschiebungen sind genauer als Spannungen.
+:::
+
+## Ausblick
+
+Beim konischen Stab war ein Polynom über die ganze Länge noch leicht zu finden. Bei einem Bauteil aus
+mehreren Abschnitten, mit Sprüngen im Querschnitt oder bei einer Scheibe mit Bohrung ist ein Ansatz für das **ganze**
+Bauteil kaum noch zu finden. Die Idee der FEM: Das Bauteil in viele kleine **Elemente** zerlegen und in jedem
+Element einen einfachen Ritz-Ansatz verwenden. Wie beim Stabsystem werden die Elemente dann zum Gesamtsystem
+zusammengesetzt. Das zeigt Vorlesung 3.
+
+## Beispiel und Übung
+
+::: {.aufgabe}
+**Folgt:** ein Beispiel zum Ansatzgrad und zur Verjüngung des konischen Stabes sowie Übungen zum Stabsystem über die
+Energie und zum konischen Stab mit Ritz.
+:::
