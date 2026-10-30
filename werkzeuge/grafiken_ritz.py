@@ -159,9 +159,23 @@ def stabsystem():
         e.append(D.punkt(x, p, ROT, 4))
     e.append(D.text(80, P2, "p_2 = −0,133", ROT, dx=-8, dy=4, groesse=15, anker="end"))
     e.append(D.text(115, P1, "p_1 = −0,145", ROT, dx=10, dy=6, groesse=15, anker="start"))
-    for (xm, sg) in ((40, SIG[0]), (97.5, SIG[1]), (170, SIG[2])):
-        wert = f"{sg:.1f}".replace(".", ",").replace("-", "−")
-        e.append(D.text(xm, 0, f"σ = {wert}", "#444444", dy=-16, groesse=14))
+
+    # Dehnungen und Spannungen: je Stab konstant, im Bereich der Ersatzfedern (dort ausgeblendet)
+    grenzen = [(0, 80), (80, 115), (115, 225)]
+    eps = (SIG[0] / 70000 * 1000, SIG[1] / 210000 * 1000, SIG[2] / 70000 * 1000)    # in ‰
+    for name, titel, werte, ymax, ylabel, fmt, farbe, fuell in (
+            ("dehnung", "Dehnungen", eps, 2.0, "ε in ‰", "{:.2f}", GR, "#d8eadb"),
+            ("spannung", "Spannungen", SIG, 140, "σ in MPa", "{:.1f}", ROT, "#f6d5d5")):
+        Ds = Diagramm(xa[0], 380, xa[3] - xa[0], 120, 225, ymax, ymin=-ymax)
+        e = abb.ebene(name, titel)
+        e.append(Ds.achsen("x", ylabel, [(80, ""), (115, ""), (225, "")], [], raster=True))
+        for (a, b), w in zip(grenzen, werte):
+            e.append(Ds.flaeche([(a, 0), (a, w), (b, w), (b, 0)], fuell, 1.0))
+        e.append(Ds.kurve(punkte=[(0, 0), (0, werte[0]), (80, werte[0]), (80, werte[1]), (115, werte[1]),
+                                  (115, werte[2]), (225, werte[2]), (225, 0)], farbe=farbe))
+        for (a, b), w in zip(grenzen, werte):
+            t = fmt.format(w).replace(".", ",").replace("-", "−")
+            e.append(Ds.notiz((a + b) / 2, w, [t], farbe, dy=-14 if w > 0 else 14, groesse=15, anker="middle"))
     return abb.speichern(ZIEL / "stabsystem.svg")
 
 

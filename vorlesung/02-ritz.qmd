@@ -204,14 +204,53 @@ lsg = Solve[D[Piges, {psys}] == {0, 0}
 :::
 :::
 
-::: {.schritt zeige="system last2 dof ergebnis" dimmen="federn"}
-### Ergebnis
+::: {.schritt zeige="system last2 dof ergebnis"}
+### Ergebnis: Verschiebungsverlauf
 
 $$
 p_1 = -0{,}145\ \text{mm}, \qquad p_2 = -0{,}133\ \text{mm}
 $$
 
-Beide Verbindungsstellen verschieben sich nach links. Die Spannungen folgen aus $\sigma_e = E_e\,\Delta u_e / L_e$:
+Beide Verbindungsstellen verschieben sich nach links. In jedem Stab ist $u(x)$ **linear**, wie bei der Ersatzfeder
+vorausgesetzt. Zwischen den Knoten wird also linear interpoliert:
+
+```mathematica
+uh = Piecewise[{{p2 x/80, x <= 80},
+       {p2 + (p1 - p2) (x - 80)/35,
+        x <= 115}},
+       p1 (225 - x)/110] /. lsg[[1]];
+Plot[uh, {x, 0, 225},
+  AxesLabel -> {"x in mm", "u in mm"}]
+```
+
+`Piecewise` setzt $u(x)$ stückweise zusammen: `{Ausdruck, Bedingung}`, der letzte Ausdruck gilt sonst.
+:::
+
+::: {.schritt zeige="system last2 dof ergebnis dehnung"}
+### Dehnungen
+
+Die Dehnung ist in jedem Stab konstant, Verlängerung durch Länge:
+
+$$
+\varepsilon_e = \frac{\Delta u_e}{L_e}
+$$
+
+Der Stahlstab dehnt sich am wenigsten: Er hat die mit Abstand größte Dehnsteifigkeit $EA$. Am Übergang der Stäbe springt die Dehnung.
+
+```mathematica
+eps = {du1/80, du2/35, du3/110} /.
+        du /. lsg[[1]]
+Plot[Piecewise[{{eps[[1]], x < 80},
+       {eps[[2]], x < 115}}, eps[[3]]],
+  {x, 0, 225}, Filling -> Axis,
+  AxesLabel -> {"x in mm", "ε"}]
+```
+:::
+
+::: {.schritt zeige="system last2 dof ergebnis spannung"}
+### Spannungen
+
+Mit dem Hookeschen Gesetz $\sigma_e = E_e\,\varepsilon_e$:
 
 | Stab | 1 (Al) | 2 (St) | 3 (Al) |
 |:--|:-:|:-:|:-:|
@@ -219,12 +258,15 @@ Beide Verbindungsstellen verschieben sich nach links. Die Spannungen folgen aus 
 
 : {.striped}
 
-Stab 1 und 2 werden gedrückt, Stab 3 gezogen. Im Bild ist $u(x)$ in jedem Stab **linear**, wie bei der Ersatzfeder
-vorausgesetzt.
+Stab 1 und 2 werden gedrückt, Stab 3 gezogen. Im Stahl ist die Dehnung klein, die Spannung wegen des dreifachen
+E-Moduls aber nicht.
 
 ```mathematica
-{Ealu du1/80, Estahl du2/35,
- Ealu du3/110} /. du /. lsg[[1]] /. data
+sig = {Ealu, Estahl, Ealu} eps /. data
+Plot[Piecewise[{{sig[[1]], x < 80},
+       {sig[[2]], x < 115}}, sig[[3]]],
+  {x, 0, 225}, Filling -> Axis,
+  AxesLabel -> {"x in mm", "σ in MPa"}]
 ```
 :::
 
