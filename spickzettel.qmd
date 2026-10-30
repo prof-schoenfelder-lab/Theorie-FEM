@@ -193,7 +193,7 @@ ue   = Ne . pe;  sige = Em dNe . pe;
 | Problem | Abhilfe |
 |:--|:--|
 | `E`, `N`, `D`, `C`, `I` sind belegt (Eulersche Zahl, numerisch, Ableitung, Konstante, imaginäre Einheit) | `Em`, `Nx`, `c1` usw. verwenden |
-| `K = {...} // MatrixForm` – danach rechnet `K` nicht mehr | nur zur Anzeige: `K = {...}; K // MatrixForm` |
+| `K = {...} // MatrixForm` – danach rechnet `K` nicht mehr | erst `K = {...};`, dann in einer eigenen Zeile `K // MatrixForm` (nur zur Anzeige) |
 | `x = 3` gesetzt, später überall 3 | `Clear[x]` oder Kernel neu starten (*Auswertung → Kernel beenden*) |
 | `=` statt `==` in `Solve` | Gleichungen immer mit `==` |
 | `ab` statt `a b` | Leerzeichen oder `*` |

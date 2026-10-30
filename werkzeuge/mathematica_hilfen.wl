@@ -9,11 +9,23 @@ nbziel = FileNameJoin[{kursordner, "mathematica"}];
    und Graphics/Graphics3D (sonst würde die Eingabezelle schon eine fertige Grafik enthalten, z. B. aus Red und einem
    noch unbekannten Punkt, und Mathematica meldet „Red is not a Graphics3D primitive or directive“). *)
 alsText = {D -> befehlD, Integrate -> befehlIntegrate, Reals -> befehlReals,
-           Graphics -> befehlGraphics, Graphics3D -> befehlGraphics3D};
+           Graphics -> befehlGraphics, Graphics3D -> befehlGraphics3D, MatrixForm -> befehlMatrixForm};
+boxen[s_String] := (ToExpression[s, InputForm, HoldComplete] /. alsText /.
+      HoldComplete[e_] :> MakeBoxes[e, StandardForm]) /.
+    Thread[ToString /@ Values[alsText] -> ToString /@ Keys[alsText]];
+(* Nachgestelltes „// Befehl“ (MatrixForm, N, Simplify, Expand …) bleibt so stehen, wie es geschrieben ist.
+   Sonst wird z. B. aus „Ksys // MatrixForm“ eine unsichtbare Hülle, und in der Zelle steht nur „Ksys“. *)
+(* nur an „ // “ außerhalb aller Klammern trennen (in Table[… // MatrixForm, …] bleibt es Teil des Ausdrucks) *)
+tiefe[s_String] := StringCount[s, "[" | "{" | "("] - StringCount[s, "]" | "}" | ")"];
+obenTrennen[s_String] := Module[{pos = Select[StringPosition[s, " // "], tiefe[StringTake[s, #[[1]] - 1]] == 0 &]},
+   StringTake[s, #] & /@ Partition[Flatten[{1, Riffle[pos[[All, 1]] - 1, pos[[All, 2]] + 1], StringLength[s]}], 2]];
+postfix[s_String] := With[{teile = obenTrennen[s]},
+   Fold[RowBox[{#1, "//", #2}] &, boxen[First[teile]], Rest[teile]]];
+(* Bei einer Zuweisung „x = … // f“ gehört das // zur rechten Seite (x = f[…]), wie Mathematica es liest. *)
 ein[s_String] := Cell[BoxData[
-    ToExpression[s, InputForm, HoldComplete] /. alsText /.
-      HoldComplete[e_] :> MakeBoxes[e, StandardForm]] /.
-    Thread[ToString /@ Values[alsText] -> ToString /@ Keys[alsText]], "Input"];
+    If[StringMatchQ[s, RegularExpression["\\s*[A-Za-z][A-Za-z0-9]*\\s*=[^=].*"]] && Length[obenTrennen[s]] > 1,
+      With[{t = StringSplit[s, "=", 2]}, RowBox[{StringTrim[t[[1]]], "=", postfix[StringTrim[t[[2]]]]}]],
+      postfix[s]]], "Input"];
 (* Kurze Erklärung zu einem Rechenschritt, direkt unter der Eingabezelle (nur in der Musterlösung) *)
 erklaerung[s_String] := Cell[s, "Text", FontColor -> GrayLevel[0.35], CellMargins -> {{66, 10}, {10, 2}}];
 leer[hinweis_String] := Cell[BoxData[RowBox[{"(*", " ", hinweis, " ", "*)"}]], "Input"];

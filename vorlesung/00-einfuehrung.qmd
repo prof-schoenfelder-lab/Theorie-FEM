@@ -623,7 +623,8 @@ lsg = Solve[glgw /. federgesetz /. kinematik /. data, {p1, p2}]
 psys  = {p1, p2};
 qsys  = {f1, f2};
 innen = {N2 + N3, N1 - N2} /. federgesetz /. kinematik;
-Ksys  = D[innen, {psys}];  Ksys // MatrixForm
+Ksys  = D[innen, {psys}];
+Ksys // MatrixForm
 plsg  = LinearSolve[Ksys, qsys] /. data // Simplify
 {N1, N2, N3} /. federgesetz /. kinematik /. Thread[psys -> plsg] /. data
 ```
