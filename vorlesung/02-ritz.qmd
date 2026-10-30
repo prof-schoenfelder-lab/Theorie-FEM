@@ -476,6 +476,13 @@ zusammengesetzt. Das zeigt Vorlesung 3.
 ## Beispiel und Übung
 
 ::: {.aufgabe}
-**Folgt:** ein Beispiel zum Ansatzgrad und zur Verjüngung des konischen Stabes sowie Übungen zum Stabsystem über die
-Energie und zum konischen Stab mit Ritz.
+**Abgesetzte Welle über die Energie.** Eine abgesetzte Stahlwelle aus drei Abschnitten, links eingespannt, rechts
+mit $F$ gedrückt. Lösen Sie sie wie das Stabsystem oben: Ersatzfedern, potentielle Energie, Minimum,
+Steifigkeitsmatrix, Verschiebungs- und Spannungsverlauf, zum Schluss dieselbe Welle aus Aluminium.
+
+[Aufgabe herunterladen (Mathematica)](../mathematica/02-welle-energie-task.nb){download="02-welle-energie-task.nb"}
+:::
+
+::: {.aufgabe}
+**Folgt:** eine Übung zum konischen Stab mit Ritz.
 :::

@@ -12,8 +12,8 @@ import math
 from pathlib import Path
 
 from nlzeichnen import Diagramm, feder, notiz, wandgelenk
-from tmzeichnen import (FARBE, Abbildung, einspannung, festlager, kraft, kreis, linie, loslager, mass, pfeil,
-                        polylinie, text)
+from tmzeichnen import (FARBE, Abbildung, einspannung, festlager, kraft, kreis, linie, loslager, mass, nummer,
+                        pfeil, polylinie, text)
 
 ZIEL = Path(__file__).resolve().parent.parent / "grafiken" / "ritz"
 EX, ROT, GR = FARBE["linear"], FARBE["nichtlinear"], FARBE["mass"]
@@ -301,9 +301,41 @@ def portraets():
     return abb.speichern(ZIEL / "portraets.svg")
 
 
+# ---------------------------------------------------------------- Übung: abgesetzte Welle (3-FEM-Stab/2b)
+def welle(mit_dof):
+    """Abgesetzte Stahlwelle Ø11/Ø25/Ø11, L = 240/160/240 mm, links eingespannt, rechts F drückend."""
+    titel = "Abgesetzte Welle: Freiheitsgrade" if mit_dof else "Abgesetzte Welle"
+    abb = Abbildung(860, 300, titel)
+    s, sd = 1.0, 3.6                             # px je mm in Längs- und Querrichtung
+    x0, y = 70, 120
+    xa = [x0, x0 + 240 * s, x0 + 400 * s, x0 + 640 * s]
+    h = [11 / 2 * sd, 25 / 2 * sd, 11 / 2 * sd]
+    e = abb.ebene("system", "System")
+    e.append(einspannung(xa[0], y, 80))
+    for i in range(3):
+        e.append(_stab(xa[i], xa[i + 1], y, h[i]))
+    for i, l in enumerate((240, 160, 240)):
+        e.append(mass(xa[i], y + 66, xa[i + 1], y + 66, f"[{l}]", abstand=-20))
+    if not mit_dof:
+        e.append(kraft(xa[3], y, 180, "F", laenge=60, label_seite=1, label_abstand=24))
+        for i, d in enumerate((11, 25, 11)):
+            e.append(notiz((xa[i] + xa[i + 1]) / 2, y - h[1] - 16, [f"Ø {d}"], "#444444", 16, anker="middle"))
+        e.append(notiz(xa[3], y + 112, ["Maße in mm, Stahl"], "#666666", 14, anker="end"))
+    else:
+        e.append(kraft(xa[3] + 80, y, 180, "F", laenge=60, label_seite=1, label_abstand=24))
+        for i in range(3):
+            e.append(nummer((xa[i] + xa[i + 1]) / 2, y + h[1] + 22, i + 1))
+        for x, n, hh in ((xa[1], 2, h[1]), (xa[2], 3, h[1]), (xa[3], 1, h[2])):
+            e.append(kreis(x, y, 4.2))
+            e.append(pfeil(x, y, x + 40, y, GR, 1.6, (9, 6)))
+            e.append(text(x + 20, y - hh - 16, f"p_{n}", GR, 18))
+    return abb.speichern(ZIEL / ("welle-dof.svg" if mit_dof else "welle-system.svg"))
+
+
 if __name__ == "__main__":
     for n in (1, 2, 3):
         u, sig = ritz(n)
         print(f"Grad {n}: u(L) = {u(L):.4f} mm, σ(L) = {sig(L):.1f} MPa")
     for fn in (stab_feder, stabsystem, konisch_ritz, haengestab, portraets):
         print(fn())
+    print(welle(False), welle(True))
