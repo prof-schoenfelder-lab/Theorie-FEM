@@ -107,7 +107,15 @@ $$
 c = \frac{EA}{L}
 $$
 
-Mit $\Pi_a = -F\,u_L$ liefert das Minimum $F = \frac{EA}{L}\,u_L$, das bekannte Ergebnis aus der Festigkeitslehre.
+Mit $\Pi_a = -F\,u_L$ liefert das Minimum
+
+$$
+F = \frac{EA}{L}\,u_L
+\qquad\Rightarrow\qquad
+u_L = \frac{F\,L}{EA}
+$$
+
+Das ist die bekannte Verlängerung eines Zugstabes aus der Technischen Mechanik.
 **Ein Stab mit konstantem $EA$ ist eine Feder.**
 :::
 
@@ -124,6 +132,9 @@ Drei Stäbe zwischen zwei festen Wänden: Aluminium, Stahl, Aluminium. An den be
 die Kräfte $2F$ und $5F$ an.
 
 **Gegeben:** $E_{Al} = 70\,000$ MPa, $E_{St} = 210\,000$ MPa, $F = 10$ kN, Längen und Querschnitte im Bild.
+
+**Gesucht:** Verschiebungen der Verbindungsstellen, Verschiebungsverlauf $u(x)$, Dehnungen, Spannungen und
+Stabkräfte.
 
 Jeder Stab hat konstantes $EA$, ist also eine Feder. Wir rechnen wie in Vorlesung 1 über die Energie, ohne
 Freischnitt.
@@ -229,22 +240,26 @@ Plot[uh, {x, 0, 225},
 ::: {.schritt zeige="system last2 dof ergebnis dehnung"}
 ### Dehnungen
 
-Die Dehnung ist in jedem Stab konstant, Verlängerung durch Länge:
+Die Dehnung ist die **Ableitung der Verschiebungsfunktion**. Weil $u(x)$ in jedem Stab linear ist, ist sie
+dort konstant, Verlängerung durch Länge:
 
 $$
+\varepsilon(x) = u'(x)
+\qquad\Rightarrow\qquad
 \varepsilon_e = \frac{\Delta u_e}{L_e}
 $$
 
-Der Stahlstab dehnt sich am wenigsten: Er hat die mit Abstand größte Dehnsteifigkeit $EA$. Am Übergang der Stäbe springt die Dehnung.
+Der Stahlstab dehnt sich am wenigsten: Er hat die mit Abstand größte Dehnsteifigkeit $EA$. Am Übergang der Stäbe
+springt die Dehnung. So geht später auch die FEM vor: erst die Verschiebungen, dann durch Ableiten die Dehnungen.
 
 ```mathematica
-eps = {du1/80, du2/35, du3/110} /.
-        du /. lsg[[1]]
-Plot[Piecewise[{{eps[[1]], x < 80},
-       {eps[[2]], x < 115}}, eps[[3]]],
-  {x, 0, 225}, Filling -> Axis,
+eps = D[uh, x];
+Plot[eps, {x, 0, 225}, Filling -> Axis,
   AxesLabel -> {"x in mm", "ε"}]
+Table[eps, {x, {40, 100, 170}}]
 ```
+
+`D` leitet auch die stückweise Funktion ab. `Table` wertet sie in der Mitte jedes Stabes aus.
 :::
 
 ::: {.schritt zeige="system last2 dof ergebnis spannung"}
@@ -262,11 +277,40 @@ Stab 1 und 2 werden gedrückt, Stab 3 gezogen. Im Stahl ist die Dehnung klein, d
 E-Moduls aber nicht.
 
 ```mathematica
-sig = {Ealu, Estahl, Ealu} eps /. data
-Plot[Piecewise[{{sig[[1]], x < 80},
-       {sig[[2]], x < 115}}, sig[[3]]],
-  {x, 0, 225}, Filling -> Axis,
+Ex = Piecewise[{{Ealu, x < 80},
+       {Estahl, x < 115}}, Ealu] /. data;
+sig = Ex eps;
+Plot[sig, {x, 0, 225}, Filling -> Axis,
   AxesLabel -> {"x in mm", "σ in MPa"}]
+Table[sig, {x, {40, 100, 170}}]
+```
+
+`Ex` ist der E-Modul als Funktion von $x$.
+:::
+
+::: {.schritt zeige="system last2 dof ergebnis spannung"}
+### Stabkräfte
+
+Die Stabkräfte folgen aus dem Federgesetz, $N_e = c_e\,\Delta u_e$ (oder $N_e = \sigma_e A_e$):
+
+| Stab | 1 (Al) | 2 (St) | 3 (Al) |
+|:--|:-:|:-:|:-:|
+| $N$ in kN | $-16{,}7$ | $-36{,}7$ | $13{,}3$ |
+
+: {.striped}
+
+**Kontrolle Gleichgewicht** an den Verbindungsstellen, obwohl wir es nie aufgestellt haben:
+
+$$
+\begin{aligned}
+x = 80:&\quad N_2 - N_1 + 2F = -36{,}7 + 16{,}7 + 20 = 0 \\
+x = 115:&\quad N_3 - N_2 - 5F = 13{,}3 + 36{,}7 - 50 = 0
+\end{aligned}
+$$
+
+```mathematica
+Nst = {c1 du1, c2 du2, c3 du3} /. du /.
+        federn /. data /. lsg[[1]]
 ```
 :::
 

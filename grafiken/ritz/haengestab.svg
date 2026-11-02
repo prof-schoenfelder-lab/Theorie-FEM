@@ -12,8 +12,8 @@
 <g><path d="M 115,310.67 L 115,327.07" fill="none" stroke="#d40000" stroke-width="1.1" stroke-linecap="butt"/><path d="M 115,332.67 L 112.75,325.67 L 117.25,325.67 Z" fill="#d40000" stroke="none" stroke-linejoin="round"/></g>
 <g><path d="M 115,358 L 115,374.4" fill="none" stroke="#d40000" stroke-width="1.1" stroke-linecap="butt"/><path d="M 115,380 L 112.75,373 L 117.25,373 Z" fill="#d40000" stroke="none" stroke-linejoin="round"/></g>
 <text x="127" y="236.46" fill="#d40000" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="'Latin Modern Roman','LM Roman 10','CMU Serif',serif" font-size="19" font-style="italic" text-anchor="start" xml:space="preserve"><tspan>q</tspan><tspan baseline-shift="sub" font-size="70%" font-style="normal">0</tspan></text>
-<g><path d="M 65,74 L 65,113.6" fill="none" stroke="#006414" stroke-width="1.25" stroke-linecap="butt"/><path d="M 65,120 L 62.5,112 L 67.5,112 Z" fill="#006414" stroke="none" stroke-linejoin="round"/></g>
-<text x="59" y="120.46" fill="#006414" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="'Latin Modern Roman','LM Roman 10','CMU Serif',serif" font-size="19" font-style="italic" text-anchor="end" xml:space="preserve"><tspan>x</tspan></text>
+<g><path d="M 95,70 L 95,124.4" fill="none" stroke="#006414" stroke-width="2" stroke-linecap="butt"/><path d="M 95,134 L 91,122 L 99,122 Z" fill="#006414" stroke="none" stroke-linejoin="round"/></g>
+<text x="81" y="135.14" fill="#006414" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="'Latin Modern Roman','LM Roman 10','CMU Serif',serif" font-size="21" font-style="italic" text-anchor="end" xml:space="preserve"><tspan>x</tspan></text>
 <text x="95" y="418.62" fill="#000000" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke" font-family="'Source Sans Pro','Helvetica Neue',Arial,sans-serif" font-size="13.6" font-style="normal" text-anchor="middle" xml:space="preserve"><tspan>EA = konst.</tspan></text>
 </g>
 <g inkscape:groupmode="layer" id="achsen" inkscape:label="02 Achsen" data-ebene="achsen">

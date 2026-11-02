@@ -57,7 +57,7 @@ def stab_feder():
     # Kraft-Weg-Linie: Arbeit = Fläche des Dreiecks (wie bei der Feder in V1)
     K = Diagramm(505, 330, 130, 120, 1.25, 1.25)
     for name, titel, weg, kr, lab in (("kraftweg_f", "Kraft-Weg ganzer Stab", "u_L", "F", "F u_L"),
-                                      ("kraftweg_n", "Kraft-Weg Stabstück", "du", "N", "N du")):
+                                      ("kraftweg_n", "Kraft-Weg Stabstück", "[d]u", "N", "N [d]u")):
         e = abb.ebene(name, titel)
         e.append(K.flaeche([(0, 0), (1, 1), (1, 0)], "#dde7f5", 1.0))
         e.append(K.achsen("Weg", "Kraft", [(1, weg)], [(1, kr)], groesse=16))
@@ -72,16 +72,17 @@ def stab_feder():
     e = abb.ebene("element", "Stabstück")
     xs = 395                                     # Lage des Stabstücks im Stab
     e.append(f'<rect x="{xs}" y="{y - 18}" width="22" height="36" fill="#9db8e0" stroke="#000" stroke-width="1"/>')
-    e.append(text(xs + 11, y - 30, "dx", GR, 16))
+    e.append(text(xs + 11, y - 30, "[d]x", GR, 16))
     e.append(linie(xs, y + 18, xa, ye - he, GRAU, 0.8, "4 3"))
     e.append(linie(xs + 22, y + 18, xb, ye - he, GRAU, 0.8, "4 3"))
     e.append(f'<rect x="{xa}" y="{ye - he}" width="{xb - xa}" height="{2 * he}" fill="#9db8e0" stroke="#000" stroke-width="1.25"/>')
     e.append(polylinie([(xb, ye - he), (xb + 26, ye - he), (xb + 26, ye + he), (xb, ye + he)], GR, 1.1, strich="5 3"))
     e.append(kraft(xa, ye, 180, "N", laenge=56, ziehend=True, label_seite=-1))
     e.append(kraft(xb + 26, ye, 0, "N", laenge=56, ziehend=True, label_seite=1))
-    e.append(mass(xa, ye + he, xb, ye + he, "dx", abstand=-22))
-    e.append(mass(xb, ye + he, xb + 26, ye + he, "du", abstand=-22))
-    e.append(notiz((xa + xb) / 2 + 13, ye + he + 62, ["N = σ A,   du = ε dx"], "#444444", 16, anker="middle"))
+    e.append(mass(xa, ye + he, xb, ye + he, "[d]x", abstand=-22))
+    e.append(mass(xb, ye + he, xb + 26, ye + he, "[d]u", abstand=-22))
+    e.append(text((xa + xb) / 2 - 50, ye + he + 64, "N = σ A", "#000000", 20))
+    e.append(text((xa + xb) / 2 + 76, ye + he + 64, "[d]u = ε [d]x", "#000000", 20))
 
     D = Diagramm(x0, 300, x1 - x0, 120, 1.0, 1.0)
     e = abb.ebene("verlauf", "Verschiebungsverlauf")
@@ -133,6 +134,9 @@ def stabsystem():
     for i, name in enumerate(("Aluminium", "Stahl", "Aluminium")):
         xm = (xa[i] + xa[i + 1]) / 2
         e.append(notiz(xm, y + h[1] + 16, [f"{i + 1}: {name}"], "#444444", 14, anker="middle"))
+    # x im Ursprung auf der Mittellinie
+    e.append(pfeil(xa[0], y, xa[0] + 60, y, FARBE["koord"], 2.0, (12, 8)))
+    e.append(text(xa[0] + 68, y, "x", FARBE["koord"], 21, anker="start"))
     for i, l in enumerate((80, 35, 110)):
         e.append(mass(xa[i], y + 52, xa[i + 1], y + 52, f"[{l}]", abstand=-20))
     e.append(notiz(xa[3], y + 100, ["Maße in mm, Querschnitte quadratisch 12 × 12 bzw. 22 × 22"], "#666666", 13, anker="end"))
@@ -240,6 +244,8 @@ def konisch_ritz():
     e.append(linie(x0, y, x1, y, GRAU, 0.8, "8 3 2 3"))
     e.append(wandgelenk(x0, y, 60))
     e.append(loslager(x1, y, 12))
+    e.append(pfeil(x0, y, x0 + 60, y, FARBE["koord"], 2.0, (12, 8)))     # x im Ursprung auf der Mittellinie
+    e.append(text(x0 + 68, y, "x", FARBE["koord"], 21, anker="start"))
     e.append(kraft(x1 + 4, y, 0, "F", laenge=55, ziehend=True, label_seite=1))
     e.append(text(x0 + 20, y - hs * A0 - 16, "A_0", GR, anker="start"))
     e.append(text(x1 - 6, y - hs * A1 - 16, "A_1", GR, anker="end"))
@@ -282,8 +288,8 @@ def haengestab():
         yy = y0 + 18 + i * (y1 - y0 - 36) / 6
         e.append(pfeil(xs + 20, yy - 14, xs + 20, yy + 8, ROT, 1.1, (7, 4.5)))
     e.append(text(xs + 32, (y0 + y1) / 2, "q_0", ROT, anker="start"))
-    e.append(pfeil(xs - 30, y0 + 4, xs - 30, y0 + 50, GR, 1.25, (8, 5)))
-    e.append(text(xs - 36, y0 + 44, "x", GR, anker="end"))
+    e.append(pfeil(xs, y0, xs, y0 + 64, FARBE["koord"], 2.0, (12, 8)))      # x im Ursprung auf der Mittellinie
+    e.append(text(xs - 14, y0 + 58, "x", FARBE["koord"], 21, anker="end"))
     e.append(text(xs, y1 + 24, "EA = konst.", "#000000", 16))
 
     Du = Diagramm(250, 200, 440, 140, 1.0, 0.55)
