@@ -100,16 +100,30 @@ def stab_feder():
 
 
 # ---------------------------------------------------------------- Stabsystem (2a-Übung-2DOF)
+def _kraft(x, y, nach_rechts, label, laenge=80, ueber=0):
+    """Kräftige Einzelkraft auf der Mittellinie, Spitze bei (x, y) (greift von außen an).
+    ueber: halbe Bauteilhöhe, das Label steht darüber."""
+    x1 = x - laenge if nach_rechts else x + laenge
+    return (pfeil(x1, y, x, y, FARBE["last"], 3.0, (18, 11))
+            + text((x1 + x) / 2, y - max(24, ueber + 18), label, FARBE["last"], 23))
+
+
+def _dof(x, y, n, ueber, laenge=55):
+    """Freiheitsgrad auf der Mittellinie: Knoten, kräftiger grüner Pfeil, Label über dem Bauteil."""
+    return (kreis(x, y, 5) + pfeil(x, y, x + laenge, y, GR, 2.8, (16, 10))
+            + text(x + laenge / 2, y - ueber - 20, f"p_{n}", GR, 22))
+
+
 P1, P2 = -0.14516, -0.13252                      # mm, aus dem Kernel
 SIG = (-115.96, -75.82, 92.38)                   # MPa
 
 
 def stabsystem():
     abb = Abbildung(780, 600, "Stabsystem über das Energieprinzip")
-    s = 2.4                                      # px je mm
+    s, sq = 2.4, 2.8                             # px je mm längs und quer (Querschnitt schlanker gezeichnet)
     x0, y = 110, 120
     xa = [x0, x0 + 80 * s, x0 + 115 * s, x0 + 225 * s]
-    h = [12 / 2 * s, 22 / 2 * s, 12 / 2 * s]
+    h = [12 / 2 * sq, 22 / 2 * sq, 12 / 2 * sq]
 
     e = abb.ebene("system", "System")
     e.append(einspannung(xa[0], y, 80))
@@ -120,24 +134,22 @@ def stabsystem():
         xm = (xa[i] + xa[i + 1]) / 2
         e.append(notiz(xm, y + h[1] + 16, [f"{i + 1}: {name}"], "#444444", 14, anker="middle"))
     for i, l in enumerate((80, 35, 110)):
-        e.append(mass(xa[i], y + 66, xa[i + 1], y + 66, f"[{l}]", abstand=-20))
-    e.append(notiz(xa[3], y + 112, ["Maße in mm, Querschnitte quadratisch 12 × 12 bzw. 22 × 22"], "#666666", 13, anker="end"))
+        e.append(mass(xa[i], y + 52, xa[i + 1], y + 52, f"[{l}]", abstand=-20))
+    e.append(notiz(xa[3], y + 100, ["Maße in mm, Querschnitte quadratisch 12 × 12 bzw. 22 × 22"], "#666666", 13, anker="end"))
 
     # Kräfte greifen von außen am Stahlstück an, Wirkungslinie = Mittellinie
     e = abb.ebene("last", "Lasten")
-    e.append(kraft(xa[1], y, 0, "2F", laenge=60, label_seite=-1, label_abstand=24))
-    e.append(kraft(xa[2], y, 180, "5F", laenge=60, label_seite=1, label_abstand=24))
+    e.append(_kraft(xa[1], y, True, "2F", ueber=h[0]))
+    e.append(_kraft(xa[2], y, False, "5F", ueber=h[2]))
 
     # Mit den Freiheitsgraden: 5F längs der Wirkungslinie verschoben, damit p1 frei bleibt
     e = abb.ebene("last2", "Lasten verschoben")
-    e.append(kraft(xa[1], y, 0, "2F", laenge=60, label_seite=-1, label_abstand=24))
-    e.append(kraft(xa[2] + 76, y, 180, "5F", laenge=60, label_seite=1, label_abstand=24))
+    e.append(_kraft(xa[1], y, True, "2F", ueber=h[0]))
+    e.append(_kraft(xa[2] + 85, y, False, "5F", ueber=h[2]))
 
     e = abb.ebene("dof", "Freiheitsgrade")
-    for x, n, hh in ((xa[1], 2, h[1]), (xa[2], 1, h[2])):
-        e.append(kreis(x, y, 4.2))
-        e.append(pfeil(x, y, x + 40, y, GR, 1.6, (9, 6)))
-        e.append(text(x + 20, y - hh - 16, f"p_{n}", GR, 17))
+    for x, n, hh in ((xa[1], 2, h[1]), (xa[2], 1, h[1])):
+        e.append(_dof(x, y, n, hh))
 
     yf = 300
     e = abb.ebene("federn", "Ersatzfedern")
@@ -146,9 +158,9 @@ def stabsystem():
     for i, c in enumerate(("c_1", "c_2", "c_3")):
         e.append(feder(xa[i], yf, xa[i + 1], yf, 5 if i != 1 else 3, 9, label=c, label_abstand=22))
     for x, n in ((xa[1], 2), (xa[2], 1)):
-        e.append(kreis(x, yf, 4.2))
-        e.append(pfeil(x, yf + 18, x + 30, yf + 18, GR, 1.4, (8, 5)))
-        e.append(text(x + 34, yf + 18, f"p_{n}", GR, 16, anker="start"))
+        e.append(kreis(x, yf, 5))
+        e.append(pfeil(x, yf + 22, x + 45, yf + 22, GR, 2.8, (16, 10)))
+        e.append(text(x + 52, yf + 22, f"p_{n}", GR, 21, anker="start"))
     e.append(text((xa[0] + xa[3]) / 2, yf + 52, "c_e = E_e A_e / L_e", "#000000", 18))
 
     D = Diagramm(xa[0], 545, xa[3] - xa[0], 120, 225, 0.0, ymin=-0.16)
@@ -317,9 +329,10 @@ def portraets():
 
 # ---------------------------------------------------------------- Übung: abgesetzte Welle (3-FEM-Stab/2b)
 def welle(mit_dof):
-    """Abgesetzte Stahlwelle Ø11/Ø25/Ø11, L = 240/160/240 mm, links eingespannt, rechts F drückend."""
+    """Abgesetzte Stahlwelle Ø11/Ø25/Ø11, L = 240/160/240 mm, links eingespannt, rechts F drückend.
+    Freiheitsgrade von links nach rechts: p1, p2 an den Absätzen, p3 am freien Ende."""
     titel = "Abgesetzte Welle: Freiheitsgrade" if mit_dof else "Abgesetzte Welle"
-    abb = Abbildung(860, 300, titel)
+    abb = Abbildung(900, 300, titel)
     s, sd = 1.0, 3.6                             # px je mm in Längs- und Querrichtung
     x0, y = 70, 120
     xa = [x0, x0 + 240 * s, x0 + 400 * s, x0 + 640 * s]
@@ -329,20 +342,18 @@ def welle(mit_dof):
     for i in range(3):
         e.append(_stab(xa[i], xa[i + 1], y, h[i]))
     for i, l in enumerate((240, 160, 240)):
-        e.append(mass(xa[i], y + 66, xa[i + 1], y + 66, f"[{l}]", abstand=-20))
+        e.append(mass(xa[i], y + 72, xa[i + 1], y + 72, f"[{l}]", abstand=-20))
     if not mit_dof:
-        e.append(kraft(xa[3], y, 180, "F", laenge=60, label_seite=1, label_abstand=24))
+        e.append(_kraft(xa[3], y, False, "F"))
         for i, d in enumerate((11, 25, 11)):
             e.append(notiz((xa[i] + xa[i + 1]) / 2, y - h[1] - 16, [f"Ø {d}"], "#444444", 16, anker="middle"))
-        e.append(notiz(xa[3], y + 112, ["Maße in mm, Stahl"], "#666666", 14, anker="end"))
+        e.append(notiz(xa[3], y + 136, ["Maße in mm, Stahl"], "#666666", 14, anker="end"))
     else:
-        e.append(kraft(xa[3] + 80, y, 180, "F", laenge=60, label_seite=1, label_abstand=24))
+        e.append(_kraft(xa[3] + 85, y, False, "F"))
         for i in range(3):
             e.append(nummer((xa[i] + xa[i + 1]) / 2, y + h[1] + 22, i + 1))
-        for x, n, hh in ((xa[1], 2, h[1]), (xa[2], 3, h[1]), (xa[3], 1, h[2])):
-            e.append(kreis(x, y, 4.2))
-            e.append(pfeil(x, y, x + 40, y, GR, 1.6, (9, 6)))
-            e.append(text(x + 20, y - hh - 16, f"p_{n}", GR, 18))
+        for x, n in ((xa[1], 1), (xa[2], 2), (xa[3], 3)):       # von links nach rechts
+            e.append(_dof(x, y, n, h[1]))
     return abb.speichern(ZIEL / ("welle-dof.svg" if mit_dof else "welle-system.svg"))
 
 
