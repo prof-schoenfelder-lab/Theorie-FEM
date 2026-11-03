@@ -12,7 +12,7 @@ import math
 from pathlib import Path
 
 from nlzeichnen import Diagramm, feder, notiz, wandgelenk
-from tmzeichnen import (FARBE, Abbildung, einspannung, festlager, kraft, kreis, linie, loslager, mass, nummer,
+from tmzeichnen import (FARBE, SCHRIFT, Abbildung, _tspans, f, einspannung, festlager, kraft, kreis, linie, loslager, mass, nummer,
                         pfeil, polylinie, text)
 
 ZIEL = Path(__file__).resolve().parent.parent / "grafiken" / "ritz"
@@ -41,6 +41,27 @@ def _halb(X, Y, links, rechts, farbe, g=19):
     ])
 
 
+def _formel(x, y, label, farbe, g=19, anker="middle"):
+    """Formeltext in Latin Modern, auch wenn er ein Wort enthält (z. B. „konst.“ aufrecht in eckigen Klammern)."""
+    return (f'<text x="{f(x)}" y="{f(y + 0.34 * g)}" fill="{farbe}" stroke="#ffffff" stroke-width="4" '
+            f'stroke-linejoin="round" paint-order="stroke" font-family="{SCHRIFT}" font-size="{f(g)}" '
+            f'font-style="italic" text-anchor="{anker}" xml:space="preserve">{_tspans(label)}</text>')
+
+
+def _bruch(X, Y, links, zaehler, nenner, rechts, farbe, g=19):
+    """Formel „links  zaehler/nenner  rechts“ mit echtem Bruchstrich; (X, Y) = Mitte des Bruchstrichs."""
+    z, d = 0.8 * g, 0.6 * g
+    zeichen = max(len(zaehler.replace("[", "").replace("]", "")), len(nenner))
+    b = max(0.55 * z * zeichen, 0.6 * g) / 2 + 2
+    return "".join([
+        _formel(X - b - 6, Y, links, farbe, g, anker="end") if links else "",
+        _formel(X, Y - d, zaehler, farbe, z),
+        linie(X - b, Y, X + b, Y, farbe, 1.1),
+        _formel(X, Y + d, nenner, farbe, z),
+        _formel(X + b + 6, Y, rechts, farbe, g, anker="start") if rechts else "",
+    ])
+
+
 def stab_feder():
     abb = Abbildung(700, 500, "Der Stab ist eine Feder")
     x0, x1, y = 100, 480, 90
@@ -50,13 +71,15 @@ def stab_feder():
     e.append(_stab(x0, x1, y, 18))
     e.append(text((x0 + x1) / 2, y - 34, "EA = konst.", "#000000"))
     e.append(mass(x0, y + 20, x1, y + 20, "L", abstand=-24))
+    e.append(pfeil(x0, y, x0 + 60, y, FARBE["koord"], 2.0, (12, 8)))      # x im Ursprung auf der Mittellinie
+    e.append(text(x0 + 68, y, "x", FARBE["koord"], 21, anker="start"))
 
     e = abb.ebene("last", "Last")
     e.append(kraft(x1, y, 0, "F", laenge=60, ziehend=True, label_seite=1))
 
     # Kraft-Weg-Linie: Arbeit = Fläche des Dreiecks (wie bei der Feder in V1)
     K = Diagramm(505, 330, 130, 120, 1.25, 1.25)
-    for name, titel, weg, kr, lab in (("kraftweg_f", "Kraft-Weg ganzer Stab", "u_L", "F", "F u_L"),
+    for name, titel, weg, kr, lab in (("kraftweg_f", "Kraft-Weg ganzer Stab", "u(L)", "F", "F u(L)"),
                                       ("kraftweg_n", "Kraft-Weg Stabstück", "[d]u", "N", "N [d]u")):
         e = abb.ebene(name, titel)
         e.append(K.flaeche([(0, 0), (1, 1), (1, 0)], "#dde7f5", 1.0))
@@ -86,10 +109,13 @@ def stab_feder():
 
     D = Diagramm(x0, 300, x1 - x0, 120, 1.0, 1.0)
     e = abb.ebene("verlauf", "Verschiebungsverlauf")
-    e.append(D.achsen("x", "u", [(1, "L")], [(1, "u_L")]))
+    e.append(D.achsen("x", "u", [(1, "L")], [(1, "u(L)")]))
+    e.append(D.hilfslinien(1, 1))
     e.append(D.kurve(lambda s: s, 0, 1, farbe=GR))
-    e.append(D.text(0.45, 0.62, "u(x) = u_L x/L", GR, dx=-8, anker="end"))
-    e.append(D.text(0.55, 0.3, "u' = u_L/L = konst.", GR, dx=8, anker="start", groesse=17))
+    X, Y = D.px(0.3, 0.72)
+    e.append(_bruch(X, Y, "u(x) = u(L)", "x", "L", "", GR))
+    X, Y = D.px(0.7, 0.3)
+    e.append(_bruch(X, Y, "u′ =", "u(L)", "L", "= [konst.]", GR))
 
     e = abb.ebene("feder", "Ersatzfeder")
     yf = 430
@@ -137,9 +163,8 @@ def stabsystem():
     # x im Ursprung auf der Mittellinie
     e.append(pfeil(xa[0], y, xa[0] + 60, y, FARBE["koord"], 2.0, (12, 8)))
     e.append(text(xa[0] + 68, y, "x", FARBE["koord"], 21, anker="start"))
-    for i, l in enumerate((80, 35, 110)):
-        e.append(mass(xa[i], y + 52, xa[i + 1], y + 52, f"[{l}]", abstand=-20))
-    e.append(notiz(xa[3], y + 100, ["Maße in mm, Querschnitte quadratisch 12 × 12 bzw. 22 × 22"], "#666666", 13, anker="end"))
+    for i in range(3):
+        e.append(mass(xa[i], y + 52, xa[i + 1], y + 52, f"L_{i + 1}", abstand=-20))
 
     # Kräfte greifen von außen am Stahlstück an, Wirkungslinie = Mittellinie
     e = abb.ebene("last", "Lasten")

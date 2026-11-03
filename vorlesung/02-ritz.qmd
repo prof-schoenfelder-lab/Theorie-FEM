@@ -23,10 +23,10 @@ mit wenigen Unbekannten und führt auf $\mathbf{K}\,\mathbf{a} = \mathbf{q}$.
 Aus Vorlesung 1: Eine Feder speichert $\Pi_i = \tfrac12\,c\,u^2 = \tfrac12\,F\,u$. Das ist die Fläche unter der
 Kraft-Weg-Linie, ein Dreieck, weil die Kraft beim Dehnen von $0$ auf $F$ anwächst.
 
-Für den ganzen Stab mit der Kraft $F$ am Ende und der Endverschiebung $u_L$ gilt dasselbe:
+Für den ganzen Stab mit der Kraft $F$ am Ende und der Endverschiebung $u(L)$ gilt dasselbe:
 
 $$
-\Pi_i = \frac12\,F\,u_L
+\Pi_i = \frac12\,F\,u(L)
 $$
 
 Das funktioniert aber nur, wenn alle Teile des Stabes gleich beansprucht sind. Für den allgemeinen Fall schauen wir
@@ -79,23 +79,25 @@ des Stabes ändert.
 ### Konstantes $EA$: $u(x)$ ist linear
 
 Ohne Streckenlast und mit $EA = \text{konst.}$ ist die Normalkraft konstant, also auch die Dehnung $u'$. Die
-Verschiebung wächst linear von $0$ bis $u_L$:
+Verschiebung wächst linear von $0$ bis $u(L)$:
 
 $$
-u(x) = u_L\,\frac{x}{L}, \qquad u' = \frac{u_L}{L}
+u(x) = u(L)\,\frac{x}{L}, \qquad u' = \frac{u(L)}{L}
 $$
 
 Eingesetzt:
 
 $$
-\Pi_i = \frac12 \int_0^L EA \left(\frac{u_L}{L}\right)^2 \mathrm{d}x = \frac12\,\frac{EA}{L}\,u_L^2
+\Pi_i = \frac12 \int_0^L EA \left(\frac{u(L)}{L}\right)^2 \mathrm{d}x = \frac12\,\frac{EA}{L}\,u(L)^2
 $$
 
 ```mathematica
-uh = uL x/L;
-Pii = 1/2 Integrate[EA D[uh, x]^2,
+ux = uL x/L;
+Pii = 1/2 Integrate[EA D[ux, x]^2,
         {x, 0, L}]
 ```
+
+`ux` steht für $u(x)$, `uL` für $u(L)$.
 :::
 
 ::: {.schritt zeige="stab last verlauf feder"}
@@ -107,13 +109,31 @@ $$
 c = \frac{EA}{L}
 $$
 
-Mit $\Pi_a = -F\,u_L$ liefert das Minimum
+Mit $\Pi_a = -F\,u(L)$ ist die gesamte potentielle Energie
 
 $$
-F = \frac{EA}{L}\,u_L
-\qquad\Rightarrow\qquad
-u_L = \frac{F\,L}{EA}
+\Pi_{ges} = \Pi_i + \Pi_a = \frac12\,\frac{EA}{L}\,u(L)^2 - F\,u(L)
 $$
+
+Im Minimum verschwindet die Ableitung nach $u(L)$:
+
+$$
+\frac{\mathrm{d}\Pi_{ges}}{\mathrm{d}u(L)} = \frac{EA}{L}\,u(L) - F \overset{!}{=} 0
+$$
+
+Daraus folgen
+
+$$
+F = \frac{EA}{L}\,u(L)
+\qquad\text{und}\qquad
+u(L) = \frac{F\,L}{EA}
+$$
+
+```mathematica
+Piges = Pii - F uL;
+Solve[D[Piges, uL] == 0, uL]
+```
+
 
 Das ist die bekannte Verlängerung eines Zugstabes aus der Technischen Mechanik.
 **Ein Stab mit konstantem $EA$ ist eine Feder.**
@@ -131,7 +151,9 @@ Das ist die bekannte Verlängerung eines Zugstabes aus der Technischen Mechanik.
 Drei Stäbe zwischen zwei festen Wänden: Aluminium, Stahl, Aluminium. An den beiden Verbindungsstellen greifen
 die Kräfte $2F$ und $5F$ an.
 
-**Gegeben:** $E_{Al} = 70\,000$ MPa, $E_{St} = 210\,000$ MPa, $F = 10$ kN, Längen und Querschnitte im Bild.
+**Gegeben:** $L_1 = 80$ mm, $L_2 = 35$ mm, $L_3 = 110$ mm, quadratische Querschnitte
+$A_1 = A_3 = 12 \times 12\ \text{mm}^2$, $A_2 = 22 \times 22\ \text{mm}^2$, $E_{Al} = 70\,000$ MPa,
+$E_{St} = 210\,000$ MPa, $F = 10$ kN
 
 **Gesucht:** Verschiebungen der Verbindungsstellen, Verschiebungsverlauf $u(x)$, Dehnungen, Spannungen und
 Stabkräfte.
@@ -151,11 +173,16 @@ data = {Ealu -> 70000, Estahl -> 210000,
 ### Freiheitsgrade und Verlängerungen
 
 Unbekannt sind die Verschiebungen der beiden Verbindungsstellen, $p_1$ und $p_2$, auf der Mittellinie. Die Kraft
-$5F$ ist dafür längs ihrer Wirkungslinie verschoben, das ändert nichts an ihrer Wirkung. Die Verlängerung jedes Stabes ist
-die Differenz der Verschiebungen seiner Enden:
+$5F$ ist dafür längs ihrer Wirkungslinie verschoben, das ändert nichts an ihrer Wirkung. Jeder Stab ist ein Stab wie oben, mit eigener Koordinate $x_e$ ab seinem linken Ende. In diesem lokalen
+Koordinatensystem ist $u_e(0) = 0$, und die Verlängerung ist wie oben $\Delta u_e = u_e(L_e)$. Sie ist die
+Verschiebung des rechten minus die des linken Stabendes:
 
 $$
-\Delta u_1 = p_2, \qquad \Delta u_2 = p_1 - p_2, \qquad \Delta u_3 = 0 - p_1
+\begin{aligned}
+\Delta u_1 &= u_1(L_1) = p_2 - 0 \\
+\Delta u_2 &= u_2(L_2) = p_1 - p_2 \\
+\Delta u_3 &= u_3(L_3) = 0 - p_1
+\end{aligned}
 $$
 
 ::: {.links}
@@ -196,7 +223,8 @@ Innere Energie aller Stäbe und Potential der beiden Kräfte ($5F$ zeigt gegen $
 
 $$
 \begin{aligned}
-\Pi_i &= \tfrac12\,c_1\,\Delta u_1^2 + \tfrac12\,c_2\,\Delta u_2^2 + \tfrac12\,c_3\,\Delta u_3^2 \\
+\Pi_i &= \sum_{e=1}^{3} \tfrac12\,\frac{E_e A_e}{L_e}\,\Delta u_e^2
+= \tfrac12\,c_1\,\Delta u_1^2 + \tfrac12\,c_2\,\Delta u_2^2 + \tfrac12\,c_3\,\Delta u_3^2 \\
 \Pi_a &= -(-5F)\,p_1 - 2F\,p_2
 \end{aligned}
 $$
@@ -226,11 +254,11 @@ Beide Verbindungsstellen verschieben sich nach links. In jedem Stab ist $u(x)$ *
 vorausgesetzt. Zwischen den Knoten wird also linear interpoliert:
 
 ```mathematica
-uh = Piecewise[{{p2 x/80, x <= 80},
+ux = Piecewise[{{p2 x/80, x <= 80},
        {p2 + (p1 - p2) (x - 80)/35,
         x <= 115}},
        p1 (225 - x)/110] /. lsg[[1]];
-Plot[uh, {x, 0, 225},
+Plot[ux, {x, 0, 225},
   AxesLabel -> {"x in mm", "u in mm"}]
 ```
 
@@ -253,7 +281,7 @@ Der Stahlstab dehnt sich am wenigsten: Er hat die mit Abstand größte Dehnsteif
 springt die Dehnung. So geht später auch die FEM vor: erst die Verschiebungen, dann durch Ableiten die Dehnungen.
 
 ```mathematica
-eps = D[uh, x];
+eps = D[ux, x];
 Plot[eps, {x, 0, 225}, Filling -> Axis,
   AxesLabel -> {"x in mm", "ε"}]
 Table[eps, {x, {40, 100, 170}}]
@@ -449,6 +477,8 @@ Pia = -F (uh /. x -> L);
 Piges = Pii + Pia;
 lsg = Solve[D[Piges, a1] == 0, a1]
 ```
+
+`uh` steht für den Ritz-Ansatz $\tilde u$, eine Näherung, nicht die exakte Lösung.
 :::
 
 ::: {.schritt zeige="system achsen exakt grad1 grad2 grad3" dimmen="grad1"}
