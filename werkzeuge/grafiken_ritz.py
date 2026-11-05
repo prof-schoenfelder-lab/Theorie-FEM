@@ -485,6 +485,9 @@ def haengend_konisch():
     e.append(text(xs - hs * A1 - 10, y1 - 14, "A_1", GR, anker="end"))
     e.append(mass(xs - hs * A0 - 55, y0, xs - hs * A0 - 55, y1, "L", abstand=0))
     e.append(text(xs + hs * A0 + 40, y0 + 22, "E, ρ", "#000000", 19, anker="start"))
+    xg = xs + hs * A0 + 75                          # Erdbeschleunigung
+    e.append(pfeil(xg, y0 + 125, xg, y0 + 205, FARBE["last"], 3.0, (18, 11)))     # wie eine Kraft
+    e.append(text(xg + 12, y0 + 170, "g", FARBE["last"], 23, anker="start"))
     return abb.speichern(ZIEL / "haengend-konisch.svg")
 
 
