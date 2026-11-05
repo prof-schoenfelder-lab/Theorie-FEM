@@ -42,6 +42,8 @@ website:
             text: "Federsystem: Steifigkeitsmatrix"
           - href: beispiele/federsystem-energie/index.html
             text: "Federsystem: Minimum der Energie"
+          - href: beispiele/ritz-konisch/index.html
+            text: "Konischer Stab: Ritzsches Verfahren"
           - href: beispiele/stab-konvergenz/index.html
             text: "Konischer Stab: Elementanzahl und Konvergenz"
       - href: spickzettel.qmd

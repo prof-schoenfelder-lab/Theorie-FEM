@@ -500,6 +500,8 @@ Mit $\tilde u = a_1 x + a_2 x^2 + a_3 x^3$ wird die Lösung schnell besser
 Die **Verschiebungen** konvergieren schnell, die **Spannungen** (Ableitungen!) deutlich langsamer.
 $\Pi$ nähert sich dem exakten Minimum **von oben**: Jeder Ansatz ist eine Einschränkung, das wahre Minimum liegt
 immer tiefer.
+
+Im [Beispiel](../beispiele/ritz-konisch/index.html) können Sie Ansatzgrad und Verjüngung verändern.
 :::
 
 ::: {.schritt zeige="system achsen exakt grad1 grad2 grad3" dimmen="grad1"}
@@ -590,6 +592,12 @@ Element einen einfachen Ritz-Ansatz verwenden. Wie beim Stabsystem werden die El
 zusammengesetzt. Das zeigt Vorlesung 3.
 
 ## Beispiel und Übung
+
+::: {.aufgabe}
+**Ausprobieren:** Im Beispiel [Konischer Stab: Ritzsches Verfahren](../beispiele/ritz-konisch/index.html) verändern
+Sie den Ansatzgrad und die Verjüngung. Ab welchem Grad ist die Spannung am Stabende auf 5 % genau? Was passiert ohne
+Verjüngung?
+:::
 
 ::: {.aufgabe}
 **Abgesetzte Welle über die Energie.** Eine abgesetzte Stahlwelle aus drei Abschnitten, links eingespannt, rechts
