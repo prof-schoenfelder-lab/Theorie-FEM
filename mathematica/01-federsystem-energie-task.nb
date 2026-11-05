@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     58128,       1033]
-NotebookOptionsPosition[     54503,        985]
-NotebookOutlinePosition[     54796,        999]
-CellTagsIndexPosition[     54753,        996]
+NotebookDataLength[     53512,        919]
+NotebookOptionsPosition[     52143,        895]
+NotebookOutlinePosition[     52436,        909]
+CellTagsIndexPosition[     52393,        906]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -23,10 +23,7 @@ Cell["Federsystem \[UDoubleDot]ber die Energie", "Title"],
 Cell["Theorie der Finite-Elemente-Methode \[CenterDot] Vorlesung 1 \
 \[CenterDot] \[CapitalUDoubleDot]bung", "Subtitle"],
 
-Cell["\<\
-Aufgabe: Federsystem mit drei Freiheitsgraden \[UDoubleDot]ber das Minimum \
-der potentiellen Energie\
-\>", "Section"],
+Cell["Aufgabe", "Section"],
 
 Cell["\<\
 Dasselbe System wie in der \[CapitalUDoubleDot]bung zu Vorlesung 0: Drei \
@@ -855,133 +852,46 @@ AAAAAAAAADr8P/OJFXw=
   ImageSizeRaw->{1440., 800.},
   PlotRange->{{0, 1440.}, {0, 800.}}]], "Text"],
 
-Cell["\<\
-Gegeben: c1 = c2 = k, c3 = c4 = 3k
-Gesucht: Verschiebungen p1, p2, p3 und Federkr\[ADoubleDot]fte N1 bis N4\
-\>", "Text"],
+Cell["Gegeben: c1 = c2 = k, c3 = c4 = 3k", "Text"],
 
 Cell["\<\
-L\[ODoubleDot]sen Sie die Aufgabe diesmal \[UDoubleDot]ber das Prinzip vom \
-Minimum der potentiellen Energie:
-a) Legen Sie die gegebenen Gr\[ODoubleDot]\[SZ]en und die Freiheitsgrade \
-fest.
-b) Stellen Sie die Kinematik auf.
-c) Berechnen Sie die innere potentielle Energie aller Federn.
-d) Berechnen Sie die \[ADoubleDot]u\[SZ]ere und die gesamte potentielle \
-Energie.
-e) Bestimmen Sie die Verschiebungen aus dem Minimum.
-f) Bestimmen Sie die Steifigkeitsmatrix als zweite Ableitung und vergleichen \
-Sie mit Vorlesung 0.
-g) Berechnen Sie die Federkr\[ADoubleDot]fte und die Energien im Minimum.
-h) Stellen Sie das Minimum grafisch dar: Schnitt durch das Minimum bei p3 = \
-7/3 F/k, als Zusatz die Fl\[ADoubleDot]chen gleicher Energie in 3D.\
+Berechnen Sie mit dem Prinzip vom Minimum der potentiellen Energie:
+a) die Verschiebungen p1, p2, p3 der Balken,
+b) die Steifigkeitsmatrix des Systems. Vergleichen Sie mit Vorlesung 0.
+c) die Federkr\[ADoubleDot]fte N1 bis N4 sowie die innere, \
+\[ADoubleDot]u\[SZ]ere und gesamte potentielle Energie im Minimum,
+d) eine grafische Darstellung des Minimums: H\[ODoubleDot]henlinien von \
+\[CapitalPi]_ges als Schnitt durch das Minimum bei p3 = 7/3 F/k, als Zusatz \
+die Fl\[ADoubleDot]chen gleicher Energie in 3D.\
 \>", "Text"],
 
-Cell["a) Gegebene Gr\[ODoubleDot]\[SZ]en und Freiheitsgrade", "Subsection"],
+Cell["Hinweise", "Subsection"],
 
-Cell["Gesucht: Regelliste data, Vektoren psys und qsys", "Text"],
+Cell["\<\
+Vorgehen wie im Vorlesungsbeispiel \[OpenCurlyDoubleQuote]Das Federsystem aus \
+Vorlesung 0\[CloseCurlyDoubleQuote]: Kinematik, innere und \
+\[ADoubleDot]u\[SZ]ere potentielle Energie, Ableitungen nach den \
+Freiheitsgraden gleich null. Einen Freischnitt brauchen Sie nicht.
+Die Steifigkeitsmatrix ist die zweite Ableitung der gesamten potentiellen \
+Energie.\
+\>", "Text"],
+
+Cell["Kontrollergebnisse", "Subsection"],
+
+Cell["\<\
+a) p1 = 7/3 F/k, p2 = 4/3 F/k, p3 = 7/3 F/k
+b) K = k {{2, \[Minus]1, \[Minus]1}, {\[Minus]1, 7, \[Minus]3}, {\[Minus]1, \
+\[Minus]3, 4}} (dieselbe Matrix wie in Vorlesung 0)
+c) N1 = 0, N2 = \[Minus]F, N3 = 3F, N4 = \[Minus]4F; \[CapitalPi]_i = 14/3 F\
+\.b2/k, \[CapitalPi]_a = \[Minus]28/3 F\.b2/k, \[CapitalPi]_ges = \
+\[Minus]14/3 F\.b2/k\
+\>", "Text"],
+
+Cell["L\[ODoubleDot]sung", "Section"],
 
 Cell[BoxData[
  RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["b) Kinematik", "Subsection"],
-
-Cell["\<\
-Verl\[ADoubleDot]ngerung einer Feder = Verschiebung des rechten minus des \
-linken Endes. Einen Freischnitt brauchen wir diesmal nicht.\
-\>", "Text"],
-
-Cell["Gesucht: Regelliste kinematik (u1 bis u4)", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["c) Innere potentielle Energie", "Subsection"],
-
-Cell["Jede Feder speichert die Form\[ADoubleDot]nderungsenergie 1/2 c \
-u\.b2.", "Text"],
-
-Cell["\<\
-Gesucht: innere potentielle Energie Pii in Abh\[ADoubleDot]ngigkeit von p1, \
-p2, p3\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["d) \[CapitalADoubleDot]u\[SZ]ere und gesamte potentielle Energie", \
-"Subsection"],
-
-Cell["\<\
-Jede Kraft \[OpenCurlyDoubleQuote]mal ihrem\[CloseCurlyDoubleQuote] \
-Freiheitsgrad, mit negativem Vorzeichen.\
-\>", "Text"],
-
-Cell["\<\
-Gesucht: \[ADoubleDot]u\[SZ]ere potentielle Energie Pia und gesamte \
-potentielle Energie Piges\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["e) Minimum: Verschiebungen", "Subsection"],
-
-Cell["Im Minimum verschwinden alle drei partiellen Ableitungen.", "Text"],
-
-Cell["\<\
-Gesucht: Ableitungen von Piges und die Verschiebungen im Minimum\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["f) Steifigkeitsmatrix", "Subsection"],
-
-Cell["\<\
-Die zweite Ableitung von Piges nach den Freiheitsgraden ist die \
-Steifigkeitsmatrix.\
-\>", "Text"],
-
-Cell["Gesucht: Systemsteifigkeitsmatrix Ksys als zweite Ableitung", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["g) Federkr\[ADoubleDot]fte und Energien im Minimum", "Subsection"],
-
-Cell["\<\
-Gesucht: Federkr\[ADoubleDot]fte Nlsg sowie Pii, Pia und Piges im Minimum. \
-Was f\[ADoubleDot]llt beim Verh\[ADoubleDot]ltnis von Pii und Pia auf?\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["h) Grafische Kontrolle", "Subsection"],
-
-Cell["\<\
-\[CapitalPi]_ges h\[ADoubleDot]ngt von drei Freiheitsgraden ab. Ein Schnitt \
-durch das Minimum zeigt wieder ein Tal mit H\[ODoubleDot]henlinien wie in der \
-Vorlesung.\
-\>", "Text"],
-
-Cell["\<\
-Gesucht: H\[ODoubleDot]henlinien von \[CapitalPi]_ges in p1 und p2 bei p3 = \
-7/3 F/k mit dem Minimum als Punkt; als Zusatz die Fl\[ADoubleDot]chen \
-gleicher Energie in 3D\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"]
+  RowBox[{"Ihre", " ", "L\[ODoubleDot]sung"}], " ", "*)"}]], "Input"]
 },
 Magnification:>1.25 Inherited,
 FrontEndVersion->"13.1 for Mac OS X ARM (64-bit) (June 16, 2022)",
@@ -998,43 +908,19 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 57, 0, 87, "Title",ExpressionUUID->"aaf79b90-91ec-44c4-ae47-075eca339c2c"],
-Cell[618, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"033ba532-07f6-43c7-a6f1-beb4d64d79c0"],
-Cell[741, 25, 128, 3, 87, "Section",ExpressionUUID->"be51236e-b458-4e64-bb44-86953dc33bf3"],
-Cell[872, 30, 268, 5, 87, "Text",ExpressionUUID->"d00871cf-c390-4c4b-8d12-e026b330bd6a"],
-Cell[1143, 37, 49530, 818, 87, "Text",ExpressionUUID->"d5c3be42-506d-4794-8cad-912a0d9dff2b"],
-Cell[50676, 857, 131, 3, 87, "Text",ExpressionUUID->"e4662610-13cb-4287-917e-464f1aa5a34a"],
-Cell[50810, 862, 767, 15, 87, "Text",ExpressionUUID->"c6fbc226-2a25-490c-9c80-8980b2fdce81"],
-Cell[51580, 879, 75, 0, 87, "Subsection",ExpressionUUID->"3cb93b0d-bcb5-4710-ac39-1e906d1c44e1"],
-Cell[51658, 881, 64, 0, 87, "Text",ExpressionUUID->"19594977-3ed1-4cec-8aa9-aef51d43aee6"],
-Cell[51725, 883, 93, 2, 87, "Input",ExpressionUUID->"d580b68e-bc8a-4be3-8590-22f790d4ebfa"],
-Cell[51821, 887, 34, 0, 87, "Subsection",ExpressionUUID->"e5a9f4f7-181e-4ac7-934b-270b469dd9f7"],
-Cell[51858, 889, 159, 3, 87, "Text",ExpressionUUID->"1116e942-66fe-4238-aa4c-2560f1e3e5c2"],
-Cell[52020, 894, 57, 0, 87, "Text",ExpressionUUID->"dfaf0102-b21d-4d75-b988-45fe5479f8ec"],
-Cell[52080, 896, 93, 2, 87, "Input",ExpressionUUID->"30d09637-4d6a-41a2-bf3d-3ffcd35a7d42"],
-Cell[52176, 900, 51, 0, 87, "Subsection",ExpressionUUID->"12ecfbf4-959a-4dd1-9fae-f6e8c0dcea05"],
-Cell[52230, 902, 88, 1, 87, "Text",ExpressionUUID->"c49dfbe2-d3f0-43bb-beaa-6560933acb8d"],
-Cell[52321, 905, 108, 3, 87, "Text",ExpressionUUID->"1cafc1f6-2b8b-4955-adcd-6e194753ce82"],
-Cell[52432, 910, 93, 2, 87, "Input",ExpressionUUID->"f72da71c-11b6-45f8-88e2-1b4fff832253"],
-Cell[52528, 914, 88, 1, 87, "Subsection",ExpressionUUID->"a834fd37-5103-4b1e-ac24-945c8d96f6a4"],
-Cell[52619, 917, 134, 3, 87, "Text",ExpressionUUID->"0b9df454-ab04-4bc8-b8aa-72664ddcb97f"],
-Cell[52756, 922, 119, 3, 87, "Text",ExpressionUUID->"801dc3ed-b03c-4fcf-99f1-d9615be2b588"],
-Cell[52878, 927, 93, 2, 87, "Input",ExpressionUUID->"3e25c827-a8d9-4aef-bf83-b71993a59b7d"],
-Cell[52974, 931, 48, 0, 87, "Subsection",ExpressionUUID->"424290b5-7ac2-461d-8a4f-a3a71e38e5da"],
-Cell[53025, 933, 73, 0, 87, "Text",ExpressionUUID->"5041947b-11cb-440c-936b-b16e1b81fc2f"],
-Cell[53101, 935, 88, 2, 87, "Text",ExpressionUUID->"e1eba8fe-77df-44b3-9bf8-2ccbcb26b9b2"],
-Cell[53192, 939, 93, 2, 87, "Input",ExpressionUUID->"5edc61d8-b041-4439-bdfe-a66dfbd9a9a6"],
-Cell[53288, 943, 43, 0, 87, "Subsection",ExpressionUUID->"6f104d83-5d43-448d-beba-6dc4c50e07de"],
-Cell[53334, 945, 109, 3, 87, "Text",ExpressionUUID->"890eda20-604e-40b3-a922-85d55f3ad906"],
-Cell[53446, 950, 75, 0, 87, "Text",ExpressionUUID->"a948564f-a1a5-473c-9cb0-707d08e4a704"],
-Cell[53524, 952, 93, 2, 87, "Input",ExpressionUUID->"6a17678a-8b52-4444-8e67-007a611e8a34"],
-Cell[53620, 956, 72, 0, 87, "Subsection",ExpressionUUID->"39505d85-f8d7-457d-b349-32042c732e96"],
-Cell[53695, 958, 171, 3, 87, "Text",ExpressionUUID->"4d2165d8-3bb7-4b8b-a8cb-3be802741d89"],
-Cell[53869, 963, 93, 2, 87, "Input",ExpressionUUID->"149279fd-2aef-40bc-9d6c-7df3147d9142"],
-Cell[53965, 967, 44, 0, 87, "Subsection",ExpressionUUID->"6436d488-abc8-4712-9d8f-3e39a31cdb25"],
-Cell[54012, 969, 192, 4, 87, "Text",ExpressionUUID->"d3784551-9b2c-4f3a-95a4-4e108913278b"],
-Cell[54207, 975, 196, 4, 87, "Text",ExpressionUUID->"2300022a-6c16-4502-ba2d-811d2e371a76"],
-Cell[54406, 981, 93, 2, 87, "Input",ExpressionUUID->"4dcef9a3-2e36-4167-9988-03249607eb1b"]
+Cell[558, 20, 57, 0, 87, "Title",ExpressionUUID->"92a15207-44cf-4f45-8667-f49aa3a8e9ae"],
+Cell[618, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"fea21ede-57d5-426d-8f6a-3301414137de"],
+Cell[741, 25, 26, 0, 87, "Section",ExpressionUUID->"5ae80368-045f-4aeb-9187-f4fc9343eec0"],
+Cell[770, 27, 268, 5, 87, "Text",ExpressionUUID->"52bf749f-084c-4b81-91db-1974a04a330f"],
+Cell[1041, 34, 49530, 818, 87, "Text",ExpressionUUID->"57334f52-6641-4c64-8fbd-312fc8a9e43a"],
+Cell[50574, 854, 50, 0, 87, "Text",ExpressionUUID->"94482edf-4da3-4a5d-b6e1-27a5f53d2077"],
+Cell[50627, 856, 536, 9, 87, "Text",ExpressionUUID->"9a21f94e-2e4f-4d5a-b18b-12788f548525"],
+Cell[51166, 867, 30, 0, 87, "Subsection",ExpressionUUID->"164d5a24-0fa4-42de-a28a-c7673bff9fdf"],
+Cell[51199, 869, 383, 7, 87, "Text",ExpressionUUID->"48d49f4f-a4ef-49c3-a93d-6ff8c4556f0b"],
+Cell[51585, 878, 40, 0, 87, "Subsection",ExpressionUUID->"008706fa-e0c0-4bd6-81f8-d5a9a4fc601e"],
+Cell[51628, 880, 364, 7, 87, "Text",ExpressionUUID->"3dffa286-de45-43f5-8fa8-56958de5d7dc"],
+Cell[51995, 889, 37, 0, 87, "Section",ExpressionUUID->"99d56d76-0cc5-4d96-ae3a-dc79c6f1357c"],
+Cell[52035, 891, 104, 2, 87, "Input",ExpressionUUID->"9adcd405-6a86-4435-aee5-93c9d31f266f"]
 }
 ]
 *)
