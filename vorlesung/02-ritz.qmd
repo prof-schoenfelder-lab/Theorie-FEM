@@ -383,6 +383,209 @@ Wie findet man das Minimum eines Funktionals, wenn man die exakte Lösung **nich
 
 ::::
 
+## Ritz am konischen Stab
+
+:::: {.scrolly svg="../grafiken/ritz/konisch-ritz.svg"}
+
+::: {.schritt zeige="system achsen exakt"}
+### Die Idee: ein Ansatz
+
+Wir kennen $u(x)$ nicht, wissen aber ungefähr, wie es aussieht. Also setzen wir eine **einfache Funktion mit
+unbekannten Koeffizienten** an und suchen nur noch die besten Koeffizienten.
+
+Der Ansatz muss die **geometrische Randbedingung** erfüllen: Der Stab ist links fest, $u(0) = 0$. Der einfachste
+Ansatz ist eine Gerade durch den Ursprung:
+
+$$
+u(x) \approx \tilde u(x) = a_1\,x
+$$
+:::
+
+::: {.schritt zeige="system achsen exakt"}
+### Welcher Ansatz?
+
+**Polynome**, weil wir mit ihnen sicher rechnen können: Der Ansatz wird abgeleitet, quadriert und über die Länge
+integriert. Bei Polynomen geht das immer, bei komplizierteren Funktionen meldet auch Mathematica schnell, dass es
+das Integral nicht lösen kann. Sinus- und Kosinusfunktionen wären auch möglich.
+
+**Keine Konstante**, denn der Ansatz muss die **wesentliche (geometrische) Randbedingung** $u(0) = 0$ erfüllen. Mit
+$\tilde u = a_1\,x + a_2$ wäre $\tilde u(0) = a_2$: Das Minimum könnte ein $a_2 \neq 0$ liefern, der Stab würde sich
+an der Einspannung verschieben. Ebenso beim quadratischen Ansatz: $a_1\,x + a_2\,x^2$ ja,
+$a_1\,x + a_2\,x^2 + a_3$ nein.
+
+Kraftrandbedingungen (hier $F$ am Ende) muss der Ansatz nicht erfüllen, sie stecken in $\Pi_a$.
+:::
+
+::: {.schritt zeige="system achsen exakt grad1"}
+### Linearer Ansatz
+
+Eingesetzt in die potentielle Energie, mit $\tilde u' = a_1$:
+
+$$
+\Pi(a_1) = \frac12\,a_1^2\,E\,L\,\frac{A_0 + A_1}{2} - F\,a_1\,L
+$$
+
+Das ist der Trick: Wir suchen keine Funktion mehr, sondern nur noch eine **Zahl** $a_1$. Aus dem Funktional ist
+wieder eine gewöhnliche Funktion geworden, das Minimum eine Extremwertaufgabe wie beim Federsystem. Die
+Variationsrechnung, die man für Funktionale eigentlich bräuchte, umgehen wir so.
+
+$$
+\frac{\mathrm{d}\Pi}{\mathrm{d}a_1} = 0
+\quad\Rightarrow\quad
+a_1 = \frac{2F}{E\,(A_0 + A_1)}
+$$
+
+```mathematica
+data = {Em -> 70000, L -> 1000, F -> 5000,
+        A0 -> 100, A1 -> 20};
+Ax = A0 - (A0 - A1)/L x;
+uh = a1 x;
+Pii = 1/2 Integrate[Em Ax D[uh, x]^2,
+        {x, 0, L}];
+Pia = -F (uh /. x -> L);
+Piges = Pii + Pia;
+lsg = Solve[D[Piges, a1] == 0, a1]
+```
+
+`uh` steht für den Ritz-Ansatz $\tilde u$, eine Näherung, nicht die exakte Lösung.
+:::
+
+::: {.schritt zeige="system achsen exakt grad1"}
+### Linearer Ansatz: Verschiebung
+
+Den Koeffizienten setzen wir in den Ansatz ein und vergleichen mit der exakten Lösung. Der Stab wird wie ein Stab
+mit **mittlerem** Querschnitt behandelt:
+
+$$
+\tilde u(L) = 1{,}19\ \text{mm} \quad\text{statt}\quad u(L) = 1{,}44\ \text{mm} \quad (-17\ \%)
+$$
+
+```mathematica
+uhlin = uh /. lsg[[1]]
+uex = F L/(Em (A0 - A1)) Log[A0/Ax];
+Plot[{uex, uhlin} /. data,
+  {x, 0, L /. data},
+  PlotLegends -> {"exakt", "linear"}]
+uhlin /. x -> L /. data // N
+```
+
+`/. lsg[[1]]` ersetzt `a1` durch die Lösung. `uex` ist die exakte Lösung aus Vorlesung 0, in Mathematica ein
+**Ausdruck** in `x`, keine Funktion `u[x_]`. Ableiten, plotten und integrieren geht trotzdem, einen Wert liefert
+`/. x -> L`.
+:::
+
+::: {.schritt zeige="system achsen exakt grad1"}
+### Linearer Ansatz: Spannung
+
+Die Spannung folgt wie bei der FEM aus der Ableitung der Verschiebung, $\sigma = E\,\tilde u'$. Beim linearen
+Ansatz ist sie **konstant**, $83{,}3$ MPa: eine mittlere Spannung. Am Stabende sind es exakt $250$ MPa, die
+Höchstspannung wird also stark unterschätzt.
+
+```mathematica
+siglin = Em D[uhlin, x];
+Plot[{F/Ax, siglin} /. data,
+  {x, 0, L /. data}, Filling -> Axis,
+  PlotLegends -> {"exakt", "linear"}]
+```
+
+::: {.vertiefung titel="Wo ist die Ritz-Spannung exakt?"}
+Die konstante Ritz-Spannung schneidet die exakte genau in der **Stabmitte**: $83{,}3$ MPa $= F/A(L/2)$. Beim
+quadratischen Ansatz schneiden sich die Kurven bei $x = 211$ und $789$ mm, beim kubischen bei $113$, $500$ und
+$887$ mm. Das sind genau die **Gauß-Punkte** des Intervalls.
+
+Das ist kein Zufall: Ritz macht den Fehler der Normalkraft $EA\,\tilde u' - N$ im Mittel über die Länge so klein
+wie möglich, und solche Fehlerverläufe haben ihre Nullstellen an den Gauß-Punkten. In der FEM heißen diese besonders
+genauen Stellen **Barlow-Punkte** (bei linearen Elementen die Elementmitte). Im Allgemeinen ist die Spannung dort nur
+besonders genau. Hier ist sie sogar exakt, weil $N = F$ konstant und $A(x)$ linear ist.
+:::
+:::
+
+::: {.schritt zeige="system achsen exakt grad1 grad2" dimmen="grad1"}
+### Quadratischer Ansatz
+
+Ein Polynom zweiten Grades, wieder ohne Konstante, damit $u(0) = 0$ erfüllt bleibt:
+
+$$
+\tilde u(x) = a_1\,x + a_2\,x^2
+$$
+
+Jetzt hängt $\Pi$ von zwei Koeffizienten ab. Im Minimum sind beide Ableitungen null:
+
+$$
+\frac{\partial \Pi}{\partial a_1} = 0, \qquad \frac{\partial \Pi}{\partial a_2} = 0
+$$
+
+```mathematica
+uh = a1 x + a2 x^2;
+Piges = 1/2 Integrate[Em Ax D[uh, x]^2,
+          {x, 0, L}] - F (uh /. x -> L);
+lsg = Solve[D[Piges, {{a1, a2}}] == {0, 0},
+        {a1, a2}]
+```
+
+`D[Piges, {{a1, a2}}]` leitet nach beiden Koeffizienten auf einmal ab.
+:::
+
+::: {.schritt zeige="system achsen exakt grad1 grad2" dimmen="grad1"}
+### Quadratischer Ansatz: Ergebnis
+
+Die Verschiebung ist schon nah an der exakten, $\tilde u(L) = 1{,}40$ mm ($-2{,}7\ \%$). Die Spannung ist jetzt
+linear, von $32{,}6$ auf $163{,}0$ MPa: besser, aber noch weit von $250$ MPa entfernt.
+
+```mathematica
+uhquad = uh /. lsg[[1]] // Simplify
+Plot[{uex, uhlin, uhquad} /. data,
+  {x, 0, L /. data}]
+uhquad /. x -> L /. data // N
+sigquad = Em D[uhquad, x];
+Plot[{F/Ax, siglin, sigquad} /. data,
+  {x, 0, L /. data}]
+```
+:::
+
+::: {.schritt zeige="system achsen exakt grad1 grad2 grad3" dimmen="grad1 grad2"}
+### Mehr Ansatzfunktionen
+
+Mit $\tilde u = a_1 x + a_2 x^2 + a_3 x^3$ und höheren Graden wird die Lösung weiter besser
+($E = 70\,000$ MPa, $L = 1000$ mm, $F = 5$ kN, $A_0 = 100$ mm², $A_1 = 20$ mm²):
+
+| Grad | $u(L)$ in mm | Fehler | $\sigma(L)$ in MPa | Fehler | $\Pi$ in Nmm |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| 1 | 1,190 | −17,2 % | 83,3 | −66,7 % | −2976 |
+| 2 | 1,398 | −2,7 % | 163,0 | −34,8 % | −3494 |
+| 3 | 1,431 | −0,4 % | 209,6 | −16,2 % | −3577 |
+| 4 | 1,436 | −0,1 % | 232,3 | −7,1 % | −3590 |
+| exakt | 1,437 | | 250,0 | | −3592,5 |
+
+: {.striped}
+
+**Verschiebungen sind gut, Spannungen sind schwierig:** Die Verschiebungen konvergieren schnell, die Spannungen
+als Ableitungen deutlich langsamer. Das gilt auch für die FEM. Passen berechnete Verschiebungen zum Versuch, heißt
+das noch nicht, dass die Spannungen stimmen, und gerade sie interessieren meistens.
+$\Pi$ nähert sich dem exakten Minimum **von oben**: Jeder Ansatz ist eine Einschränkung, das wahre Minimum liegt
+immer tiefer.
+
+Im [Beispiel](../beispiele/ritz-konisch/index.html) können Sie Ansatzgrad und Verjüngung verändern.
+:::
+
+::: {.schritt zeige="system achsen exakt grad1 grad2 grad3" dimmen="grad1 grad2"}
+### Mehr Ansatzfunktionen in Mathematica
+
+Der Ansatz wird als Skalarprodukt aus Koeffizienten und Ansatzfunktionen geschrieben. Abgeleitet wird nach allen
+Koeffizienten auf einmal, wie beim Federsystem nach `psys`:
+
+```mathematica
+a = {a1, a2, a3};
+uh = a . {x, x^2, x^3};
+Piges = 1/2 Integrate[Em Ax D[uh, x]^2,
+          {x, 0, L}] - F (uh /. x -> L);
+lsg = Solve[D[Piges, {a}] == {0, 0, 0}
+        /. data, a]
+```
+:::
+
+::::
+
 ## Rayleigh und Ritz
 
 :::: {.scrolly svg="../grafiken/ritz/portraets.svg"}
@@ -415,15 +618,15 @@ Bilder: gemeinfrei, über Wikimedia Commons (Rayleigh: Proceedings of the Royal 
 
 ::::
 
-## Das Ritzsche Verfahren am konischen Stab
+## Das Ritzsche Verfahren allgemein
 
 :::: {.scrolly svg="../grafiken/ritz/konisch-ritz.svg"}
 
-::: {.schritt zeige="system achsen exakt"}
-### Die Idee: ein Ansatz
+::: {.schritt zeige="system achsen exakt grad1 grad2 grad3"}
+### Der allgemeine Ansatz
 
-Statt unter allen Funktionen zu suchen, wählen wir einige **Ansatzfunktionen** $\varphi_i(x)$ und suchen nur noch
-die besten Koeffizienten $a_i$:
+Was wir am konischen Stab getan haben, schreibt man allgemein so: Man wählt **Ansatzfunktionen** $\varphi_i(x)$
+und sucht die besten Koeffizienten $a_i$:
 
 $$
 u(x) \approx \tilde u(x) = \sum_{i=1}^{n} a_i\,\varphi_i(x)
@@ -433,91 +636,29 @@ Jede Ansatzfunktion muss die **geometrischen Randbedingungen** erfüllen, hier $
 $\varphi_i = x^i$, ohne Konstante.
 :::
 
-::: {.schritt zeige="system achsen exakt"}
+::: {.schritt zeige="system achsen exakt grad1 grad2 grad3"}
 ### Einsetzen und Minimum
 
 Eingesetzt wird aus dem Funktional $\Pi[u]$ eine gewöhnliche Funktion $\Pi(a_1, \dots, a_n)$. Im Minimum sind alle
 Ableitungen null, $\partial \Pi / \partial a_i = 0$. Das ergibt ein lineares Gleichungssystem
 
 $$
-\mathbf{K}\,\mathbf{a} = \mathbf{q}, \qquad
+\mathbf{K}\,\mathbf{a} = \mathbf{q}
+$$
+
+Das ist dieselbe Struktur wie beim Federsystem, nur sind die Unbekannten jetzt Koeffizienten eines Ansatzes.
+
+::: {.vertiefung titel="Allgemeine Formel für K und q"}
+So steht es in Lehrbüchern: Für den Normalkraftstab mit Einzelkraft $F$ am Ende ist
+
+$$
 K_{ij} = \int_0^L EA\,\varphi_i'\,\varphi_j'\,\mathrm{d}x, \qquad
 q_i = F\,\varphi_i(L)
 $$
 
-Das ist dieselbe Struktur wie beim Federsystem, nur sind die Unbekannten jetzt Koeffizienten eines Ansatzes.
+$i$ und $j$ geben Zeile und Spalte an. Für die Rechnung brauchen wir die Formel nicht: Mathematica bildet die
+Ableitungen $\partial \Pi / \partial a_i$ direkt.
 :::
-
-::: {.schritt zeige="system achsen exakt grad1"}
-### Linearer Ansatz
-
-Der einfachste Ansatz, der $u(0) = 0$ erfüllt: $\tilde u = a_1\,x$. Eingesetzt:
-
-$$
-\Pi(a_1) = \frac12\,a_1^2\,E\,L\,\frac{A_0 + A_1}{2} - F\,a_1\,L
-$$
-
-$$
-\frac{\mathrm{d}\Pi}{\mathrm{d}a_1} = 0
-\quad\Rightarrow\quad
-a_1 = \frac{2F}{E\,(A_0 + A_1)}
-$$
-
-Der Stab wird wie ein Stab mit **mittlerem** Querschnitt behandelt. $u(L)$ ist um 17 % zu klein, die Spannung ist
-konstant und am Ende nur ein Drittel der richtigen.
-
-```mathematica
-data = {Em -> 70000, L -> 1000, F -> 5000,
-        A0 -> 100, A1 -> 20};
-Ax = A0 - (A0 - A1)/L x;
-uh = a1 x;
-Pii = 1/2 Integrate[Em Ax D[uh, x]^2,
-        {x, 0, L}];
-Pia = -F (uh /. x -> L);
-Piges = Pii + Pia;
-lsg = Solve[D[Piges, a1] == 0, a1]
-```
-
-`uh` steht für den Ritz-Ansatz $\tilde u$, eine Näherung, nicht die exakte Lösung.
-:::
-
-::: {.schritt zeige="system achsen exakt grad1 grad2 grad3" dimmen="grad1"}
-### Mehr Ansatzfunktionen
-
-Mit $\tilde u = a_1 x + a_2 x^2 + a_3 x^3$ wird die Lösung schnell besser
-($E = 70\,000$ MPa, $L = 1000$ mm, $F = 5$ kN, $A_0 = 100$ mm², $A_1 = 20$ mm²):
-
-| Grad | $u(L)$ in mm | Fehler | $\sigma(L)$ in MPa | Fehler | $\Pi$ in Nmm |
-|:-:|:-:|:-:|:-:|:-:|:-:|
-| 1 | 1,190 | −17,2 % | 83,3 | −66,7 % | −2976 |
-| 2 | 1,398 | −2,7 % | 163,0 | −34,8 % | −3494 |
-| 3 | 1,431 | −0,4 % | 209,6 | −16,2 % | −3577 |
-| 4 | 1,436 | −0,1 % | 232,3 | −7,1 % | −3590 |
-| exakt | 1,437 | | 250,0 | | −3592,5 |
-
-: {.striped}
-
-Die **Verschiebungen** konvergieren schnell, die **Spannungen** (Ableitungen!) deutlich langsamer.
-$\Pi$ nähert sich dem exakten Minimum **von oben**: Jeder Ansatz ist eine Einschränkung, das wahre Minimum liegt
-immer tiefer.
-
-Im [Beispiel](../beispiele/ritz-konisch/index.html) können Sie Ansatzgrad und Verjüngung verändern.
-:::
-
-::: {.schritt zeige="system achsen exakt grad1 grad2 grad3" dimmen="grad1"}
-### Mehr Ansatzfunktionen in Mathematica
-
-Der Ansatz wird als Skalarprodukt aus Koeffizienten und Ansatzfunktionen geschrieben. Abgeleitet wird nach allen
-Koeffizienten auf einmal, wie beim Federsystem nach `psys`:
-
-```mathematica
-a = {a1, a2, a3};
-uh = a . {x, x^2, x^3};
-Piges = 1/2 Integrate[Em Ax D[uh, x]^2,
-          {x, 0, L}] - F (uh /. x -> L);
-lsg = Solve[D[Piges, {a}] == {0, 0, 0}
-        /. data, a]
-```
 :::
 
 ::::
@@ -526,18 +667,24 @@ lsg = Solve[D[Piges, {a}] == {0, 0, 0}
 
 :::: {.scrolly svg="../grafiken/ritz/haengestab.svg"}
 
-::: {.schritt zeige="system"}
+::: {.schritt zeige="system achsen exakt"}
 ### Das System
 
 Ein Stab mit konstantem $EA$ hängt an der Decke und trägt sein Eigengewicht als Streckenlast $q_0 = \rho\,g\,A$.
-Die Streckenlast leistet auf ihrer ganzen Länge Arbeit:
+Die exakte Lösung kennen wir aus der DGL in Vorlesung 0:
+
+$$
+u(x) = \frac{q_0}{2EA}\,(2L - x)\,x, \qquad N(x) = q_0\,(L - x)
+$$
+
+Für Ritz brauchen wir die Energie. Die Streckenlast leistet auf ihrer ganzen Länge Arbeit:
 
 $$
 \Pi = \frac12 \int_0^L EA\,u'^2\,\mathrm{d}x - \int_0^L q_0\,u\,\mathrm{d}x
 $$
 :::
 
-::: {.schritt zeige="system achsen linear"}
+::: {.schritt zeige="system achsen exakt linear"}
 ### Linearer Ansatz
 
 Mit $\tilde u = a_1 x$ folgt $a_1 = q_0 L / (2EA)$. Die Normalkraft $N = EA\,\tilde u'$ ist **konstant**
@@ -554,34 +701,68 @@ Solve[D[Piges, a1] == 0, a1]
 ```
 :::
 
-::: {.schritt zeige="system achsen exakt linear" dimmen="linear"}
+::: {.schritt zeige="system achsen exakt linear quadratisch" dimmen="linear"}
 ### Quadratischer Ansatz
 
 Mit $\tilde u = a_1 x + a_2 x^2$ liefert Ritz
 
 $$
-u(x) = \frac{q_0}{2EA}\,(2L - x)\,x, \qquad N(x) = q_0\,(L - x)
+\tilde u(x) = \frac{q_0}{2EA}\,(2L - x)\,x
 $$
 
-Das ist die **exakte Lösung** (vgl. die DGL in Vorlesung 0): Liegt die exakte Lösung im Ansatz, findet Ritz sie.
+Das ist genau die **exakte Lösung**: Im Bild liegt der quadratische Ansatz (gestrichelt) auf der exakten Lösung,
+auch die Normalkraft stimmt. Liegt die exakte Lösung im Ansatz, findet Ritz sie.
 Die Energie sinkt von $-\tfrac18$ auf $-\tfrac16\,q_0^2 L^3/(EA)$.
 
 ```mathematica
 uh = a1 x + a2 x^2;
+Piges = 1/2 Integrate[EA D[uh, x]^2,
+          {x, 0, L}] - Integrate[q0 uh, {x, 0, L}];
+lsg = Solve[D[Piges, {{a1, a2}}] == {0, 0},
+        {a1, a2}];
+uhquad = uh /. lsg[[1]] // Factor
 ```
 :::
 
 ::::
 
-::: {.merke}
-**Das Verfahren nach Rayleigh-Ritz**
+## Zusammenfassung
+
+:::: {.scrolly svg="../grafiken/ritz/zusammenfassung.svg"}
+
+::: {.schritt zeige="feder"}
+### Stab als Feder
+
+Mit Einzelkräften an den Enden und konstantem $EA$ ist $u(x)$ im Stab linear. Der Stab ist dann eine **Feder**
+mit
+
+$$
+c = \frac{EA}{L}
+$$
+
+Stabsysteme lassen sich damit wie Federsysteme über das Minimum der potentiellen Energie berechnen.
+:::
+
+::: {.schritt zeige="feder konisch" dimmen="feder"}
+### Allgemeiner Fall
+
+Ändert sich $EA$ oder greifen Streckenlasten an, ist $u(x)$ nicht mehr linear. Die potentielle Energie ist dann ein
+**Funktional** $\Pi[u]$. Das Prinzip vom Minimum der potentiellen Energie gilt weiter, wir wenden es mit dem
+**Ritzschen Verfahren** an.
+:::
+
+::: {.schritt zeige="feder konisch ritz" dimmen="feder"}
+### Das Verfahren nach Rayleigh-Ritz
 
 - Ansatz $\tilde u = \sum a_i\,\varphi_i$ für das **ganze Bauteil**, die Ansatzfunktionen erfüllen die
   **geometrischen** Randbedingungen. Kraftrandbedingungen müssen nicht erfüllt werden, sie stecken in $\Pi_a$.
 - Einsetzen in $\Pi$, Ableitungen nach $a_i$ gleich null: $\mathbf{K}\,\mathbf{a} = \mathbf{q}$.
 - Mehr Ansatzfunktionen machen die Lösung nie schlechter; $\Pi$ nähert sich dem Minimum von oben.
-- Verschiebungen sind genauer als Spannungen.
+- **Verschiebungen sind gut, Spannungen sind schwierig:** Spannungen sind Ableitungen und konvergieren langsamer.
+- Ohne exakte Lösung erhöht man den Ansatzgrad, bis sich das Ergebnis nicht mehr ändert.
 :::
+
+::::
 
 ## Ausblick
 
@@ -608,5 +789,17 @@ Steifigkeitsmatrix, Verschiebungs- und Spannungsverlauf, zum Schluss dieselbe We
 :::
 
 ::: {.aufgabe}
-**Folgt:** eine Übung zum konischen Stab mit Ritz.
+**Konischer Stab hängend mit Ritz.** Ein konischer Stahlstab hängt an der Decke und trägt sein Eigengewicht und eine
+Einzellast. Vergleichen Sie die Ritz-Lösungen mit linearem, quadratischem und kubischem Ansatz mit der exakten
+Lösung, für Verschiebungen und Spannungen.
+
+[Aufgabe herunterladen (Mathematica)](../mathematica/02-konisch-haengend-ritz-task.nb){download="02-konisch-haengend-ritz-task.nb"}
+:::
+
+::: {.aufgabe}
+**Stab beidseitig eingespannt mit Ritz.** Ein Stab ist an beiden Enden eingespannt und trägt eine linear wachsende
+Längslast. Der Ansatz muss jetzt zwei geometrische Randbedingungen erfüllen. Vergleichen Sie Verschiebungen,
+Normalkraft und Lagerkräfte mit der exakten Lösung.
+
+[Aufgabe herunterladen (Mathematica)](../mathematica/02-beidseitig-ritz-task.nb){download="02-beidseitig-ritz-task.nb"}
 :::

@@ -49,6 +49,13 @@ schrittzellen[s_List, geloest_] := Join[
   If[s[[2]] =!= "", {txt[s[[2]]]}, {}],
   If[geloest, Flatten[codeZellen /@ s[[3]]], {txt["Gesucht: " <> s[[4]]], leer["Ihre Eingabe"]}]];
 
+(* Aufbau wie in den Notebooks des Dozenten: Aufgabe fragt nach Ergebnissen, Kontrollergebnisse vorweg,
+   damit man selbständig vergleichen kann; der Lösungsweg steht nur in der Musterlösung. *)
+hinweise[zeilen_List] := {Cell["Hinweise", "Subsection"], txt[StringRiffle[zeilen, "\n"]]};
+kontrolle[zeilen_List] := {Cell["Kontrollergebnisse", "Subsection"], txt[StringRiffle[zeilen, "\n"]]};
+loesung[schritte_List, geloest_] := Join[{Cell["L\[ODoubleDot]sung", "Section"]},
+  If[geloest, Flatten[schrittzellen[#, True] & /@ schritte, 1], {leer["Ihre L\[ODoubleDot]sung"]}]];
+
 speichereNB[name_String, zellen_List] := Module[{pfad = FileNameJoin[{nbziel, name}]},
   Export[pfad, Notebook[zellen, StyleDefinitions -> "Default.nb", Magnification :> 1.25 Inherited], "NB"];
   Print["geschrieben: ", pfad]];

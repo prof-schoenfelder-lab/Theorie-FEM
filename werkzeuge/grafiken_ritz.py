@@ -309,10 +309,8 @@ def haengestab():
     e.append('<rect x="{}" y="{}" width="14" height="{}" fill="{}" stroke="#000" stroke-width="1.25"/>'
              .format(xs - 7, y0, y1 - y0, FARBE["bauteil"]))
     e.append(festlager(xs, y0, drehung=180))
-    for i in range(7):
-        yy = y0 + 18 + i * (y1 - y0 - 36) / 6
-        e.append(pfeil(xs + 20, yy - 14, xs + 20, yy + 8, ROT, 1.1, (7, 4.5)))
-    e.append(text(xs + 32, (y0 + y1) / 2, "q_0", ROT, anker="start"))
+    e.append(_laengslast((xs, y0), (xs, y1), 26, 26, (1, 0), n=8))   # Eigengewicht konstant auf der Mittellinie
+    e.append(text(xs + 34, (y0 + y1) / 2, "q_0", ROT, anker="start"))
     e.append(pfeil(xs, y0, xs, y0 + 64, FARBE["koord"], 2.0, (12, 8)))      # x im Ursprung auf der Mittellinie
     e.append(text(xs - 14, y0 + 58, "x", FARBE["koord"], 21, anker="end"))
     e.append(text(xs, y1 + 24, "EA = konst.", "#000000", 16))
@@ -323,11 +321,11 @@ def haengestab():
     e.append(Du.achsen("x", "u · EA/(q_0 L^2)", [(0.5, "L/2"), (1, "L")], [(0.25, "0,25"), (0.5, "0,5")], raster=True, groesse=16))
     e.append(Dn.achsen("x", "N/(q_0 L)", [(0.5, "L/2"), (1, "L")], [(0.5, "0,5"), (1, "1")], raster=True, groesse=16))
 
-    e = abb.ebene("exakt", "Exakt (= quadratischer Ansatz)")
+    e = abb.ebene("exakt", "Exakte Lösung")
     e.append(Du.kurve(lambda x: x * (2 - x) / 2, 0, 1, farbe=EX))
     e.append(Dn.kurve(lambda x: 1 - x, 0, 1, farbe=EX))
-    e.append(Du.notiz(0.3, 0.5, ["exakt = quadratischer Ansatz"], EX, groesse=13))
-    e.append(Dn.notiz(0.08, 0.92, ["exakt = quadratisch"], EX, dx=14, groesse=13, anker="start"))
+    e.append(Du.notiz(0.14, 0.42, ["exakt"], EX, groesse=13))
+    e.append(Dn.notiz(0.08, 0.92, ["exakt"], EX, dx=14, groesse=13, anker="start"))
 
     e = abb.ebene("linear", "Linearer Ansatz")
     e.append(Du.kurve(lambda x: x / 2, 0, 1, farbe=ROT, breite=2.2))
@@ -339,6 +337,13 @@ def haengestab():
     e.append(Dn.punkt(0, 1, ROT, 4))
     e.append(Dn.punkt(0, 0.5, ROT, 4))
     e.append(Dn.notiz(0, 0.75, ["nur halb so groß"], ROT, dx=12, groesse=13, anker="start"))
+
+    # Quadratischer Ansatz: liegt genau auf der exakten Lösung (gestrichelt darüber)
+    e = abb.ebene("quadratisch", "Quadratischer Ansatz")
+    e.append(Du.kurve(lambda x: x * (2 - x) / 2, 0, 1, farbe=RITZ[2], breite=2.6, strich="9 6"))
+    e.append(Dn.kurve(lambda x: 1 - x, 0, 1, farbe=RITZ[2], breite=2.6, strich="9 6"))
+    e.append(Du.notiz(0.66, 0.44, ["quadratisch = exakt"], RITZ[2], dy=-20, groesse=13, anker="end"))
+    e.append(Dn.notiz(0.75, 0.25, ["quadratisch = exakt"], RITZ[2], dx=14, groesse=13, anker="start"))
     return abb.speichern(ZIEL / "haengestab.svg")
 
 
@@ -388,6 +393,118 @@ def welle(mit_dof):
     return abb.speichern(ZIEL / ("welle-dof.svg" if mit_dof else "welle-system.svg"))
 
 
+# ---------------------------------------------------------------- Zusammenfassung
+def zusammenfassung():
+    """Drei Ebenen: Stab = Feder, konischer Stab (allgemeiner Fall), Ritz-Näherungen."""
+    abb = Abbildung(780, 560, "Zusammenfassung Vorlesung 2")
+
+    e = abb.ebene("feder", "Stab als Feder")
+    y, xa, xb = 95, 90, 320
+    e.append(einspannung(xa, y, 56))
+    e.append(_stab(xa, xb, y, 15))
+    e.append(text((xa + xb) / 2, y - 30, "EA = konst.", "#000000"))
+    e.append(pfeil(xa, y, xa + 50, y, FARBE["koord"], 2.0, (12, 8)))
+    e.append(text(xa + 57, y, "x", FARBE["koord"], 19, anker="start"))
+    e.append(kraft(xb, y, 0, "F", laenge=50, ziehend=True, label_seite=1))
+    e.append(text(420, y, "=", "#000000", 30, italic=False))
+    e.append(einspannung(470, y, 40))
+    e.append(feder(470, y, 680, y, 6, 10, label="c = EA/L", label_abstand=24))
+    e.append(kreis(680, y, 4.2))
+    e.append(kraft(680, y, 0, "F", laenge=50, ziehend=True, label_seite=1))
+
+    x0, lp, yk = 110, 540, 225
+    x1 = x0 + lp
+    hs = 0.3
+    e = abb.ebene("konisch", "Allgemeiner Fall")
+    e.append(polylinie([(x0, yk - hs * A0), (x1, yk - hs * A1), (x1, yk + hs * A1), (x0, yk + hs * A0)],
+                       "#000000", 1.25, FARBE["bauteil"], schliessen=True))
+    e.append(linie(x0, yk, x1, yk, GRAU, 0.8, "8 3 2 3"))
+    e.append(wandgelenk(x0, yk, 46))
+    e.append(pfeil(x0, yk, x0 + 55, yk, FARBE["koord"], 2.0, (12, 8)))
+    e.append(text(x0 + 62, yk, "x", FARBE["koord"], 19, anker="start"))
+    e.append(kraft(x1, yk, 0, "F", laenge=50, ziehend=True, label_seite=1))
+    e.append(text((x0 + x1) / 2, yk - (A0 + A1) / 2 * hs - 16, "E, A(x)", GR))
+    Du = Diagramm(x0, 520, lp, 210, L, 1.6)
+    e.append(Du.achsen("x", "u", [(1000, "L")], [], raster=False))
+    e.append(Du.kurve(u_exakt, 0, L, farbe=EX))
+    e.append(Du.notiz(L, u_exakt(L), ["exakt"], EX, dx=8, dy=-8, anker="start"))
+
+    e = abb.ebene("ritz", "Ritz-Näherungen")
+    for n in (1, 2, 3):
+        u, _ = ritz(n)
+        e.append(Du.kurve(u, 0, L, farbe=RITZ[n - 1], breite=2.2))
+    u1, _ = ritz(1)
+    e.append(Du.notiz(L, u1(L), ["Grad 1"], RITZ[0], dx=8, anker="start", groesse=13))
+    X, Y = Du.px(0.42 * L, 0.95)
+    e.append(_formel(X, Y, "ũ = [Σ] a_i φ_i", RITZ[2], 21, anker="end"))
+    return abb.speichern(ZIEL / "zusammenfassung.svg")
+
+
+# ---------------------------------------------------------------- Längslast auf der Mittellinie
+def _laengslast(p0, p1, w0, w1, seite, n=8, laenge=None):
+    """Linienlast in Stabrichtung: leicht rote Fläche entlang der Mittellinie von p0 nach p1, Breite w0 → w1
+    (proportional zu q) zur Seite seite = (nx, ny), dazu Pfeile auf der Mittellinie in Lastrichtung p0 → p1."""
+    (x0, y0), (x1, y1) = p0, p1
+    nx, ny = seite
+    flaeche = polylinie([(x0, y0), (x0 + nx * w0, y0 + ny * w0), (x1 + nx * w1, y1 + ny * w1), (x1, y1)],
+                        ROT, 0.9, "#f6c9c9", schliessen=True)
+    fl = flaeche.replace('fill="#f6c9c9"', 'fill="#f6c9c9" fill-opacity="0.75"')
+    teile = [fl]
+    lx, ly = x1 - x0, y1 - y0
+    d = math.hypot(lx, ly)
+    ux, uy = lx / d, ly / d
+    la = laenge or d / n * 0.6
+    for i in range(n):
+        t = (i + 0.5) / n
+        xm, ym = x0 + lx * t, y0 + ly * t
+        teile.append(pfeil(xm - ux * la / 2, ym - uy * la / 2, xm + ux * la / 2, ym + uy * la / 2, ROT, 1.3, (7, 4.5)))
+    return "".join(teile)
+
+
+# ---------------------------------------------------------------- Übungen zu Ritz
+def haengend_konisch():
+    """Übung: konischer Stab hängt an der Decke, Eigengewicht q(x) = ρ g A(x) und Einzellast F am Ende."""
+    abb = Abbildung(420, 560, "Konischer Stab hängend")
+    xs, y0, y1 = 170, 70, 470
+    hs = 0.55
+    e = abb.ebene("system", "System")
+    e.append(polylinie([(xs - hs * A0, y0), (xs + hs * A0, y0), (xs + hs * A1, y1), (xs - hs * A1, y1)],
+                       "#000000", 1.25, FARBE["bauteil"], schliessen=True))
+    e.append(linie(xs, y0, xs, y1, GRAU, 0.8, "8 3 2 3"))
+    e.append(linie(xs - hs * A0 - 20, y0, xs + hs * A0 + 20, y0, "#000000", 2.0))   # Decke
+    for i in range(9):                               # Schraffur der Decke
+        xx = xs - hs * A0 - 16 + i * (2 * hs * A0 + 32) / 8
+        e.append(linie(xx, y0, xx + 8, y0 - 8, "#000000", 0.8))
+    # Eigengewicht auf der Mittellinie, Fläche proportional zu A(x)
+    e.append(_laengslast((xs, y0), (xs, y1), 0.28 * A0, 0.28 * A1, (1, 0), n=9))
+    e.append(text(xs + hs * A0 + 18, (y0 + y1) / 2 - 40, "q(x)", ROT, anker="start"))
+    e.append(pfeil(xs, y0, xs, y0 + 60, FARBE["koord"], 2.0, (12, 8)))
+    e.append(text(xs - 10, y0 + 54, "x", FARBE["koord"], 21, anker="end"))
+    e.append(kraft(xs, y1, -90, "F", laenge=55, ziehend=True, label_seite=-1))
+    e.append(text(xs - hs * A0 - 10, y0 + 22, "A_0", GR, anker="end"))
+    e.append(text(xs - hs * A1 - 10, y1 - 14, "A_1", GR, anker="end"))
+    e.append(mass(xs - hs * A0 - 55, y0, xs - hs * A0 - 55, y1, "L", abstand=0))
+    e.append(text(xs + hs * A0 + 40, y0 + 22, "E, ρ", "#000000", 19, anker="start"))
+    return abb.speichern(ZIEL / "haengend-konisch.svg")
+
+
+def beidseitig():
+    """Übung: Stab mit konstantem EA, beidseitig eingespannt, Dreieckslast q(x) = q0 x/L in Längsrichtung."""
+    abb = Abbildung(720, 250, "Stab beidseitig eingespannt")
+    x0, x1, y, h = 90, 630, 120, 16
+    e = abb.ebene("system", "System")
+    e.append(einspannung(x0, y, 70))
+    e.append(einspannung(x1, y, 70, seite="rechts"))
+    e.append(_stab(x0, x1, y, h))
+    e.append(_laengslast((x0, y), (x1, y), 0, 46, (0, -1), n=10))   # Längslast, linear wachsend
+    e.append(text(x1 - 10, y - 62, "q(x) = q_0 x/L", ROT, 19, anker="end"))
+    e.append(pfeil(x0, y, x0 + 60, y, FARBE["koord"], 2.0, (12, 8)))
+    e.append(text(x0 + 68, y + 14, "x", FARBE["koord"], 21, anker="start"))
+    e.append(text((x0 + x1) / 2, y + h + 22, "EA = konst.", "#000000"))
+    e.append(mass(x0, y + 70, x1, y + 70, "L", abstand=-20))
+    return abb.speichern(ZIEL / "beidseitig.svg")
+
+
 if __name__ == "__main__":
     for n in (1, 2, 3):
         u, sig = ritz(n)
@@ -395,3 +512,5 @@ if __name__ == "__main__":
     for fn in (stab_feder, stabsystem, konisch_ritz, haengestab, portraets):
         print(fn())
     print(welle(False), welle(True))
+    print(zusammenfassung())
+    print(haengend_konisch(), beidseitig())

@@ -180,11 +180,16 @@ def _(A, BLAU, F, GRAU, GRUEN, L, RITZ, n, np, plt, ritz, u_exakt):
     _axk.text(7.6, 6, "5 %", color="#666666")
     _axk.axvline(n.value, color="k", lw=0.8, ls=":")
     if max(_eu.max(), _es.max(), _ep.max()) < 1e-6:
-        _axk.text(4.5, 1e-2, "Schon Grad 1 ist exakt:\nDie Lösung ist linear und liegt im Ansatz.",
+        _axk.text(4.5, 1e-1, "Schon Grad 1 ist exakt:\nDie Lösung ist linear und liegt im Ansatz.",
                   ha="center", va="center", fontsize=14, color="#444444")
-    _axk.set_xlabel("Ansatzgrad $n$"); _axk.set_ylabel("Fehler in %")
+    _axk.set_xlabel("Ansatzgrad $n$"); _axk.set_ylabel("Fehler (logarithmische Skala)")
     _axk.set_title("Konvergenz: Fehler über dem Ansatzgrad", fontsize=14)
-    _axk.set_ylim(1e-6, 200)
+    _axk.set_ylim(1e-5, 200)
+    # Achse in Prozent statt Zehnerpotenzen: 100 %, 10 %, 1 %, 0,1 % …
+    _axk.set_yticks([10.0 ** _k for _k in range(-5, 3)])
+    _axk.yaxis.set_major_formatter(plt.FuncFormatter(
+        lambda v, _: (f"{v:.5f}".rstrip("0").rstrip(".") + " %").replace(".", ",")))
+    _axk.yaxis.set_minor_formatter(plt.NullFormatter())
     _axk.grid(alpha=0.3, which="both"); _axk.legend(loc="lower left")
     _figk.tight_layout()
     _figk

@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     54869,        996]
-NotebookOptionsPosition[     50586,        941]
-NotebookOutlinePosition[     50879,        955]
-CellTagsIndexPosition[     50836,        952]
+NotebookDataLength[     48850,        853]
+NotebookOptionsPosition[     47383,        828]
+NotebookOutlinePosition[     47676,        842]
+CellTagsIndexPosition[     47633,        839]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -23,9 +23,7 @@ Cell["Abgesetzte Welle \[UDoubleDot]ber die Energie", "Title"],
 Cell["Theorie der Finite-Elemente-Methode \[CenterDot] Vorlesung 2 \
 \[CenterDot] \[CapitalUDoubleDot]bung", "Subtitle"],
 
-Cell["\<\
-Aufgabe: Stabsystem \[UDoubleDot]ber das Minimum der potentiellen Energie\
-\>", "Section"],
+Cell["Aufgabe", "Section"],
 
 Cell["\<\
 Gegeben ist eine abgesetzte Welle aus Stahl, links eingespannt und am rechten \
@@ -405,13 +403,6 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoLr/AlVukpo=
 Cell["\<\
 Gegeben: F = 1500 N, E_Stahl = 210 000 MPa, E_Alu = 70 000 MPa, Durchmesser \
 und L\[ADoubleDot]ngen wie in der Skizze\
-\>", "Text"],
-
-Cell["\<\
-Jeder Abschnitt hat konstantes EA und ist damit eine Feder. Die \
-Freiheitsgrade sind die Verschiebungen der Abs\[ADoubleDot]tze und des freien \
-Endes auf der Mittellinie (F ist l\[ADoubleDot]ngs seiner Wirkungslinie \
-verschoben):\
 \>", "Text"],
 
 Cell[BoxData[
@@ -796,148 +787,44 @@ AAAAAAAAAAAAAADg+94BgauJYg==
   PlotRange->{{0, 1800.}, {0, 600.}}]], "Text"],
 
 Cell["\<\
-L\[ODoubleDot]sen Sie die Aufgabe wie im Vorlesungsbeispiel \
-\[OpenCurlyDoubleQuote]Stabsystem \[UDoubleDot]ber das Energieprinzip\
-\[CloseCurlyDoubleQuote]:
-a) Legen Sie die gegebenen Gr\[ODoubleDot]\[SZ]en und die Freiheitsgrade \
-fest.
-b) Berechnen Sie die Steifigkeiten der drei Ersatzfedern.
-c) Stellen Sie die Verl\[ADoubleDot]ngerungen der St\[ADoubleDot]be durch die \
-Freiheitsgrade dar.
-d) Stellen Sie die innere, \[ADoubleDot]u\[SZ]ere und gesamte potentielle \
-Energie auf.
-e) Bestimmen Sie die Systemverschiebungen p aus dem Minimum.
-f) Bestimmen Sie die Steifigkeitsmatrix als zweite Ableitung.
-g) Stellen Sie den Verschiebungsverlauf u(x) \[UDoubleDot]ber die ganze Welle \
-dar. Wie gro\[SZ] ist die Verschiebung 300 mm von der Einspannung entfernt?
-h) Berechnen Sie die Dehnungen und Spannungen aller drei St\[ADoubleDot]be \
-und stellen Sie den Spannungsverlauf dar.
-i) Wie gro\[SZ] sind die Verschiebungen an den Wellenabs\[ADoubleDot]tzen, \
-wenn die Welle aus Aluminium ist?\
+Berechnen Sie mit dem Prinzip vom Minimum der potentiellen Energie:
+a) die Verschiebungen p1, p2, p3 an den Abs\[ADoubleDot]tzen und am freien \
+Ende,
+b) die Systemsteifigkeitsmatrix,
+c) den Verschiebungsverlauf u(x) \[UDoubleDot]ber die ganze Welle (Bild) und \
+die Verschiebung 300 mm von der Einspannung,
+d) Dehnungen und Spannungen der drei Abschnitte und den Spannungsverlauf \
+(Bild),
+e) die Verschiebungen an den Abs\[ADoubleDot]tzen, wenn die Welle aus \
+Aluminium ist.\
 \>", "Text"],
 
-Cell["a) Gegebene Gr\[ODoubleDot]\[SZ]en und Freiheitsgrade", "Subsection"],
+Cell["Hinweise", "Subsection"],
 
-Cell["Gesucht: Regelliste data und Vektor psys", "Text"],
+Cell["\<\
+Jeder Abschnitt hat konstantes EA und ist eine Feder mit c = EA/L.
+Vorgehen wie im Vorlesungsbeispiel \[OpenCurlyDoubleQuote]Stabsystem \
+\[UDoubleDot]ber das Energieprinzip\[CloseCurlyDoubleQuote].\
+\>", "Text"],
+
+Cell["Kontrollergebnisse", "Subsection"],
+
+Cell["\<\
+Federsteifigkeiten: c1 = c3 = 83 154 N/mm, c2 = 644 272 N/mm
+a) p1 = \[Minus]0,0180 mm, p2 = \[Minus]0,0204 mm, p3 = \[Minus]0,0384 mm
+c) u(300 mm) = \[Minus]0,0189 mm
+d) \[CurlyEpsilon] = \[Minus]75,2 \[CenterDot] 10\:207b\:2076 / \[Minus]14,6 \
+\[CenterDot] 10\:207b\:2076 / \[Minus]75,2 \[CenterDot] 10\:207b\:2076, \
+\[Sigma] = \[Minus]15,8 / \[Minus]3,06 / \[Minus]15,8 MPa
+e) Aluminium: p1 = \[Minus]0,0541 mm, p2 = \[Minus]0,0611 mm (dreimal so gro\
+\[SZ])\
+\>", "Text"],
+
+Cell["L\[ODoubleDot]sung", "Section"],
 
 Cell[BoxData[
  RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["b) Jeder Stab eine Feder", "Subsection"],
-
-Cell["\<\
-Jeder Abschnitt hat konstantes EA, ist also eine Feder mit c = E A / L. Der \
-Querschnitt ist ein Kreis, A = \[Pi] d\.b2/4.\
-\>", "Text"],
-
-Cell["\<\
-Gesucht: Ersatzfedern c1, c2, c3 (Regelliste federn) und ihre Zahlenwerte\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["c) Verl\[ADoubleDot]ngerungen", "Subsection"],
-
-Cell["\<\
-Verl\[ADoubleDot]ngerung eines Stabes = Verschiebung des rechten minus des \
-linken Endes. Das linke Ende von Stab 1 ist fest.\
-\>", "Text"],
-
-Cell["Gesucht: Regelliste kinematik (du1 bis du3)", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["d) Potentielle Energie", "Subsection"],
-
-Cell["\<\
-Innere Energie aller Stabfedern plus Potential der Kraft. F zeigt nach links, \
-also gegen die positive Richtung von p3: Die Kraft ist \[Minus]F.\
-\>", "Text"],
-
-Cell["Gesucht: Pii, Pia und Piges in Abh\[ADoubleDot]ngigkeit von p1, p2, \
-p3", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["e) Minimum: Systemverschiebungen", "Subsection"],
-
-Cell["Im Minimum verschwinden alle drei partiellen Ableitungen.", "Text"],
-
-Cell["\<\
-Gesucht: Systemverschiebungen p allgemein (lsg) und als Zahlen (plsg)\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["f) Steifigkeitsmatrix", "Subsection"],
-
-Cell["\<\
-Die zweite Ableitung von Piges nach den Freiheitsgraden ist die \
-Steifigkeitsmatrix, wie im Federsystem.\
-\>", "Text"],
-
-Cell["Gesucht: Systemsteifigkeitsmatrix Ksys als zweite Ableitung", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["g) Verschiebungsverlauf", "Subsection"],
-
-Cell["\<\
-In jedem Stab ist u(x) linear (konstantes EA, keine Streckenlast). Zwischen \
-den Knoten wird also linear interpoliert; x z\[ADoubleDot]hlt von der \
-Einspannung.\
-\>", "Text"],
-
-Cell["\<\
-Gesucht: Verschiebungsverlauf u(x) als Bild und die Verschiebung bei x = 300 \
-mm\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["h) Dehnungen und Spannungen", "Subsection"],
-
-Cell["\<\
-Dehnung = Verl\[ADoubleDot]ngerung / L\[ADoubleDot]nge, Spannung = E mal \
-Dehnung. Beide sind je Stab konstant.\
-\>", "Text"],
-
-Cell["\<\
-Gesucht: Dehnungen eps, Spannungen sig und der Spannungsverlauf als Bild\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["i) Welle aus Aluminium", "Subsection"],
-
-Cell["\<\
-Nur der E-Modul \[ADoubleDot]ndert sich. Die allgemeine L\[ODoubleDot]sung \
-lsg kann weiterverwendet werden.\
-\>", "Text"],
-
-Cell["\<\
-Gesucht: Verschiebungen pAlu, insbesondere an den Abs\[ADoubleDot]tzen (p1, \
-p2)\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"]
+  RowBox[{"Ihre", " ", "L\[ODoubleDot]sung"}], " ", "*)"}]], "Input"]
 },
 Magnification:>1.25 Inherited,
 FrontEndVersion->"13.1 for Mac OS X ARM (64-bit) (June 16, 2022)",
@@ -954,50 +841,20 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 62, 0, 87, "Title",ExpressionUUID->"11910df9-153f-4711-9211-b9eb78814f91"],
-Cell[623, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"25ff048e-f57e-4976-835a-76613a20272a"],
-Cell[746, 25, 100, 2, 87, "Section",ExpressionUUID->"5d58f4c5-de81-4592-8e81-122b020309e6"],
-Cell[849, 29, 140, 3, 87, "Text",ExpressionUUID->"064bc9db-c1fd-4c8b-b4d7-595336d87f5b"],
-Cell[992, 34, 22112, 368, 87, "Text",ExpressionUUID->"d2aed475-c1d3-491f-9499-36baabac5ef7"],
-Cell[23107, 404, 142, 3, 87, "Text",ExpressionUUID->"1f2d405b-8b95-498c-8f84-a7fa6bd2c1a7"],
-Cell[23252, 409, 256, 5, 87, "Text",ExpressionUUID->"02926d43-d943-4281-b406-8092c3c83b69"],
-Cell[23511, 416, 22759, 379, 87, "Text",ExpressionUUID->"01308124-ff16-429c-a1dd-1066a6fdd3f7"],
-Cell[46273, 797, 1019, 19, 87, "Text",ExpressionUUID->"d4dfb819-83c0-4cff-93d0-436a4637c493"],
-Cell[47295, 818, 75, 0, 87, "Subsection",ExpressionUUID->"177483ad-1856-47e6-a2cf-04484ea5b280"],
-Cell[47373, 820, 56, 0, 87, "Text",ExpressionUUID->"a3216f91-96b6-4a1a-b492-445d26516995"],
-Cell[47432, 822, 93, 2, 87, "Input",ExpressionUUID->"9ee8fedd-b93b-4aed-8d2b-954422346e20"],
-Cell[47528, 826, 46, 0, 87, "Subsection",ExpressionUUID->"47e51833-eb6e-4413-943c-bf42b5d7e620"],
-Cell[47577, 828, 147, 3, 87, "Text",ExpressionUUID->"06ec259a-1f94-4d9f-8791-cdb1570e92d9"],
-Cell[47727, 833, 97, 2, 87, "Text",ExpressionUUID->"31f9cb32-9a52-4ac7-b452-f3b953b595bb"],
-Cell[47827, 837, 93, 2, 87, "Input",ExpressionUUID->"f5b2cfe1-137e-4b36-a63f-2066e3231b5c"],
-Cell[47923, 841, 51, 0, 87, "Subsection",ExpressionUUID->"e76a0d31-152c-4d91-8021-3356cc232ca7"],
-Cell[47977, 843, 150, 3, 87, "Text",ExpressionUUID->"5ba9979f-c8d6-4d36-9600-8a012afcec5d"],
-Cell[48130, 848, 59, 0, 87, "Text",ExpressionUUID->"56f1d737-a450-43a6-9c59-8b492c5c13bd"],
-Cell[48192, 850, 93, 2, 87, "Input",ExpressionUUID->"5286bbc2-9cd3-4881-bf9c-585b4ea2a6fa"],
-Cell[48288, 854, 44, 0, 87, "Subsection",ExpressionUUID->"624bc7aa-1af8-4cfa-be0f-cb3510d280a2"],
-Cell[48335, 856, 169, 3, 87, "Text",ExpressionUUID->"4b8fc1bc-e9df-41c1-97f3-fc7e958d9fbc"],
-Cell[48507, 861, 88, 1, 87, "Text",ExpressionUUID->"96e817d5-76f2-40fb-8853-b2030f3a766c"],
-Cell[48598, 864, 93, 2, 87, "Input",ExpressionUUID->"74ef4522-ae16-418c-a1e7-152650047477"],
-Cell[48694, 868, 54, 0, 87, "Subsection",ExpressionUUID->"87376eaa-85a0-42dd-adc9-be75f8a96d23"],
-Cell[48751, 870, 73, 0, 87, "Text",ExpressionUUID->"c50a6e8c-7d97-4c1d-998c-76a082b7cc76"],
-Cell[48827, 872, 93, 2, 87, "Text",ExpressionUUID->"6e319c03-4c0c-4e01-a8b1-0505077758ac"],
-Cell[48923, 876, 93, 2, 87, "Input",ExpressionUUID->"d928a546-137c-41c6-b2f0-1517d0d70502"],
-Cell[49019, 880, 43, 0, 87, "Subsection",ExpressionUUID->"cb896a10-2ace-4c28-9be7-6b15d4e50f6d"],
-Cell[49065, 882, 129, 3, 87, "Text",ExpressionUUID->"94ac886a-ada9-428f-9b67-f0781ce4ef77"],
-Cell[49197, 887, 75, 0, 87, "Text",ExpressionUUID->"4ff8000b-82a3-4eb3-b500-0e8b23005315"],
-Cell[49275, 889, 93, 2, 87, "Input",ExpressionUUID->"b005d24e-31ce-4fa8-b0e0-f1731c763d34"],
-Cell[49371, 893, 45, 0, 87, "Subsection",ExpressionUUID->"09963abb-cb89-47bf-a5c4-970dab9d5456"],
-Cell[49419, 895, 186, 4, 87, "Text",ExpressionUUID->"c147e7af-09b5-4700-8451-d681d95b1bc2"],
-Cell[49608, 901, 105, 3, 87, "Text",ExpressionUUID->"df20d75f-0e88-4b59-bfd1-8dee6b2b0b99"],
-Cell[49716, 906, 93, 2, 87, "Input",ExpressionUUID->"e25a3f77-aa97-44e0-9ce2-77b67e8508bb"],
-Cell[49812, 910, 49, 0, 87, "Subsection",ExpressionUUID->"06f7e453-f63d-48df-9410-d9dc77015bbf"],
-Cell[49864, 912, 136, 3, 87, "Text",ExpressionUUID->"76a1deed-b6d0-4505-9f2e-c8565d40eb8c"],
-Cell[50003, 917, 96, 2, 87, "Text",ExpressionUUID->"b7c9245d-8101-4b8b-93b2-71e427a26e29"],
-Cell[50102, 921, 93, 2, 87, "Input",ExpressionUUID->"7f4ecb50-95f7-49dd-b1e4-5259e6aecafa"],
-Cell[50198, 925, 44, 0, 87, "Subsection",ExpressionUUID->"16083490-9370-4857-9d8e-f5b802685d41"],
-Cell[50245, 927, 133, 3, 87, "Text",ExpressionUUID->"589895c7-434c-41ba-b4b5-abbed1d887c2"],
-Cell[50381, 932, 105, 3, 87, "Text",ExpressionUUID->"35731513-edbb-4dc7-9deb-29f9f91a110b"],
-Cell[50489, 937, 93, 2, 87, "Input",ExpressionUUID->"78740443-e87e-4cc6-9bc6-9892bb752ea8"]
+Cell[558, 20, 62, 0, 87, "Title",ExpressionUUID->"d30d2f93-999b-4e36-85a9-f5d8bee85e8c"],
+Cell[623, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"840cad8b-c1fc-4aa1-83f0-bab468995256"],
+Cell[746, 25, 26, 0, 87, "Section",ExpressionUUID->"00c2f0ac-8921-4e9e-b3b2-8e7b364d157f"],
+Cell[775, 27, 140, 3, 87, "Text",ExpressionUUID->"a4a71779-0647-4655-acae-5f55ab4d27fb"],
+Cell[918, 32, 22112, 368, 87, "Text",ExpressionUUID->"bec2e42e-3d9c-4d57-8ee1-8b2c953816d2"],
+Cell[23033, 402, 142, 3, 87, "Text",ExpressionUUID->"425a92ba-6050-4c87-b0a5-eeb6fa6a8369"],
+Cell[23178, 407, 22759, 379, 87, "Text",ExpressionUUID->"a3e7f9d4-43a1-45c7-86d4-33f354e4e863"],
+Cell[45940, 788, 501, 11, 87, "Text",ExpressionUUID->"c58b9513-6464-4c0c-859c-236c024f3580"],
+Cell[46444, 801, 30, 0, 87, "Subsection",ExpressionUUID->"0bf6ecd5-59e6-456a-9c61-e4befde4da91"],
+Cell[46477, 803, 222, 4, 87, "Text",ExpressionUUID->"c1026c61-09ad-4dfd-bf41-6853f24fe145"],
+Cell[46702, 809, 40, 0, 87, "Subsection",ExpressionUUID->"b47aedde-5ac5-4984-8653-34e1188d2952"],
+Cell[46745, 811, 487, 9, 87, "Text",ExpressionUUID->"5193653c-04d6-4b5b-8af7-6970e1586283"],
+Cell[47235, 822, 37, 0, 87, "Section",ExpressionUUID->"dd0dd501-b994-4b7d-8225-b1da34300520"],
+Cell[47275, 824, 104, 2, 87, "Input",ExpressionUUID->"5097a0a8-730c-4167-8402-b57c237410cf"]
 }
 ]
 *)
