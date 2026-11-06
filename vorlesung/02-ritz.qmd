@@ -463,7 +463,7 @@ $$
 ```mathematica
 uhlin = uh /. lsg[[1]]
 uex = F L/(Em (A0 - A1)) Log[A0/Ax];
-Plot[{uex, uhlin} /. data,
+Plot[Evaluate[{uex, uhlin} /. data],
   {x, 0, L /. data},
   PlotLegends -> {"exakt", "linear"}]
 uhlin /. x -> L /. data // N
@@ -483,7 +483,7 @@ Höchstspannung wird also stark unterschätzt.
 
 ```mathematica
 siglin = Em D[uhlin, x];
-Plot[{F/Ax, siglin} /. data,
+Plot[Evaluate[{F/Ax, siglin} /. data],
   {x, 0, L /. data}, Filling -> Axis,
   PlotLegends -> {"exakt", "linear"}]
 ```
@@ -534,11 +534,11 @@ linear, von $32{,}6$ auf $163{,}0$ MPa: besser, aber noch weit von $250$ MPa ent
 
 ```mathematica
 uhquad = uh /. lsg[[1]] // Simplify
-Plot[{uex, uhlin, uhquad} /. data,
+Plot[Evaluate[{uex, uhlin, uhquad} /. data],
   {x, 0, L /. data}]
 uhquad /. x -> L /. data // N
 sigquad = Em D[uhquad, x];
-Plot[{F/Ax, siglin, sigquad} /. data,
+Plot[Evaluate[{F/Ax, siglin, sigquad} /. data],
   {x, 0, L /. data}]
 ```
 :::
@@ -683,9 +683,11 @@ $$
 ### Die Arbeit der Streckenlast
 
 Eine Einzelkraft trägt $-F\,u(L)$ zur potentiellen Energie bei: Kraft mal Verschiebung ihres Angriffspunktes.
-Die Streckenlast greift dagegen **überall** an. Ein Stabstück der Länge $\mathrm{d}x$ an der Stelle $x$ trägt die
-Kraft $q_0\,\mathrm{d}x$ und verschiebt sich um $u(x)$. Es liefert also $-q_0\,u(x)\,\mathrm{d}x$, im Bild den
-dunklen Streifen. Die Summe über alle Stücke ist das Integral, $q_0$ mal die Fläche unter $u(x)$:
+Die Streckenlast greift dagegen **überall** an. Wir schneiden ein Stabstück der Länge $\mathrm{d}x$ an der Stelle
+$x$ heraus. Die Kraft darauf sieht man im $N$-Verlauf: Über $\mathrm{d}x$ fällt $N$ um $q_0\,\mathrm{d}x$. Diese
+Kraft legt den Weg $u(x)$ zurück, im $u$-Diagramm an derselben Stelle. Das Stück liefert also
+$-q_0\,u(x)\,\mathrm{d}x$, den dunklen Streifen. Die Kraft ist von Anfang an voll da, darum gibt es wie bei
+$-F\,u(L)$ keinen Faktor $\tfrac12$. Die Summe über alle Stücke ist $q_0$ mal die Fläche unter $u(x)$:
 
 $$
 \Pi_a = -\int_0^L q_0\,u(x)\,\mathrm{d}x
@@ -699,6 +701,27 @@ $$
     &\quad - \int_0^L q_0\,u(x)\,\mathrm{d}x
 \end{aligned}
 $$
+
+::: {.vertiefung titel="Warum ist die Stufe im N-Verlauf die Kraft auf das Stück?"}
+Wir schneiden das Stück $\mathrm{d}x$ frei. Oben zieht $N(x)$ nach oben, unten zieht $N(x+\mathrm{d}x)$ nach
+unten, dazu wirkt das Gewicht $q_0\,\mathrm{d}x$ nach unten. Gleichgewicht:
+
+$$
+\begin{aligned}
+N(x) - N(x+\mathrm{d}x) &= q_0\,\mathrm{d}x\\
+\Rightarrow\quad N'(x) &= -q_0
+\end{aligned}
+$$
+
+Die Kraft auf das Stück ist also der **Unterschied der Normalkraft** zwischen den beiden Schnitten, im Bild die
+rote senkrechte Stufe. Die waagerechte Hilfslinie ist nur die Länge $\mathrm{d}x$ des Stücks, keine Kraft.
+Weil $N$ hier linear ist, ist die Stufe überall gleich groß. Bei veränderlicher Last, etwa beim konischen Stab mit
+$q(x) = \rho\,g\,A(x)$, ist sie $q(x)\,\mathrm{d}x$.
+
+Die Fläche unter $N(x)$ ist dagegen **nicht** die Arbeit der Last: $\int_0^L N\,\mathrm{d}x = \int_0^L EA\,u'\,\mathrm{d}x
+= EA\,u(L)$ bei konstantem $EA$. Die Arbeit entsteht erst, wenn die Kraft $q_0\,\mathrm{d}x$ den Weg $u(x)$
+zurücklegt, deshalb steht die Fläche im $u$-Diagramm.
+:::
 :::
 
 ::: {.schritt zeige="system achsen exakt linear"}

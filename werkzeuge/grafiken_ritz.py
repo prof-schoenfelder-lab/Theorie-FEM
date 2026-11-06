@@ -327,18 +327,31 @@ def haengestab():
     e.append(Du.notiz(0.14, 0.42, ["exakt"], EX, groesse=13))
     e.append(Dn.notiz(0.08, 0.92, ["exakt"], EX, dx=14, groesse=13, anker="start"))
 
-    # Arbeit der Streckenlast: Scheibe dx bei x trägt q0 dx und verschiebt sich um u(x);
-    # Summe über alle Scheiben = q0 mal Fläche unter u(x)
+    # Arbeit der Streckenlast: Im N-Verlauf fällt N über dx um q0 dx – das ist die Kraft auf das Stück dx.
+    # Dieselbe Kraft legt den Weg u(x) zurück: Streifen q0 u(x) dx, Summe = q0 mal Fläche unter u(x).
     e = abb.ebene("arbeit", "Arbeit der Streckenlast")
     ue = lambda x: x * (2 - x) / 2
-    xa, dxa = 0.6, 0.05
+    xa, dxa = 0.6, 0.1
     e.append(Du.flaeche([(0, 0)] + [(i / 60, ue(i / 60)) for i in range(61)] + [(1, 0)], "#f6c9c9", 0.55))
     e.append(Du.flaeche([(xa, 0), (xa, ue(xa)), (xa + dxa, ue(xa + dxa)), (xa + dxa, 0)], ROT, 0.55))
     e.append(Du.kurve(ue, 0, 1, farbe=EX))
-    Xs, Ys = Du.px(xa + dxa / 2, ue(xa) / 2)
-    e.append(_formel(Xs + 22, Ys - 14, "q_0 u(x) dx", ROT, 17, anker="start"))
-    e.append(_formel(*Du.px(xa + dxa / 2, 0)[:1], Du.px(0, 0)[1] + 16, "dx", ROT, 15))
-    e.append(_formel(Du.px(0.3, 0)[0], Du.px(0, 0.08)[1], "q_0 · [Fläche]", ROT, 17))
+    Xa = Du.px(xa, 0)[0]                          # gestrichelte Verbindung beider Diagramme bei x
+    e.append(linie(Xa, Dn.px(0, 0)[1], Xa, Du.px(0, ue(xa))[1], GRAU, 1.1, "6 4"))
+    e.append(Du.pfeil(xa, 0, xa, ue(xa), GR, 2.6, (14, 9)))
+    Xp, Yp = Du.px(xa, ue(xa) / 2)
+    e.append(_formel(Xp - 8, Yp, "u(x)", GR, 18, anker="end"))
+    Xs, Ys = Du.px(xa + dxa, ue(xa) / 2)
+    e.append(_formel(Xs + 10, Ys, "q_0 u(x) dx", ROT, 17, anker="start"))
+    e.append(_formel(Du.px(xa + dxa / 2, 0)[0], Du.px(0, 0)[1] + 16, "dx", ROT, 15))
+    e.append(_formel(Du.px(0.28, 0)[0], Du.px(0, 0.08)[1], "q_0 · [Fläche]", ROT, 17))
+    # Stufe im N-Verlauf: N fällt über dx um q0 dx
+    n0 = 1 - xa
+    e.append(Dn.linie(xa, n0, xa + dxa, n0, GRAU, 1.0, "4 3"))          # dx nur als Hilfslinie
+    e.append(Dn.linie(xa + dxa, n0, xa + dxa, n0 - dxa, ROT, 3.4))      # Stufe q0 dx = Kraft auf das Stück
+    e.append(_formel(Dn.px(xa + dxa / 2, 0)[0], Dn.px(0, n0)[1] - 13, "dx", GRAU, 15))
+    Xd, Yd = Dn.px(xa + dxa, n0)
+    e.append(_formel(Xd + 10, Yd - 4, "q_0 dx", ROT, 17, anker="start"))
+    e.append(Dn.notiz(xa + dxa, n0, ["Kraft auf das Stück dx"], ROT, dx=10, dy=-30, groesse=13))
     ys = y0 + xa * (y1 - y0)                     # Scheibe dx im Stab
     e.append(f'<rect x="{xs - 11}" y="{ys - 7}" width="22" height="14" fill="{ROT}" fill-opacity="0.35" '
              f'stroke="{ROT}" stroke-width="2"/>')
