@@ -327,6 +327,25 @@ def haengestab():
     e.append(Du.notiz(0.14, 0.42, ["exakt"], EX, groesse=13))
     e.append(Dn.notiz(0.08, 0.92, ["exakt"], EX, dx=14, groesse=13, anker="start"))
 
+    # Arbeit der Streckenlast: Scheibe dx bei x trägt q0 dx und verschiebt sich um u(x);
+    # Summe über alle Scheiben = q0 mal Fläche unter u(x)
+    e = abb.ebene("arbeit", "Arbeit der Streckenlast")
+    ue = lambda x: x * (2 - x) / 2
+    xa, dxa = 0.6, 0.05
+    e.append(Du.flaeche([(0, 0)] + [(i / 60, ue(i / 60)) for i in range(61)] + [(1, 0)], "#f6c9c9", 0.55))
+    e.append(Du.flaeche([(xa, 0), (xa, ue(xa)), (xa + dxa, ue(xa + dxa)), (xa + dxa, 0)], ROT, 0.55))
+    e.append(Du.kurve(ue, 0, 1, farbe=EX))
+    Xs, Ys = Du.px(xa + dxa / 2, ue(xa) / 2)
+    e.append(_formel(Xs + 22, Ys - 14, "q_0 u(x) dx", ROT, 17, anker="start"))
+    e.append(_formel(*Du.px(xa + dxa / 2, 0)[:1], Du.px(0, 0)[1] + 16, "dx", ROT, 15))
+    e.append(_formel(Du.px(0.3, 0)[0], Du.px(0, 0.08)[1], "q_0 · [Fläche]", ROT, 17))
+    ys = y0 + xa * (y1 - y0)                     # Scheibe dx im Stab
+    e.append(f'<rect x="{xs - 11}" y="{ys - 7}" width="22" height="14" fill="{ROT}" fill-opacity="0.35" '
+             f'stroke="{ROT}" stroke-width="2"/>')
+    e.append(pfeil(xs, ys, xs, ys + 48, FARBE["last"], 3.0, (16, 10)))
+    e.append(_formel(xs - 16, ys + 30, "q_0 dx", FARBE["last"], 19, anker="end"))
+    e.append(text(xs - 16, ys - 12, "x", FARBE["koord"], 19, anker="end"))
+
     e = abb.ebene("linear", "Linearer Ansatz")
     e.append(Du.kurve(lambda x: x / 2, 0, 1, farbe=ROT, breite=2.2))
     e.append(Dn.kurve(lambda x: 0.5, 0, 1, farbe=ROT, breite=2.2))

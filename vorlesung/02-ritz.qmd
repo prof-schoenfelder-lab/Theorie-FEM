@@ -677,17 +677,34 @@ $$
 u(x) = \frac{q_0}{2EA}\,(2L - x)\,x, \qquad N(x) = q_0\,(L - x)
 $$
 
-Für Ritz brauchen wir die Energie. Die Streckenlast leistet auf ihrer ganzen Länge Arbeit:
+:::
+
+::: {.schritt zeige="system achsen exakt arbeit"}
+### Die Arbeit der Streckenlast
+
+Eine Einzelkraft trägt $-F\,u(L)$ zur potentiellen Energie bei: Kraft mal Verschiebung ihres Angriffspunktes.
+Die Streckenlast greift dagegen **überall** an. Ein Stabstück der Länge $\mathrm{d}x$ an der Stelle $x$ trägt die
+Kraft $q_0\,\mathrm{d}x$ und verschiebt sich um $u(x)$. Es liefert also $-q_0\,u(x)\,\mathrm{d}x$, im Bild den
+dunklen Streifen. Die Summe über alle Stücke ist das Integral, $q_0$ mal die Fläche unter $u(x)$:
 
 $$
-\Pi = \frac12 \int_0^L EA\,u'^2\,\mathrm{d}x - \int_0^L q_0\,u\,\mathrm{d}x
+\Pi_a = -\int_0^L q_0\,u(x)\,\mathrm{d}x
+$$
+
+Zusammen mit der inneren Energie:
+
+$$
+\begin{aligned}
+\Pi &= \frac12 \int_0^L EA\,u'(x)^2\,\mathrm{d}x\\
+    &\quad - \int_0^L q_0\,u(x)\,\mathrm{d}x
+\end{aligned}
 $$
 :::
 
 ::: {.schritt zeige="system achsen exakt linear"}
 ### Linearer Ansatz
 
-Mit $\tilde u = a_1 x$ folgt $a_1 = q_0 L / (2EA)$. Die Normalkraft $N = EA\,\tilde u'$ ist **konstant**
+Mit $\tilde u(x) = a_1 x$ folgt $a_1 = q_0 L / (2EA)$. Die Normalkraft $N = EA\,\tilde u'(x)$ ist **konstant**
 $q_0 L / 2$. An der Einspannung ist sie nur halb so groß wie richtig, am freien Ende statt null ebenfalls
 $q_0 L / 2$. Die Verschiebung am Ende $u(L) = q_0 L^2 / (2EA)$ ist trotzdem exakt.
 
@@ -704,7 +721,7 @@ Solve[D[Piges, a1] == 0, a1]
 ::: {.schritt zeige="system achsen exakt linear quadratisch" dimmen="linear"}
 ### Quadratischer Ansatz
 
-Mit $\tilde u = a_1 x + a_2 x^2$ liefert Ritz
+Mit $\tilde u(x) = a_1 x + a_2 x^2$ liefert Ritz
 
 $$
 \tilde u(x) = \frac{q_0}{2EA}\,(2L - x)\,x
@@ -802,4 +819,12 @@ Längslast. Der Ansatz muss jetzt zwei geometrische Randbedingungen erfüllen. V
 Normalkraft und Lagerkräfte mit der exakten Lösung.
 
 [Aufgabe herunterladen (Mathematica)](../mathematica/02-beidseitig-ritz-task.nb){download="02-beidseitig-ritz-task.nb"}
+:::
+
+::: {.aufgabe}
+**Abgesetzte Welle mit Ritz.** Dieselbe Welle wie in der ersten Übung, jetzt mit einem einzigen Polynom für die
+ganze Welle. Wie schnell konvergiert Ritz bei Querschnittssprüngen, und was können die Spannungen? Die Antwort führt
+direkt zur FEM.
+
+[Aufgabe herunterladen (Mathematica)](../mathematica/02-welle-ritz-task.nb){download="02-welle-ritz-task.nb"}
 :::

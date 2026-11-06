@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     69694,       1187]
-NotebookOptionsPosition[     68316,       1163]
-NotebookOutlinePosition[     68609,       1177]
-CellTagsIndexPosition[     68566,       1174]
+NotebookDataLength[     69840,       1189]
+NotebookOptionsPosition[     68462,       1165]
+NotebookOutlinePosition[     68755,       1179]
+CellTagsIndexPosition[     68712,       1176]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -1125,7 +1125,8 @@ Gegeben: L = 10 m, A0 = 100 mm\.b2, A1 = 20 mm\.b2, E = 210 000 MPa, \[Rho] = \
 
 Cell["\<\
 Berechnen Sie:
-a) die exakte Normalkraft N(x) und Verschiebung u(x),
+a) die exakte Verschiebung u(x) und Normalkraft N(x) aus der \
+Differentialgleichung des Normalkraftstabes,
 b) N\[ADoubleDot]herungen nach Ritz mit Polynomans\[ADoubleDot]tzen ersten, \
 zweiten und dritten Grades,
 c) Verschiebungs- und Spannungsverl\[ADoubleDot]ufe aller \
@@ -1136,8 +1137,9 @@ am Stabende und die gr\[ODoubleDot]\[SZ]te Spannung getroffen?\
 Cell["Hinweise", "Subsection"],
 
 Cell["\<\
-Die Normalkraft an der Stelle x tr\[ADoubleDot]gt F und das Gewicht des \
-Stabes unterhalb von x.
+Exakte L\[ODoubleDot]sung wie in Vorlesung 0 \[UDoubleDot]ber die \
+Differentialgleichung (E A u\[Prime])\[Prime] = \[Minus]q mit DSolve; unten \
+ist die Normalkraft E A u\[Prime] gleich F.
 F\[UDoubleDot]r Ritz: Der Ansatz muss u(0) = 0 erf\[UDoubleDot]llen. Die \
 \[ADoubleDot]u\[SZ]ere potentielle Energie enth\[ADoubleDot]lt die \
 Streckenlast und die Einzellast.
@@ -1176,19 +1178,19 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 60, 0, 87, "Title",ExpressionUUID->"b248f394-8b52-4ba0-b8cc-0166679bd4d5"],
-Cell[621, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"940452f3-f3c2-4e69-955b-612568e584db"],
-Cell[744, 25, 26, 0, 87, "Section",ExpressionUUID->"fa8607b2-eb4f-49c4-bbfb-195683b1282b"],
-Cell[773, 27, 174, 3, 87, "Text",ExpressionUUID->"94d43295-ac4f-453e-82f7-98d092c2572e"],
-Cell[950, 32, 65858, 1086, 87, "Text",ExpressionUUID->"450db24e-0046-46dd-a441-197cca8d32a5"],
-Cell[66811, 1120, 174, 3, 87, "Text",ExpressionUUID->"06a112b8-ba59-414c-8980-1b2133552415"],
-Cell[66988, 1125, 401, 8, 87, "Text",ExpressionUUID->"30eadb24-e618-4d2b-be94-fc488b42f491"],
-Cell[67392, 1135, 30, 0, 87, "Subsection",ExpressionUUID->"40b8dc62-c936-4e78-a395-978143ae627e"],
-Cell[67425, 1137, 406, 8, 87, "Text",ExpressionUUID->"153cd517-cc54-4e81-8272-8d1aa86835b2"],
-Cell[67834, 1147, 40, 0, 87, "Subsection",ExpressionUUID->"36703199-f7aa-4140-8b4c-d0bb36c504fe"],
-Cell[67877, 1149, 288, 6, 87, "Text",ExpressionUUID->"da67c06c-6b79-4d0b-8546-78059f44606d"],
-Cell[68168, 1157, 37, 0, 87, "Section",ExpressionUUID->"5e7a525c-0a1a-4bae-9beb-cb2ad08d49a0"],
-Cell[68208, 1159, 104, 2, 87, "Input",ExpressionUUID->"3e005a98-9d9c-4b56-801c-b2ff124a80ed"]
+Cell[558, 20, 60, 0, 87, "Title",ExpressionUUID->"565b1c4f-2954-4375-b2a9-ed6bedf1f825"],
+Cell[621, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"895726d5-fa35-4011-bccf-102403a75169"],
+Cell[744, 25, 26, 0, 87, "Section",ExpressionUUID->"0c86d276-923c-4bc9-b023-cce6911312aa"],
+Cell[773, 27, 174, 3, 87, "Text",ExpressionUUID->"b3ff6a0c-ba44-404b-871a-e1d0603ddb2a"],
+Cell[950, 32, 65858, 1086, 87, "Text",ExpressionUUID->"d9c3ea57-7ca5-4f58-b84a-0633eac1893e"],
+Cell[66811, 1120, 174, 3, 87, "Text",ExpressionUUID->"e058670f-e2aa-4965-a80a-f2ca40e89969"],
+Cell[66988, 1125, 455, 9, 87, "Text",ExpressionUUID->"0104ad14-fbb7-4cc1-b660-6abaac89d9d3"],
+Cell[67446, 1136, 30, 0, 87, "Subsection",ExpressionUUID->"3bcccf2f-813e-46d2-8d66-55ad2901f51f"],
+Cell[67479, 1138, 498, 9, 87, "Text",ExpressionUUID->"57390da0-cf4b-432f-840f-d478d02491c4"],
+Cell[67980, 1149, 40, 0, 87, "Subsection",ExpressionUUID->"9f223904-c2f2-4564-ab90-fce90fa27eb4"],
+Cell[68023, 1151, 288, 6, 87, "Text",ExpressionUUID->"4f5c3f90-7fc3-4c5c-ab04-bb106625edf6"],
+Cell[68314, 1159, 37, 0, 87, "Section",ExpressionUUID->"3f5b57dc-bb4e-40fd-830d-e30fc446874f"],
+Cell[68354, 1161, 104, 2, 87, "Input",ExpressionUUID->"89cd28fc-6afa-4af5-81e5-ae2e140ff361"]
 }
 ]
 *)
