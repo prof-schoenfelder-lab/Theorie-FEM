@@ -16,7 +16,7 @@ def _():
     from matplotlib.ticker import FuncFormatter
     # Achsenbeschriftung mit deutschem Komma
     KOMMA = FuncFormatter(lambda v, _: f"{v:g}".replace(".", ","))
-    return BLAU, GRAU, KOMMA, ROT, mo, np, plt
+    return BLAU, FuncFormatter, GRAU, GRUEN, KOMMA, ROT, mo, np, plt
 
 
 @app.cell
@@ -52,6 +52,41 @@ def _(mo):
     verh = mo.ui.slider(0.1, 1.0, step=0.05, value=0.2, label="Verjüngung $A_1/A_0$", show_value=True)
     mo.hstack([n, verh], justify="start", gap=3)
     return n, verh
+
+
+@app.cell
+def _(GRAU, GRUEN, ROT, n, np, plt, verh):
+    # Systemskizze: Lager links, Zugkraft F rechts, Elemente mit der Fläche in ihrer Mitte
+    from matplotlib.patches import Polygon as _Polygon, Rectangle as _Rechteck
+    _h0, _h1 = 0.13, 0.13 * verh.value                     # halbe Höhe ∝ A0, A1
+    _figs, _axs = plt.subplots(figsize=(7.2, 2.6))
+    _axs.add_patch(_Polygon([(0, _h0), (1, _h1), (1, -_h1), (0, -_h0)], closed=True,
+                           facecolor="#e6e6e6", edgecolor="k", lw=1.2))
+    _axs.plot([0, 1], [0, 0], color=GRAU, lw=0.8, ls=(0, (8, 3, 2, 3)))
+    _le = 1 / n.value
+    for _e in range(n.value):
+        _hm = _h0 - (_h0 - _h1) * (_e + 0.5) * _le
+        _axs.add_patch(_Rechteck((_e * _le, -_hm), _le, 2 * _hm, fill=False,
+                                 edgecolor=ROT, lw=1.0, ls="--"))
+    _axs.plot([0, 0], [-0.2, 0.2], color="k", lw=1.6)  # Wand mit Schraffur
+    for _y in np.linspace(-0.17, 0.2, 8):
+        _axs.plot([-0.025, 0], [_y - 0.025, _y], color="k", lw=0.8)
+    _axs.add_patch(_Polygon([(1, 0), (0.983, -0.04), (1.017, -0.04)], closed=True,
+                           facecolor="#d9d9d9", edgecolor="k", lw=1.0))   # Loslager
+    _axs.plot([0.975, 1.025], [-0.05, -0.05], color="k", lw=1.0)
+    _axs.annotate("", xy=(0.09, 0), xytext=(0, 0),
+                  arrowprops=dict(arrowstyle="-|>", color=GRUEN, lw=1.8))
+    _axs.text(0.1, -0.005, "$x$", color=GRUEN, va="center", fontsize=16)
+    _axs.annotate("", xy=(1.17, 0), xytext=(1.01, 0),
+                  arrowprops=dict(arrowstyle="-|>", color="#d40000", lw=3, mutation_scale=22))
+    _axs.text(1.09, 0.035, "$F$", color="#d40000", ha="center", fontsize=18)
+    _axs.text(0.02, -_h0 - 0.05, "$A_0$", color=GRUEN, fontsize=15)
+    _axs.text(0.97, _h1 + 0.025, "$A_1$", color=GRUEN, ha="right", fontsize=15)
+    _axs.set_xlim(-0.05, 1.2); _axs.set_ylim(-0.24, 0.24)
+    _axs.set_aspect("equal"); _axs.axis("off")
+    _figs.subplots_adjust(0, 0, 1, 1)
+    _figs
+    return
 
 
 @app.cell
@@ -129,7 +164,7 @@ def _(A, F, L, mo, p, sig, u_exakt):
 
 
 @app.cell
-def _(A, BLAU, F, KOMMA, L, ROT, fem, n, np, plt, u_exakt):
+def _(A, BLAU, F, FuncFormatter, KOMMA, L, ROT, fem, n, np, plt, u_exakt):
     ns = np.arange(1, 61)
     eu = np.array([abs(fem(k)[2][-1] - u_exakt(L)) / u_exakt(L) * 100 for k in ns])
     es = np.array([abs(fem(k)[3].max() - F / A(L)) / (F / A(L)) * 100 for k in ns])
@@ -139,10 +174,11 @@ def _(A, BLAU, F, KOMMA, L, ROT, fem, n, np, plt, u_exakt):
     axk.axhline(5, color="#9a9a9a", ls="--", lw=1)
     axk.text(1.05, 5.5, "5 %", color="#666666")
     axk.plot([n.value, n.value], [eu[n.value - 1], es[n.value - 1]], "o", color="k", ms=5)
-    axk.set_xlabel("Anzahl Elemente $n$"); axk.set_ylabel("Fehler in %")
+    axk.set_xlabel("Anzahl Elemente $n$"); axk.set_ylabel("Fehler")
     axk.set_title("Konvergenz: Fehler über der Elementanzahl", fontsize=14)
     axk.grid(alpha=0.3, which="both"); axk.legend()
-    axk.yaxis.set_major_formatter(KOMMA)
+    axk.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g} %".replace(".", ",")))
+    axk.xaxis.set_major_formatter(KOMMA)
     figk.tight_layout()
     figk
     return

@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     10635,        280]
-NotebookOptionsPosition[      6433,        226]
-NotebookOutlinePosition[      6695,        239]
-CellTagsIndexPosition[      6652,        236]
+NotebookDataLength[      4011,        102]
+NotebookOptionsPosition[      2753,         79]
+NotebookOutlinePosition[      3046,         93]
+CellTagsIndexPosition[      3003,         90]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -23,7 +23,7 @@ Cell["FEM: Konischer Zugstab mit zwei Elementen", "Title"],
 Cell["Theorie der Finite-Elemente-Methode \[CenterDot] Vorlesung 3 \
 \[CenterDot] \[CapitalUDoubleDot]bung", "Subtitle"],
 
-Cell["Aufgabenstellung", "Section"],
+Cell["Aufgabe", "Section"],
 
 Cell["\<\
 Ein Stab mit linear ver\[ADoubleDot]nderlichem Querschnitt A(x) ist am linken \
@@ -31,199 +31,53 @@ Ende (x = 0) gelagert und am rechten Ende (x = L) mit der Zugkraft F belastet.\
 \>", "Text"],
 
 Cell["\<\
-L\[ODoubleDot]sen Sie den Verschiebungsverlauf u(x) und den Spannungsverlauf \
-\[Sigma](x) mit der Finite-Elemente-Methode. Verwenden Sie zwei lineare \
-Stabelemente gleicher L\[ADoubleDot]nge und gehen Sie den Ablauf der FEM \
-Schritt f\[UDoubleDot]r Schritt durch. Vergleichen Sie mit der exakten L\
-\[ODoubleDot]sung.\
-\>", "Text"],
-
-Cell["\<\
 Gegeben: E = 70000 MPa, L = 1000 mm, F = 5000 N, A0 = 100 mm\.b2, A1 = A0/5 = \
 20 mm\.b2\
 \>", "Text"],
 
-Cell["Gegebene Gr\[ODoubleDot]\[SZ]en", "Section"],
-
-Cell[BoxData[
- RowBox[{"data", "=", 
-  RowBox[{"{", 
-   RowBox[{
-    RowBox[{"Em", "\[Rule]", "70000"}], ",", 
-    RowBox[{"L", "\[Rule]", "1000"}], ",", 
-    RowBox[{"F", "\[Rule]", "5000"}], ",", 
-    RowBox[{"A0", "\[Rule]", "100"}], ",", 
-    RowBox[{"A1", "\[Rule]", "20"}]}], "}"}]}]], "Input"],
-
-Cell[BoxData[
- RowBox[{"Ax", "=", 
-  RowBox[{"A0", "-", 
-   FractionBox[
-    RowBox[{
-     RowBox[{"(", 
-      RowBox[{"A0", "-", "A1"}], ")"}], " ", "x"}], "L"]}]}]], "Input"],
-
-Cell["Exakte L\[ODoubleDot]sung (Referenz)", "Section"],
-
 Cell["\<\
-Differentialgleichung des Normalkraftstabes (EA u')' = 0 mit u(0) = 0 und E \
-A(L) u'(L) = F:\
+Berechnen Sie mit der Finite-Elemente-Methode und zwei linearen Stabelementen \
+gleicher L\[ADoubleDot]nge:
+a) die Elementsteifigkeitsmatrizen und die Systemsteifigkeitsmatrix,
+b) die Knotenverschiebungen und die Lagerkraft,
+c) den Verschiebungs- und den Spannungsverlauf im Vergleich mit der exakten L\
+\[ODoubleDot]sung (Bilder),
+d) die Fehler von Verschiebung und Spannung am Stabende. Wie viele Elemente \
+br\[ADoubleDot]uchte man f\[UDoubleDot]r 5 % Genauigkeit der Spannung?\
 \>", "Text"],
 
-Cell[BoxData[
- RowBox[{"dgl", "=", 
-  RowBox[{
-   RowBox[{"D", "[", 
-    RowBox[{
-     RowBox[{"Em", " ", "Ax", " ", 
-      RowBox[{"D", "[", 
-       RowBox[{
-        RowBox[{"u", "[", "x", "]"}], ",", "x"}], "]"}]}], ",", "x"}], "]"}], 
-   "\[Equal]", "0"}]}]], "Input"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"rb", "=", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"u", "[", "0", "]"}], "\[Equal]", "0"}], ",", 
-     RowBox[{
-      RowBox[{"Em", " ", 
-       RowBox[{"(", 
-        RowBox[{"Ax", "/.", "\[VeryThinSpace]", 
-         RowBox[{"x", "\[Rule]", "L"}]}], ")"}], " ", 
-       RowBox[{
-        SuperscriptBox["u", "\[Prime]",
-         MultilineFunction->None], "[", "L", "]"}]}], "\[Equal]", "F"}]}], 
-    "}"}]}], ";"}]], "Input"],
-
-Cell[BoxData[
- RowBox[{"uex", "=", 
-  RowBox[{
-   RowBox[{"u", "[", "x", "]"}], "/.", "\[VeryThinSpace]", 
-   RowBox[{"First", "[", 
-    RowBox[{"DSolve", "[", 
-     RowBox[{
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{"dgl", ",", 
-         RowBox[{"Sequence", "@@", "rb"}]}], "}"}], "/.", "\[VeryThinSpace]", 
-       "data"}], ",", 
-      RowBox[{"u", "[", "x", "]"}], ",", "x"}], "]"}], "]"}]}]}]], "Input"],
-
-Cell[BoxData[
- RowBox[{"sigex", "=", 
-  RowBox[{
-   RowBox[{"Em", " ", 
-    RowBox[{"D", "[", 
-     RowBox[{"uex", ",", "x"}], "]"}]}], "/.", "\[VeryThinSpace]", 
-   "data"}]}]], "Input"],
-
-Cell[BoxData[
- RowBox[{"N", "[", 
-  RowBox[{"uex", "/.", "\[VeryThinSpace]", 
-   RowBox[{"x", "\[Rule]", "1000"}]}], "]"}]], "Input"],
-
-Cell["L\[ODoubleDot]sung mit der FEM", "Section"],
-
-Cell["1 Elementtyp: Ansatzfunktionen und Elementsteifigkeitsmatrix", \
-"Subsection"],
+Cell["Hinweise", "Subsection"],
 
 Cell["\<\
-Lineares Stabelement mit den Elementfreiheitsgraden p1e (rechter Knoten) und \
-p2e (linker Knoten). Leiten Sie die Elementsteifigkeitsmatrix aus der inneren \
-potentiellen Energie her.\
+Ablauf der FEM wie im Vorlesungsbeispiel: Elementtyp, Vernetzung, Konnektivit\
+\[ADoubleDot]t (Inzidenzmatrizen \[CapitalLambda]e), Zusammenbau, \
+Randbedingungen, L\[ODoubleDot]sen, Auswertung.
+Jedes Element erh\[ADoubleDot]lt die Querschnittsfl\[ADoubleDot]che in seiner \
+Mitte.
+Exakte L\[ODoubleDot]sung \[UDoubleDot]ber die DGL (EA u')' = 0 mit u(0) = 0 \
+und E A(L) u'(L) = F, wie in Vorlesung 0.\
 \>", "Text"],
 
+Cell["Kontrollergebnisse", "Subsection"],
+
 Cell["\<\
-Gesucht: Ansatzfunktionen Ne, Ableitung dNe und Elementsteifigkeitsmatrix Ke\
+a) K1 = 11 200 N/mm \[CenterDot] {{1, \[Minus]1}, {\[Minus]1, 1}}, K2 = 5600 \
+N/mm \[CenterDot] {{1, \[Minus]1}, {\[Minus]1, 1}}; Ksys = {{11 200, \
+\[Minus]11 200, 0}, {\[Minus]11 200, 16 800, \[Minus]5600}, {0, \[Minus]5600, \
+5600}} N/mm
+b) p2 = 0,446 mm, p3 = 1,339 mm, Lagerkraft q1 = \[Minus]5000 N
+c) Spannungen je Element konstant: \[Sigma]1 = 62,5 MPa, \[Sigma]2 = 125 MPa
+d) u(L): FEM 1,339 mm, exakt 1,437 mm (\[Minus]6,8 %); \[Sigma](L): FEM 125 \
+MPa, exakt 250 MPa (\[Minus]50 %)\
 \>", "Text"],
+
+Cell["L\[ODoubleDot]sung", "Section"],
 
 Cell[BoxData[
  RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["2 Vernetzung: Elementl\[ADoubleDot]ngen und Querschnitte", "Subsection"],
-
-Cell["\<\
-Zwei Elemente gleicher L\[ADoubleDot]nge. Jedes Element erh\[ADoubleDot]lt \
-die Querschnittsfl\[ADoubleDot]che in seiner Mitte.\
-\>", "Text"],
-
-Cell["Gesucht: Listen le und ae, Elementsteifigkeitsmatrizen K[e]", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["3 Konnektivit\[ADoubleDot]t: Inzidenzmatrizen", "Subsection"],
-
-Cell["\<\
-Systemfreiheitsgrade p1, p2, p3 (von links nach rechts). Es gilt pe = \
-\[CapitalLambda]e . psys.\
-\>", "Text"],
-
-Cell["Gesucht: Inzidenzmatrizen \[CapitalLambda][1] und \[CapitalLambda][2]", \
-"Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["4 Zusammenbau: Systemsteifigkeitsmatrix", "Subsection"],
-
-Cell["Gesucht: Ksys als Summe \[CapitalLambda]e^T Ke \[CapitalLambda]e", \
-"Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["5 Gleichungssystem l\[ODoubleDot]sen", "Subsection"],
-
-Cell["\<\
-Randbedingung: p1 = 0 (Lager), dort wirkt die unbekannte Lagerkraft q1. Am \
-rechten Ende greift F an.\
-\>", "Text"],
-
-Cell["Gesucht: psys, qsys und L\[ODoubleDot]sung des Gleichungssystems", \
-"Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["6 bis 8 Auswertung: Verschiebungen und Spannungen", "Subsection"],
-
-Cell["\<\
-Elementverschiebungen pe = \[CapitalLambda]e . psys, Verschiebungsverlauf ue \
-= Ne . pe, Spannung \[Sigma]e = E Ne' . pe\
-\>", "Text"],
-
-Cell["\<\
-Gesucht: Verschiebungsverlauf ufem und Spannungsverlauf sigfem, Diagramme mit \
-Vergleich zur exakten L\[ODoubleDot]sung\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"],
-
-Cell["Vergleich", "Subsection"],
-
-Cell["Relative Fehler am Stabende in Prozent:", "Text"],
-
-Cell["\<\
-Gesucht: Fehler der Verschiebung und der Spannung am Stabende. Wie viele \
-Elemente br\[ADoubleDot]uchte man f\[UDoubleDot]r 5 % Genauigkeit der \
-Spannung?\
-\>", "Text"],
-
-Cell[BoxData[
- RowBox[{"(*", " ", 
-  RowBox[{"Ihre", " ", "Eingabe"}], " ", "*)"}]], "Input"]
+  RowBox[{"Ihre", " ", "L\[ODoubleDot]sung"}], " ", "*)"}]], "Input"]
 },
+Magnification:>1.25 Inherited,
 FrontEndVersion->"13.1 for Mac OS X ARM (64-bit) (June 16, 2022)",
 StyleDefinitions->"Default.nb"
 ]
@@ -238,50 +92,18 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 58, 0, 70, "Title",ExpressionUUID->"4e711a20-e870-4180-9087-a6a6bb0352f0"],
-Cell[619, 22, 120, 1, 70, "Subtitle",ExpressionUUID->"e1f1d1a7-386f-4852-9718-c779193c761a"],
-Cell[742, 25, 35, 0, 70, "Section",ExpressionUUID->"d1310e32-6e71-4f19-9cc2-7829a20a739d"],
-Cell[780, 27, 182, 3, 70, "Text",ExpressionUUID->"ee77e550-25fa-4f31-a0e7-1c95d541638e"],
-Cell[965, 32, 344, 6, 70, "Text",ExpressionUUID->"38e59f87-fec4-4b05-8d52-b809bf70a1cf"],
-Cell[1312, 40, 113, 3, 70, "Text",ExpressionUUID->"88c0f9b2-7281-48af-9345-144227879306"],
-Cell[1428, 45, 50, 0, 70, "Section",ExpressionUUID->"b6f37cd1-9be8-4f54-af6a-db32a820e88c"],
-Cell[1481, 47, 300, 8, 70, "Input",ExpressionUUID->"3783df2a-0b12-4d22-aa95-f42db1c49eb4"],
-Cell[1784, 57, 176, 6, 70, "Input",ExpressionUUID->"83d071c1-4c5a-42ce-953b-3b29d06c4abc"],
-Cell[1963, 65, 55, 0, 70, "Section",ExpressionUUID->"a9ca18db-6e6a-4335-96f6-46629a3bb81e"],
-Cell[2021, 67, 117, 3, 70, "Text",ExpressionUUID->"dd595b0e-1892-49da-819e-354dde3954eb"],
-Cell[2141, 72, 271, 9, 70, "Input",ExpressionUUID->"eb19b262-7c5d-4982-aae0-5b3795db51fa"],
-Cell[2415, 83, 477, 15, 70, "Input",ExpressionUUID->"368a4427-a8c7-4ed7-b7f7-f6439b71ae66"],
-Cell[2895, 100, 417, 12, 70, "Input",ExpressionUUID->"55deb6c3-6702-4ccc-9e37-7d8ac35ccab9"],
-Cell[3315, 114, 187, 6, 70, "Input",ExpressionUUID->"d542c050-00b2-4803-ae4c-e441f60ee3db"],
-Cell[3505, 122, 133, 3, 70, "Input",ExpressionUUID->"eceb6396-a2a4-44f5-a93c-396c3d2cb3c3"],
-Cell[3641, 127, 49, 0, 70, "Section",ExpressionUUID->"e0948863-8c09-4350-ac15-a2b8a58ef993"],
-Cell[3693, 129, 84, 1, 70, "Subsection",ExpressionUUID->"e7655951-60e0-4d7b-8ea2-0f6f61ec3b63"],
-Cell[3780, 132, 208, 4, 70, "Text",ExpressionUUID->"1aeec37e-400f-432a-aa8d-43dbf0d9427b"],
-Cell[3991, 138, 100, 2, 70, "Text",ExpressionUUID->"c77472a4-5ed0-4e95-97da-ef92931f3de6"],
-Cell[4094, 142, 93, 2, 70, "Input",ExpressionUUID->"8f6061f8-99c2-4312-9188-d5ef29a25843"],
-Cell[4190, 146, 78, 0, 70, "Subsection",ExpressionUUID->"7dcf0df8-a5b5-4ee7-bed5-681fb03dac5b"],
-Cell[4271, 148, 152, 3, 70, "Text",ExpressionUUID->"4fd48cc4-2637-4113-bd35-3f572fed23f2"],
-Cell[4426, 153, 75, 0, 70, "Text",ExpressionUUID->"7e46c001-bc06-4559-aaff-cad8254f3e44"],
-Cell[4504, 155, 93, 2, 70, "Input",ExpressionUUID->"7911f00f-acdc-4e4b-9a9d-fa2ef77b218d"],
-Cell[4600, 159, 67, 0, 70, "Subsection",ExpressionUUID->"ed8213c3-548c-42c0-be8b-9957f527221a"],
-Cell[4670, 161, 121, 3, 70, "Text",ExpressionUUID->"8553ffa4-4be3-4c54-8f48-3ebd0ae3a12b"],
-Cell[4794, 166, 87, 1, 70, "Text",ExpressionUUID->"21d5a15f-d47c-4d9f-be5c-cdef71934300"],
-Cell[4884, 169, 93, 2, 70, "Input",ExpressionUUID->"e076d742-8f81-4955-9d51-5ef1aec42872"],
-Cell[4980, 173, 61, 0, 70, "Subsection",ExpressionUUID->"1c10b80a-affd-455e-bfc7-4c200d4faed2"],
-Cell[5044, 175, 82, 1, 70, "Text",ExpressionUUID->"ac86140d-e030-4ea7-a0b1-8023051b2c0a"],
-Cell[5129, 178, 93, 2, 70, "Input",ExpressionUUID->"0d246c58-320e-439f-9c86-14346302383b"],
-Cell[5225, 182, 58, 0, 70, "Subsection",ExpressionUUID->"eeffdd28-452f-4783-8589-423598036fcf"],
-Cell[5286, 184, 126, 3, 70, "Text",ExpressionUUID->"5214d0b9-c161-4389-8715-2845c1c577a6"],
-Cell[5415, 189, 82, 1, 70, "Text",ExpressionUUID->"bb64a1dd-bd21-4d24-976c-cc0675ae30a1"],
-Cell[5500, 192, 93, 2, 70, "Input",ExpressionUUID->"9d561a73-91c1-4b99-9fa0-8078a50ea1bc"],
-Cell[5596, 196, 71, 0, 70, "Subsection",ExpressionUUID->"23c00221-acc0-4743-81db-9a345bba4a6c"],
-Cell[5670, 198, 145, 3, 70, "Text",ExpressionUUID->"64265fac-0928-4dab-8a88-ef953ba0968e"],
-Cell[5818, 203, 144, 3, 70, "Text",ExpressionUUID->"bb6d033a-b3e9-40cb-9cea-4450116b70ed"],
-Cell[5965, 208, 93, 2, 70, "Input",ExpressionUUID->"c8bec80c-5078-45a9-a6a4-8e55e1a8f793"],
-Cell[6061, 212, 31, 0, 70, "Subsection",ExpressionUUID->"97a783f3-d1aa-400e-9b10-d734dc224f0c"],
-Cell[6095, 214, 55, 0, 70, "Text",ExpressionUUID->"8eea1e31-21df-4089-bc63-68a5ff6c60e8"],
-Cell[6153, 216, 180, 4, 70, "Text",ExpressionUUID->"9e207f63-b0fb-4003-a7e8-3edc05612a7f"],
-Cell[6336, 222, 93, 2, 70, "Input",ExpressionUUID->"671ae7d1-c5f2-4732-8b2f-0d2d00cee6ee"]
+Cell[558, 20, 58, 0, 87, "Title",ExpressionUUID->"57fcc689-80ca-49f3-9091-3606cf1a0336"],
+Cell[619, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"46a19f2d-d2cf-4a83-aff8-446c330eefe8"],
+Cell[742, 25, 26, 0, 87, "Section",ExpressionUUID->"f93134b8-b786-4a43-a6ca-566b22e02b8d"],
+Cell[771, 27, 182, 3, 87, "Text",ExpressionUUID->"fb2b571f-761c-4dcd-ad80-85f7433ada27"],
+Cell[956, 32, 113, 3, 87, "Text",ExpressionUUID->"fb0c5a02-598b-49e9-997d-ba46c8ba069b"],
+Cell[1072, 37, 504, 9, 87, "Text",ExpressionUUID->"cfda0f9c-227b-445f-b481-1b143c1e8e24"],
+Cell[1579, 48, 30, 0, 87, "Subsection",ExpressionUUID->"52ba93c3-9e9f-44e5-a41d-3383a97ff077"],
+Cell[1612, 50, 426, 8, 87, "Text",ExpressionUUID->"b8e13fb9-1882-4086-9613-6d02289bfbb0"],
+Cell[2041, 60, 40, 0, 87, "Subsection",ExpressionUUID->"fc872621-5fa7-4c97-b0be-58c158c1d89e"],
+Cell[2084, 62, 518, 9, 87, "Text",ExpressionUUID->"4db2971f-2bbe-467b-9d0c-71afc456d2a2"],
+Cell[2605, 73, 37, 0, 87, "Section",ExpressionUUID->"b8bbf3b1-784c-4f7b-9586-e529a610b494"],
+Cell[2645, 75, 104, 2, 87, "Input",ExpressionUUID->"8f4e6722-357a-4fc4-a04f-1d9001bbd4e5"]
 }
 ]
 *)
