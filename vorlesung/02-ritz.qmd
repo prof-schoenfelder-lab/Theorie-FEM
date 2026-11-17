@@ -72,7 +72,27 @@ $$
 $$
 
 Das ist die Verallgemeinerung von $\tfrac12\,c\,u^2$ für den Normalkraftstab. Sie gilt auch, wenn $EA$ sich längs
-des Stabes ändert.
+des Stabes ändert: durch einen veränderlichen Querschnitt $A(x)$, aber ebenso durch einen veränderlichen E-Modul
+$E(x)$, etwa bei Verbund- oder Gradientenwerkstoffen.
+
+::: {.vertiefung titel="Ausführlicher: Formänderungsenergie allgemein"}
+Im Stab gibt es nur eine Spannung $\sigma$ und eine Dehnung $\varepsilon$. In einem räumlichen Bauteil sind Spannung
+und Dehnung **Tensoren** mit je neun Komponenten $\sigma_{ij}$ und $\varepsilon_{ij}$. Die Energie je Volumen ist dann
+die Summe aller Produkte, das doppelte Skalarprodukt $\boldsymbol\sigma : \boldsymbol\varepsilon$:
+
+$$
+\Pi_i = \frac12 \int_V \boldsymbol\sigma : \boldsymbol\varepsilon\,\mathrm{d}V
+= \frac12 \int_V \sum_{i=1}^{3}\sum_{j=1}^{3} \sigma_{ij}\,\varepsilon_{ij}\,\mathrm{d}V
+$$
+
+Diese Form gilt für Stäbe, Balken, Platten und Volumenkörper. Für den Stab bleibt nur $\sigma_{11}\,\varepsilon_{11}$
+übrig, und es entsteht die Formel oben mit der **Dehnsteifigkeit** $EA$. Beim Biegebalken steht an ihrer Stelle die
+**Biegesteifigkeit** $EI$ und statt $u'(x)$ die Krümmung $w''(x)$:
+
+$$
+\Pi_i = \frac12 \int_0^L EI\,w''(x)^2\,\mathrm{d}x
+$$
+:::
 :::
 
 ::: {.schritt zeige="stab last verlauf"}
@@ -108,6 +128,9 @@ Das ist genau die Energie einer Feder mit der Steifigkeit
 $$
 c = \frac{EA}{L}
 $$
+
+Anders als bei den Federn aus Vorlesung 1 hängt die Steifigkeit von der **Länge** ab: Ein halb so langer Stab ist
+doppelt so steif.
 
 Mit $\Pi_a = -F\,u(L)$ ist die gesamte potentielle Energie
 
@@ -173,7 +196,10 @@ data = {Ealu -> 70000, Estahl -> 210000,
 ### Freiheitsgrade und Verlängerungen
 
 Unbekannt sind die Verschiebungen der beiden Verbindungsstellen, $p_1$ und $p_2$, auf der Mittellinie. Die Kraft
-$5F$ ist dafür längs ihrer Wirkungslinie verschoben, das ändert nichts an ihrer Wirkung. Jeder Stab ist ein Stab wie oben, mit eigener Koordinate $x_e$ ab seinem linken Ende. In diesem lokalen
+$5F$ ist dafür längs ihrer Wirkungslinie verschoben, das ändert nichts an ihrer Wirkung. Knoten liegen dort, wo sich Material oder Querschnitt ändern und wo Kräfte
+angreifen. **Mehr Knoten bringen nichts:** Dazwischen ist $u(x)$ ohnehin linear.
+
+Jeder Stab ist ein Stab wie oben, mit eigener Koordinate $x_e$ ab seinem linken Ende. In diesem lokalen
 Koordinatensystem ist $u_e(0) = 0$, und die Verlängerung ist wie oben $\Delta u_e = u_e(L_e)$. Sie ist die
 Verschiebung des rechten minus die des linken Stabendes:
 
