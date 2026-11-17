@@ -435,8 +435,9 @@ integriert. Bei Polynomen geht das immer, bei komplizierteren Funktionen meldet 
 das Integral nicht lösen kann. Sinus- und Kosinusfunktionen wären auch möglich.
 
 **Keine Konstante**, denn der Ansatz muss die **wesentliche (geometrische) Randbedingung** $u(0) = 0$ erfüllen. Mit
-$\tilde u = a_1\,x + a_2$ wäre $\tilde u(0) = a_2$: Das Minimum könnte ein $a_2 \neq 0$ liefern, der Stab würde sich
-an der Einspannung verschieben. Ebenso beim quadratischen Ansatz: $a_1\,x + a_2\,x^2$ ja,
+$\tilde u = a_1\,x + a_2$ wäre $\tilde u(0) = a_2$: Der ganze Stab könnte sich verschieben, ohne sich zu dehnen.
+$\Pi_i$ hängt nicht von $a_2$ ab, $\Pi_a = -F\,(a_1 L + a_2)$ wird mit wachsendem $a_2$ immer kleiner, und es gibt
+kein Minimum. Ebenso beim quadratischen Ansatz: $a_1\,x + a_2\,x^2$ ja,
 $a_1\,x + a_2\,x^2 + a_3$ nein.
 
 Kraftrandbedingungen (hier $F$ am Ende) muss der Ansatz nicht erfüllen, sie stecken in $\Pi_a$.
