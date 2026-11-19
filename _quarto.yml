@@ -67,6 +67,7 @@ format:
     include-after-body:
       - assets/scrolly.html
       - assets/mathematica-index.html
+      - assets/inhalt-rand.html
     html-math-method: mathjax
     toc: false
 

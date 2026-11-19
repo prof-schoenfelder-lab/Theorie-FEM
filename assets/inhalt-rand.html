@@ -1,0 +1,128 @@
+<!-- Inhaltsverzeichnis am rechten Rand der Vorlesungsseiten: im Ruhezustand eine Spalte kurzer Striche
+     (lang = Abschnitt ##, kurz = Schritt ###), die aktuelle Stelle hervorgehoben. Beim Darüberfahren klappt die
+     Liste der Überschriften auf; ein Klick springt an die Stelle (Schritte in die Mitte, damit die Scroll-Grafik
+     den Schritt zeigt). Ohne Maus (Touch) und im Druck ausgeblendet. -->
+<style>
+  .inhalt-rand {
+    position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 40;
+    display: flex; flex-direction: row-reverse; align-items: center;
+    font-family: "Source Sans Pro", sans-serif;
+  }
+  .inhalt-striche {
+    display: flex; flex-direction: column; align-items: flex-end;
+    padding: 0.6rem 0.55rem 0.6rem 0.9rem; cursor: pointer;
+  }
+  .inhalt-striche span {
+    display: block; height: 2px; width: 9px; margin: var(--strich-abstand, 3px) 0;
+    background: #b4b9c0; border-radius: 1px; transition: background 0.15s, width 0.15s;
+  }
+  .inhalt-striche span.ab { width: 18px; background: #8a9099; }
+  .inhalt-striche span.aktiv { background: #0050b4; height: 3px; }
+  .inhalt-liste {
+    display: none; max-height: 80vh; overflow-y: auto; width: 20rem;
+    background: #fff; border: 1px solid #dfe2e6; border-radius: 0.5rem;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18); padding: 0.5rem 0; font-size: 1rem; line-height: 1.3;
+  }
+  .inhalt-rand:hover .inhalt-liste, .inhalt-rand:focus-within .inhalt-liste { display: block; }
+  .inhalt-liste a {
+    display: block; padding: 0.2rem 0.9rem 0.2rem 1.6rem; color: #333; text-decoration: none;
+    border-left: 3px solid transparent;
+  }
+  .inhalt-liste a.ab { padding-left: 0.9rem; font-weight: 600; margin-top: 0.35rem; color: #111; }
+  .inhalt-liste a:first-child { margin-top: 0; }
+  .inhalt-liste a:hover { background: #eef3fb; }
+  .inhalt-liste a.aktiv { border-left-color: #0050b4; color: #0050b4; background: #f4f7fc; }
+  .inhalt-liste mjx-container { font-size: 100% !important; }
+  html.beamer .inhalt-liste { font-size: 0.85rem; }
+  @media (hover: none), (max-width: 900px) { .inhalt-rand { display: none; } }
+  @media print { .inhalt-rand { display: none; } }
+</style>
+<script>
+(function () {
+  if (!/\/vorlesung\//.test(location.pathname)) return;
+  const inhalt = document.querySelector("#quarto-document-content") || document.querySelector("main");
+  if (!inhalt) return;
+  // Überschriften der Seite, ohne die in aufklappbaren Vertiefungen und Kästen
+  const kopf = [...inhalt.querySelectorAll("h2[id], h3[id], section[id] > h2, section[id] > h3")]
+    .filter((h, i, a) => a.indexOf(h) === i)
+    .filter(h => !h.closest(".callout, details, .vertiefung, .merke, .aufgabe, .quarto-title-block"));
+  if (kopf.length < 3) return;
+
+  const ziel = h => h.id || (h.parentElement && h.parentElement.id) || "";
+  const rand = document.createElement("nav");
+  rand.className = "inhalt-rand";
+  rand.setAttribute("aria-label", "Inhalt dieser Vorlesung");
+  const striche = document.createElement("div");
+  striche.className = "inhalt-striche";
+  const liste = document.createElement("div");
+  liste.className = "inhalt-liste";
+  rand.append(striche, liste);
+
+  // dichter setzen, wenn es viele Einträge sind
+  const platz = window.innerHeight * 0.8;
+  rand.style.setProperty("--strich-abstand", Math.max(1, Math.min(3, (platz / kopf.length - 2) / 2)) + "px");
+
+  const eintraege = kopf.map(h => {
+    const stufe = h.tagName.toLowerCase();
+    const s = document.createElement("span");
+    s.className = stufe === "h2" ? "ab" : "sch";
+    striche.appendChild(s);
+    const a = document.createElement("a");
+    a.className = stufe === "h2" ? "ab" : "sch";
+    a.href = "#" + ziel(h);
+    const kopie = h.cloneNode(true);
+    kopie.querySelectorAll(".anchorjs-link, .header-section-number").forEach(x => x.remove());
+    a.innerHTML = kopie.innerHTML;
+    a.addEventListener("click", e => { e.preventDefault(); springe(h); });
+    liste.appendChild(a);
+    return { h, s, a };
+  });
+
+  function springe(h) {
+    const schritt = h.closest(".schritt");
+    if (schritt) schritt.scrollIntoView({ behavior: "smooth", block: "center" });
+    else {
+      const y = h.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+    history.replaceState(null, "", "#" + ziel(h));
+  }
+  // Klick auf die Striche: zum entsprechenden Eintrag
+  striche.addEventListener("click", e => {
+    const i = [...striche.children].indexOf(e.target);
+    if (i >= 0) springe(eintraege[i].h);
+  });
+
+  let aktiv = null;
+  function markieren() {
+    const mitte = window.innerHeight / 2;
+    let neu = eintraege[0];
+    for (const e of eintraege) {
+      const bezug = e.h.closest(".schritt") || e.h;
+      if (bezug.getBoundingClientRect().top <= mitte) neu = e; else break;
+    }
+    if (neu === aktiv) return;
+    if (aktiv) { aktiv.s.classList.remove("aktiv"); aktiv.a.classList.remove("aktiv"); }
+    aktiv = neu;
+    aktiv.s.classList.add("aktiv"); aktiv.a.classList.add("aktiv");
+  }
+  let geplant = false;
+  window.addEventListener("scroll", () => {
+    if (geplant) return;
+    geplant = true;
+    requestAnimationFrame(() => { geplant = false; markieren(); });
+  }, { passive: true });
+  // beim Öffnen den aktuellen Eintrag in den sichtbaren Teil der Liste holen
+  rand.addEventListener("mouseenter", () => {
+    if (!aktiv) return;
+    const a = aktiv.a;
+    if (a.offsetTop < liste.scrollTop || a.offsetTop > liste.scrollTop + liste.clientHeight - 30)
+      liste.scrollTop = a.offsetTop - liste.clientHeight / 3;
+  });
+
+  document.body.appendChild(rand);
+  markieren();
+  // Formeln in den kopierten Überschriften setzen, falls MathJax schon fertig war
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([liste]).catch(() => {});
+})();
+</script>
