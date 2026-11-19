@@ -64,7 +64,9 @@ format:
     theme: cosmo
     mainfont: "Source Sans Pro"
     css: assets/tm.css
-    include-after-body: assets/scrolly.html
+    include-after-body:
+      - assets/scrolly.html
+      - assets/mathematica-index.html
     html-math-method: mathjax
     toc: false
 

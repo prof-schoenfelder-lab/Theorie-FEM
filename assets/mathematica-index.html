@@ -1,0 +1,84 @@
+<!-- Mathematica-Code: Subscript[L, e] wird als L mit tiefgestelltem e angezeigt (wie Strg + _ in Mathematica).
+     Beim Kopieren (Kopierknopf oder Markieren) wird daraus Mathematicas Eingabetext
+     \!\(\*SubscriptBox[\(L\), \(e\)]\), den ein Notebook beim Einfügen wieder als L_e anzeigt.
+     Die Quelle (.qmd) bleibt bei Subscript[L, e], damit der Code im Kernel geprüft werden kann. -->
+<style>
+  code.sourceCode.mathematica sub, .mma-index sub { font-size: 75%; vertical-align: sub; line-height: 0; }
+</style>
+<script>
+(function () {
+  function linear(basis, index) {
+    return "\\!\\(\\*SubscriptBox[\\(" + basis + "\\), \\(" + index + "\\)]\\)";
+  }
+
+  // Subscript[ basis , index ] in den hervorgehobenen Zeilen suchen und ersetzen; die Hervorhebung bleibt erhalten.
+  function umbauen(code) {
+    const kandidaten = [...code.querySelectorAll("span")].filter(s => s.textContent === "Subscript" && !s.children.length);
+    for (const sub of kandidaten) {
+      const teile = [];
+      let n = sub.nextSibling;
+      const txt = k => (k ? k.textContent : "");
+      if (txt(n).trim() !== "[") continue;
+      teile.push(n); n = n.nextSibling;
+      const basis = [], index = [];
+      while (n && txt(n).trim() !== ",") { basis.push(n); n = n.nextSibling; }
+      if (!n) continue;
+      teile.push(n); n = n.nextSibling;
+      while (n && !txt(n).trim().startsWith("]")) { index.push(n); n = n.nextSibling; }
+      if (!n) continue;
+      const zu = n, restZu = txt(zu).replace(/^\s*\]/, "");   // „],“ oder „]]“: nur die eigene Klammer entfernen
+      const b = basis.map(txt).join("").trim(), i = index.map(txt).join("").trim();
+      if (!b || !i || /[\[\],]/.test(b + i)) continue;          // nur einfache Indizes
+      const huelle = document.createElement("span");
+      huelle.className = "mma-index";
+      huelle.dataset.linear = linear(b, i);
+      sub.parentNode.insertBefore(huelle, sub);
+      basis.forEach(k => { if (k.textContent.trim()) huelle.appendChild(k); else k.remove(); });
+      const tief = document.createElement("sub");
+      index.forEach(k => { if (k.textContent.trim()) tief.appendChild(k); else k.remove(); });
+      huelle.appendChild(tief);
+      sub.remove();
+      teile.forEach(k => k.remove());
+      if (restZu) zu.textContent = restZu; else zu.remove();
+    }
+  }
+
+  // Text zum Kopieren: Indizes als Mathematica-Eingabetext
+  function kopiertext(knoten) {
+    const kopie = knoten.cloneNode(true);
+    kopie.querySelectorAll(".mma-index").forEach(h => h.replaceWith(document.createTextNode(h.dataset.linear)));
+    return kopie.textContent;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("code.sourceCode.mathematica").forEach(umbauen);
+
+    // Kopierknopf von Quarto: vor dessen eigenem Handler abfangen
+    document.addEventListener("click", ev => {
+      const knopf = ev.target.closest(".code-copy-button");
+      if (!knopf) return;
+      const code = knopf.closest(".code-copy-outer-scaffold, div.sourceCode")?.querySelector("code.sourceCode.mathematica");
+      if (!code || !code.querySelector(".mma-index")) return;
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      navigator.clipboard.writeText(kopiertext(code)).then(() => {
+        knopf.classList.add("code-copy-button-checked");
+        setTimeout(() => knopf.classList.remove("code-copy-button-checked"), 1000);
+      });
+    }, true);
+
+    // Markieren und Kopieren
+    document.addEventListener("copy", ev => {
+      const sel = document.getSelection();
+      if (!sel || sel.isCollapsed) return;
+      const anker = sel.getRangeAt(0).commonAncestorContainer;
+      const el = anker.nodeType === 1 ? anker : anker.parentElement;
+      if (!el.closest("code.sourceCode.mathematica")) return;
+      const frag = document.createElement("div");
+      frag.appendChild(sel.getRangeAt(0).cloneContents());
+      if (!frag.querySelector(".mma-index")) return;
+      ev.clipboardData.setData("text/plain", kopiertext(frag));
+      ev.preventDefault();
+    });
+  });
+})();
+</script>

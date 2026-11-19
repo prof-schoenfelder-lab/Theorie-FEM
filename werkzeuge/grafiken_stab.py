@@ -9,7 +9,9 @@ import math
 import re
 from pathlib import Path
 
-from grafiken_ritz import _bruch, ritz
+from fractions import Fraction
+
+from grafiken_ritz import RITZ, _bruch, _stab, ritz
 from nlzeichnen import Diagramm, feder, flaeche, notiz, wandgelenk
 from tmzeichnen import (FARBE, SCHRIFT, Abbildung, _tspans, einspannung, f, kraft, kreis, linie, loslager, mass,
                         nummer, pfeil, polylinie, text)
@@ -82,7 +84,7 @@ def _kraft(x_von, x_bis, y, label, ueber=0):
 def _x_achse(x, y, label="x", laenge=58):
     """Koordinate im Ursprung auf der Mittellinie. Beginnt dort auch ein Freiheitsgrad, ist die Koordinate
     länger als der Freiheitsgrad, damit ihre Spitze und ihr Label daneben sichtbar bleiben."""
-    return (pfeil(x, y, x + laenge, y, KO, 2.0, (12, 8))
+    return (pfeil(x, y, x + laenge, y, KO, 1.25, (9, 6))
             + text(x + laenge + 7, y, label, KO, 21, anker="start"))
 
 
@@ -116,7 +118,10 @@ def system():
     e.append(_kraft(x1 + 56, x1 + 136, y, "F", s * A1))
 
     e = abb.ebene("mass", "Bemaßung")
-    e.append(mass(x0, y + s * A0, x1, y + s * A0, "L", abstand=-38))
+    ym = y + s * A0 + 38                         # Maß L, Hilfslinien bis an beide Stabenden
+    e.append(linie(x0, y + s * A0 + 4, x0, ym + 6, GR, 0.8))
+    e.append(linie(x1, y + s * A1 + 4, x1, ym + 6, GR, 0.8))
+    e.append(mass(x0, ym, x1, ym, "L", abstand=0, hilfslinien=False))
     e.append(text(x0 + 16, y + s * A0 - 16, "A_0", GR, anker="start"))
     e.append(text(x1 - 4, y - s * A1 - 16, "A_1", GR, anker="end"))
     e.append(text(X(500), y + s * A(500) + 18, "E, A(x)", GR))
@@ -149,10 +154,10 @@ def system():
         e.append(kreis(xa, ye, 4.2))
         e.append(kreis(xb, ye, 4.2))
         e.append(nummer((xa + xb) / 2 - 10, ye - 50, n, r=11))
-        e.append(_x_achse(xa, ye, f"x^{n}", laenge=96))
-        e.append(_dof(xa, ye, f"p_2^{n}", ba, laenge=40))
-        e.append(_dof(xb, ye, f"p_1^{n}", ba, laenge=40))
-        e.append(mass(xa, ye + ba, xb, ye + ba, f"L^{n}", abstand=-30))
+        e.append(_x_achse(xa, ye, f"x^{{({n})}}", laenge=96))
+        e.append(_dof(xa, ye, f"p_2^{{({n})}}", ba, laenge=40))
+        e.append(_dof(xb, ye, f"p_1^{{({n})}}", ba, laenge=40))
+        e.append(mass(xa, ye + ba, xb, ye + ba, f"L^{{({n})}}", abstand=-30))
 
     e = abb.ebene("verbindung", "Verbindung Element – System")
     for i in range(N_EL):
@@ -232,7 +237,7 @@ def element():
     e.append(feder(xa, yf, xb, yf, 7, 11, anteil=0.6))
     e.append(kreis(xa, yf, 4.6))
     e.append(kreis(xb, yf, 4.6))
-    e.append(_bruch((xa + xb) / 2 + 28, yf + 44, "c =", "E^e A^e", "L^e", "", GR, 21))
+    e.append(_bruch((xa + xb) / 2 + 28, yf + 44, "c^e =", "E^e A^e", "L^e", "", GR, 21))
     e.append(_kraft(xa - 84, xa - 4, yf, "q_2^e"))
     e.append(_kraft(xb + 4, xb + 84, yf, "q_1^e"))
     return abb.speichern(ZIEL / "element.svg")
@@ -293,7 +298,7 @@ def zusammenbau():
     for i in range(N_EL):
         e.append(f'<rect x="{X[i]}" y="{f(y - hq[i])}" width="{X[i + 1] - X[i]}" height="{f(2 * hq[i])}" '
                  f'fill="{FARBE["bauteil"]}" stroke="#000" stroke-width="1.25"/>')
-        e.append(text((X[i] + X[i + 1]) / 2 + 12, y - hq[i] - 18, f"c_{i + 1}", "#000000", 20))
+        e.append(text((X[i] + X[i + 1]) / 2 + 12, y - hq[i] - 18, f"c^{{({i + 1})}}", "#000000", 20))
     e.append(linie(X[0], y, X[-1], y, GRAU, 0.8, "8 3 2 3"))
     for xk in X:
         e.append(kreis(xk, y, 4.6))
@@ -325,12 +330,12 @@ def zusammenbau():
                  f'stroke-width="1.4"/>')
         for r in (k, k + 1):
             for c in (k, k + 1):
-                lab = f"c_{k + 1}" if r == c else f"−c_{k + 1}"
+                lab = f"c^{{({k + 1})}}" if r == c else f"−c^{{({k + 1})}}"
                 dy = 0
                 if r == c == k + 1 and k + 1 < N_EL:          # unten rechts, Nachbarelement folgt
                     dy = -13
                 elif r == c == k and k > 0:                   # oben links, wird addiert
-                    lab, dy = f"+ c_{k + 1}", 13
+                    lab, dy = f"+ c^{{({k + 1})}}", 13
                 e.append(_fx(cx(c), cy(r) + dy, lab, ROTF, 19))
 
     e = abb.ebene("nullen", "Nullen")
@@ -377,7 +382,7 @@ def zusammenfassung():
                                       ("5  Gleichungssystem lösen", "*K*_{sys} *p*_{sys} = *q*_{sys}")]),
         ("post", "Postprocessor", GR, [("6  Elementverschiebungen", "*p*^e = *Λ*^e *p*_{sys}"),
                                        ("7  Verschiebungsverlauf", "u^e(x^e) = *N*^e*Λ*^e *p*_{sys}"),
-                                       ("8  Dehnungen, Spannungen", "σ^e = E^e *N*^e′*Λ*^e *p*_{sys}")]),
+                                       ("8  Dehnungen, Spannungen", ["ε^e = *N*^e′*Λ*^e *p*_{sys}", "σ^e = E^e ε^e"])]),
     ]
     bx, bw, bh, abst, y0 = [20, 290, 560], 240, 80, 16, 80
     for j, (id_, titel, farbe, kaesten) in enumerate(spalten):
@@ -388,7 +393,11 @@ def zusammenfassung():
             e.append(f'<rect x="{bx[j]}" y="{yt}" width="{bw}" height="{bh}" rx="8" fill="#ffffff" '
                      f'stroke="{farbe}" stroke-width="1.6"/>')
             e.append(text(bx[j] + 14, yt + 22, schritt, "#000000", 19, anker="start"))
-            e.append(_fx(bx[j] + bw / 2, yt + 55, formel, "#000000", 18))
+            if isinstance(formel, list):                   # zwei Formeln untereinander
+                for k, fo in enumerate(formel):
+                    e.append(_fx(bx[j] + bw / 2, yt + 44 + k * 22, fo, "#000000", 17))
+            else:
+                e.append(_fx(bx[j] + bw / 2, yt + 55, formel, "#000000", 18))
         if j:
             e.append(pfeil(bx[j] - 26, y0 + bh / 2, bx[j] - 4, y0 + bh / 2, "#7a7a7a", 2.0, (10, 7)))
 
@@ -415,6 +424,236 @@ def zusammenfassung():
     return abb.speichern(ZIEL / "zusammenfassung.svg")
 
 
+# ---------------------------------------------------------------- Einstieg: abgesetzte Welle mit Ritz
+WE, WF = 210000.0, 1500.0                        # Welle aus 02-welle-ritz: Stahl, F drückt (nach links)
+WL, WD = [240, 160, 240], [11, 25, 11]
+
+
+def _welle_ritz(n):
+    """Ritz mit u = Σ b_i ξ^i (ξ = x/640) für die abgesetzte Welle, exakt mit Brüchen gerechnet."""
+    gr = [Fraction(0), Fraction(240, 640), Fraction(400, 640), Fraction(1)]
+    I = lambda m: sum(Fraction(WD[k] ** 2) * (gr[k + 1] ** (m + 1) - gr[k] ** (m + 1)) / (m + 1) for k in range(3))
+    M = [[i * j * I(i + j - 2) for j in range(1, n + 1)] + [Fraction(-int(WF))] for i in range(1, n + 1)]
+    for i in range(n):                            # Gauß-Elimination
+        for j in range(i + 1, n):
+            fa = M[j][i] / M[i][i]
+            M[j] = [a - fa * b for a, b in zip(M[j], M[i])]
+    b = [Fraction(0)] * n
+    for i in reversed(range(n)):
+        b[i] = (M[i][n] - sum(M[i][j] * b[j] for j in range(i + 1, n))) / M[i][i]
+    fak = math.pi * WE / (4 * 640)
+    b = [float(v) / fak for v in b]
+    u = lambda x: sum(bi * (x / 640) ** (i + 1) for i, bi in enumerate(b))
+    sig = lambda x: WE * sum(bi * (i + 1) * (x / 640) ** i / 640 for i, bi in enumerate(b))
+    return u, sig
+
+
+def _welle_exakt():
+    A = [math.pi * d * d / 4 for d in WD]
+    knoten = [0.0]
+    for l, a in zip(WL, A):
+        knoten.append(knoten[-1] - WF * l / (WE * a))
+    sig = [-WF / a for a in A]
+    return knoten, sig
+
+
+def welle_ritz():
+    """Die abgesetzte Welle: Ritz mit einem Polynom scheitert, Elemente (ein Abschnitt je Element) sind exakt."""
+    abb = Abbildung(820, 600, "Abgesetzte Welle: Ritz und Elemente")
+    s, sd = 0.9, 3.0
+    x0, y = 110, 70
+    xa = [x0, x0 + 240 * s, x0 + 400 * s, x0 + 640 * s]
+    h = [d / 2 * sd for d in WD]
+    knoten, sig = _welle_exakt()
+    xs = [0, 240, 400, 640]
+
+    e = abb.ebene("system", "Welle")
+    e.append(einspannung(xa[0], y, 80))
+    for i in range(3):
+        e.append(_stab(xa[i], xa[i + 1], y, h[i]))
+    e.append(_x_achse(xa[0], y, laenge=50))
+    e.append(_kraft(xa[3] + 84, xa[3] + 4, y, "F", h[0]))
+    for i, d in enumerate(WD):
+        e.append(notiz((xa[i] + xa[i + 1]) / 2, y - h[1] - 14, [f"Ø {d}"], "#444444", 15, anker="middle"))
+
+    Du = Diagramm(x0, 340, 640 * s, 180, 640, 0.0, ymin=-0.045)
+    Ds = Diagramm(x0, 560, 640 * s, 170, 640, 0.0, ymin=-25.0)
+    e = abb.ebene("exakt", "Exakte Lösung")
+    e.append(Du.achsen("x", "u [in mm]", [(640, "L")], [(-0.02, "−0,02"), (-0.04, "−0,04")], achse_y0=0.0))
+    e.append(Du.kurve(punkte=list(zip(xs, knoten)), farbe=EX))
+    e.append(Du.notiz(640, knoten[-1], ["exakt"], EX, dx=8, dy=16, anker="start"))
+    e.append(Ds.achsen("x", "σ [in MPa]", [(640, "L")], [(-10, "−10"), (-20, "−20")], achse_y0=0.0))
+    stufen = []
+    for i in range(3):
+        stufen += [(xs[i], sig[i]), (xs[i + 1], sig[i])]
+    e.append(Ds.kurve(punkte=stufen, farbe=EX))
+    e.append(Ds.notiz(640, sig[-1], ["exakt"], EX, dx=8, anker="start"))
+
+    for n, farbe, name in ((3, RITZ[1], "ritz3"), (8, RITZ[2], "ritz8")):
+        u, sg = _welle_ritz(n)
+        e = abb.ebene(name, f"Ritz Grad {n}")
+        e.append(Du.kurve(u, 0, 640, farbe=farbe, breite=2.2))
+        e.append(Ds.kurve(sg, 0, 640, farbe=farbe, breite=2.2, clip=False))
+        e.append(Du.notiz(640, u(640), [f"Grad {n}"], farbe, dx=8, dy=-8, anker="start", groesse=14))
+
+    e = abb.ebene("elemente", "Ein Element je Abschnitt")
+    for i in (1, 2):
+        e.append(linie(xa[i], y - h[1] - 8, xa[i], 560, GRAU, 0.9, "4 3"))
+    for xk in xa:
+        e.append(kreis(xk, y, 4.6))
+    e.append(Du.kurve(punkte=list(zip(xs, knoten)), farbe=FE, breite=2.0, strich="7 4"))
+    for xk, uk in zip(xs, knoten):
+        e.append(Du.punkt(xk, uk, FE, 4.0))
+    e.append(Ds.kurve(punkte=stufen, farbe=FE, breite=2.0, strich="7 4"))
+    e.append(Du.notiz(320, knoten[2], ["3 Elemente = exakt"], FE, dx=-6, dy=26, anker="end"))
+    return abb.speichern(ZIEL / "welle-ritz.svg")
+
+
+# ---------------------------------------------------------------- Matrizenrechnung
+def _klammer_rund(x, y0, y1, links=True):
+    s = 1 if links else -1
+    m = (y0 + y1) / 2
+    return f'<path d="M {f(x + s * 7)},{f(y0)} Q {f(x - s * 5)},{f(m)} {f(x + s * 7)},{f(y1)}" fill="none" stroke="#000" stroke-width="1.4"/>'
+
+
+def _matrix(x, y, zeilen, w=46, h=34, g=19, farbe="#000000", fuellung=None):
+    """Matrix mit runden Klammern; (x, y) = linke obere Ecke des Inhalts. fuellung: {(r, c): Farbe}.
+    Gibt (svg, Breite) zurück."""
+    teile = []
+    nz, ns = len(zeilen), max(len(r) for r in zeilen)
+    for (r, c), fb in (fuellung or {}).items():
+        teile.append(f'<rect x="{f(x + c * w + 2)}" y="{f(y + r * h + 2)}" width="{f(w - 4)}" height="{f(h - 4)}" '
+                     f'rx="4" fill="{fb}"/>')
+    for r, zeile in enumerate(zeilen):
+        for c, t in enumerate(zeile):
+            if isinstance(t, tuple):
+                teile.append(_bruch(x + c * w + w / 2 + (6 if t[0] else 0), y + r * h + h / 2, t[0], t[1], t[2], "", farbe, g))
+            elif t:
+                teile.append(_fx(x + c * w + w / 2, y + r * h + h / 2, t, farbe, g))
+    teile.append(_klammer_rund(x - 4, y - 2, y + nz * h + 2))
+    teile.append(_klammer_rund(x + ns * w + 4, y - 2, y + nz * h + 2, links=False))
+    return "".join(teile), ns * w
+
+
+def _zeile(x, y, teile, g=22):
+    """Reihe aus Formeln und Matrizen nebeneinander; teile: Text oder (zeilen, w, h, fuellung)."""
+    out = []
+    for t in teile:
+        if isinstance(t, str):
+            if t.startswith("^"):                        # Exponent direkt an die Klammer davor
+                x -= 4
+            breite = 11 * len(t.replace("*", "").replace("_", "").replace("^", "").replace("{", "").replace("}", "")) * g / 22 + 12
+            out.append(_fx(x + 6, y, t, "#000000", g, anker="start"))
+            x += breite
+        else:
+            zeilen, w, h, fuell = t
+            svg, b = _matrix(x + 10, y - len(zeilen) * h / 2, zeilen, w, h, fuellung=fuell)
+            out.append(svg)
+            x += b + 22
+    return "".join(out)
+
+
+def _durchgestrichen(x0, y0, x1, y1):
+    return linie(x0, y0, x1, y1, "#d40000", 2.0) + linie(x0, y1, x1, y0, "#d40000", 2.0)
+
+
+def matrizen():
+    abb = Abbildung(820, 680, "Matrizenrechnung")
+    GE, BL, GN = "#fde9b8", "#d6e4f5", "#cfe8d2"         # Zeile, Spalte, Ergebnis (nur Markierung)
+    A3 = [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
+
+    e = abb.ebene("schreibweise", "Schreibweise")
+    allg = [["A_{11}", "A_{12}", "…", "A_{1n}"], ["A_{21}", "A_{22}", "…", "A_{2n}"], ["⋮", "⋮", "", "⋮"],
+            ["A_{m1}", "A_{m2}", "…", "A_{mn}"]]
+    svg, b = _matrix(150, 120, allg, 62, 44, 21, fuellung={(1, c): GE for c in range(4)})
+    e.append(_fx(130, 208, "*A* =", "#000000", 24, anker="end"))
+    e.append(svg)
+    e.append(text(150 + b + 20, 142, "Zeile 2", "#444444", 19, anker="start"))
+    e.append(text(150 + 62 * 0 + 31, 92, "1. Index = Zeile", "#444444", 19, anker="start"))
+    e.append(text(150 + 31, 335, "2. Index = Spalte", "#444444", 19, anker="start"))
+    svg, b = _matrix(470, 360, [["a_1"], ["a_2"], ["⋮"], ["a_n"]], 50, 38, 21)
+    e.append(_fx(450, 436, "*a* =", "#000000", 24, anker="end"))
+    e.append(svg)
+    e.append(_fx(470 + b + 22, 436, "= (a_1  a_2  …  a_n)^T", "#000000", 21, anker="start"))
+    e.append(text(470, 530, "Vektor = Spaltenvektor", "#444444", 19, anker="start"))
+
+    e = abb.ebene("addition", "Addition")
+    G = lambda b_: [[f"{b_}_{{{r}{c}}}" for c in (1, 2, 3)] for r in (1, 2, 3)]
+    S = [[f"A_{{{r}{c}}} + B_{{{r}{c}}}" for c in (1, 2, 3)] for r in (1, 2, 3)]
+    e.append(_zeile(20, 260, ["*A* + *B* =", (S, 112, 46, None)], 22))
+    e.append(_zeile(20, 110, ["*A* =", (G("A"), 52, 40, None), "  *B* =", (G("B"), 52, 40, None)], 22))
+    e.append(text(30, 420, "komponentenweise, nur bei gleicher Größe", "#444444", 20, anker="start"))
+
+    e = abb.ebene("multiplikation", "Multiplikation Zeile × Spalte")
+    e.append(_zeile(20, 75, ["*A* =", (G("A"), 52, 36, None), "  *B* =", (G("B"), 52, 36, None)], 22))
+    e.append(_zeile(20, 215, ["*A* *B* =", (G("A"), 52, 36, {(0, c): GE for c in range(3)}),
+                              (G("B"), 52, 36, {(r, 0): BL for r in range(3)})], 22))
+    w, hz = 52, 36                                          # Falk-Schema: A links unten, B rechts oben, AB rechts unten
+    xa_, ya_ = 70, 470
+    xb_, yb_ = 280, 330
+    svg, _ = _matrix(xa_, ya_, G("A"), w, hz, fuellung={(0, c): GE for c in range(3)})
+    e.append(svg)
+    svg, _ = _matrix(xb_, yb_, G("B"), w, hz, fuellung={(r, 0): BL for r in range(3)})
+    e.append(svg)
+    erg = [["(*AB*)_{11}", "", ""], ["", "", ""], ["", "", ""]]
+    svg, _ = _matrix(xb_, ya_, erg, w, hz, fuellung={(0, 0): GN})
+    e.append(svg)
+    e.append(_fx(xa_ + 1.5 * w, ya_ - 22, "*A*", "#000000", 22))
+    e.append(_fx(xb_ + 3 * w + 26, yb_ + 1.5 * hz, "*B*", "#000000", 22, anker="start"))
+    e.append(_fx(xb_ + 3 * w + 26, ya_ + 1.5 * hz, "*AB*", "#000000", 22, anker="start"))
+    e.append(pfeil(xa_ + 3 * w + 8, ya_ + hz / 2, xb_ - 8, ya_ + hz / 2, "#7a7a7a", 1.6, (10, 7)))
+    e.append(pfeil(xb_ + w / 2, yb_ + 3 * hz + 8, xb_ + w / 2, ya_ - 8, "#7a7a7a", 1.6, (10, 7)))
+    e.append(text(500, 360, "Rechenschema:", "#444444", 19, anker="start"))
+    e.append(text(500, 388, "B nach oben versetzt", "#444444", 19, anker="start"))
+    e.append(_fx(40, 640, "(*AB*)_{11} = A_{11} B_{11} + A_{12} B_{21} + A_{13} B_{31}", "#000000", 22, anker="start"))
+
+    e = abb.ebene("beispiele", "Beispiele")
+    B33 = [["10", "20", "30"], ["40", "50", "60"], ["70", "80", "90"]]
+    R33 = [["300", "360", "420"], ["660", "810", "960"], ["1020", "1260", "1500"]]
+    B32 = [["10", "20"], ["40", "50"], ["70", "80"]]
+    R32 = [["300", "360"], ["660", "810"], ["1020", "1260"]]
+    B23 = [["10", "20", "30"], ["40", "50", "60"]]
+    e.append(_zeile(20, 75, [(A3, 40, 30, None), (B33, 44, 30, None), "=", (R33, 56, 30, None)], 22))
+    e.append(_zeile(20, 195, [(A3, 40, 30, None), (B32, 44, 30, None), "=", (R32, 56, 30, None)], 22))
+    zeile3 = _zeile(20, 310, [(A3, 40, 30, None), (B23, 44, 30, None), "= ?"], 22)
+    e.append(zeile3)
+    e.append(_durchgestrichen(24, 262, 300, 358))
+    e.append(_zeile(20, 445, [(A3, 40, 30, None), (B23, 44, 30, None), "^T =", (A3, 40, 30, None),
+                              ([["10", "40"], ["20", "50"], ["30", "60"]], 44, 30, None), "=",
+                              ([["140", "320"], ["320", "770"], ["500", "1220"]], 56, 30, None)], 22))
+
+    e = abb.ebene("vektoren", "Vektoren")
+    X = [["x_1"], ["x_2"], ["x_3"]]
+    Y = [["y_1"], ["y_2"], ["y_3"]]
+    for yy, wort in ((30, "Spaltenvektor · Spaltenvektor: geht nicht"), (180, "Zeilenvektor · Spaltenvektor = Zahl"),
+                     (340, "Spaltenvektor · Zeilenvektor = Matrix"), (510, "Matrix · Spaltenvektor = Spaltenvektor")):
+        e.append(text(30, yy, wort, "#444444", 19, anker="start"))
+    e.append(_zeile(20, 95, ["*x* *y* =", (X, 40, 28, None), (Y, 40, 28, None), "= ?"], 22))
+    e.append(_durchgestrichen(24, 51, 270, 139))
+    e.append(_zeile(20, 250, ["*x*^T*y* =", ([["x_1", "x_2", "x_3"]], 40, 32, None), (Y, 40, 28, None),
+                              "= x_1 y_1 + x_2 y_2 + x_3 y_3"], 22))
+    e.append(_zeile(20, 415, ["*x* *y*^T =", (X, 40, 28, None), ([["y_1", "y_2", "y_3"]], 40, 32, None), "=",
+                              ([[f"x_{r} y_{c}" for c in (1, 2, 3)] for r in (1, 2, 3)], 58, 28, None)], 22))
+    e.append(_zeile(20, 590, ["*A* *x* =", (A3, 34, 28, None), (X, 40, 28, None), "=",
+                              ([["x_1 + 2 x_2 + 3 x_3"], ["4 x_1 + 5 x_2 + 6 x_3"], ["7 x_1 + 8 x_2 + 9 x_3"]], 190, 28, None)], 22))
+
+    e = abb.ebene("quadrat", "Quadrat eines Produkts")
+    X = [["x_1"], ["x_2"], ["x_3"]]
+    Y = [["y_1"], ["y_2"], ["y_3"]]
+    e.append(text(30, 40, "Transponieren dreht die Reihenfolge um", "#444444", 19, anker="start"))
+    e.append(_fx(40, 85, "(*A* *B*)^T = *B*^T *A*^T", "#000000", 24, anker="start"))
+    e.append(text(30, 140, "Zeilenvektor · Spaltenvektor = Zahl; Transponieren ändert sie nicht", "#444444", 19, anker="start"))
+    e.append(_fx(40, 185, "s = *x*^T*y*,    s^T = (*x*^T*y*)^T = *y*^T*x*", "#000000", 24, anker="start"))
+    e.append(_fx(40, 250, "s^2 = s^T s = *y*^T*x* *x*^T*y* = *y*^T (*x* *x*^T) *y*", "#000000", 24, anker="start"))
+    e.append(text(30, 310, "in der Mitte Spaltenvektor · Zeilenvektor = Matrix", "#444444", 19, anker="start"))
+    e.append(_zeile(20, 400, ["*x* *x*^T =", (X, 40, 28, None), ([["x_1", "x_2", "x_3"]], 40, 32, None), "=",
+                              ([[f"x_{r} x_{c}" for c in (1, 2, 3)] for r in (1, 2, 3)], 58, 28, None)], 22))
+    e.append(_zeile(20, 570, ["s^2 =", ([["y_1", "y_2", "y_3"]], 40, 32, None),
+                              ([[f"x_{r} x_{c}" for c in (1, 2, 3)] for r in (1, 2, 3)], 58, 28, None),
+                              (Y, 40, 28, None)], 22))
+    return abb.speichern(ZIEL / "matrizen.svg")
+
+
 if __name__ == "__main__":
-    for fn in (system, element, ergebnis, zusammenbau, zusammenfassung):
+    for fn in (welle_ritz, matrizen, system, element, ergebnis, zusammenbau, zusammenfassung):
         print(fn())

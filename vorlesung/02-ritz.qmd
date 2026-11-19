@@ -199,8 +199,8 @@ Unbekannt sind die Verschiebungen der beiden Verbindungsstellen, $p_1$ und $p_2$
 $5F$ ist dafür längs ihrer Wirkungslinie verschoben, das ändert nichts an ihrer Wirkung. Knoten liegen dort, wo sich Material oder Querschnitt ändern und wo Kräfte
 angreifen. **Mehr Knoten bringen nichts:** Dazwischen ist $u(x)$ ohnehin linear.
 
-Jeder Stab ist ein Stab wie oben, mit eigener Koordinate $x_e$ ab seinem linken Ende. In diesem lokalen
-Koordinatensystem ist $u_e(0) = 0$, und die Verlängerung ist wie oben $\Delta u_e = u_e(L_e)$. Sie ist die
+Jeder Stab ist ein Stab wie oben, mit eigener Koordinate $x_j$ ab seinem linken Ende. In diesem lokalen
+Koordinatensystem ist $u_j(0) = 0$, und die Verlängerung ist wie oben $\Delta u_j = u_j(L_j)$. Sie ist die
 Verschiebung des rechten minus die des linken Stabendes:
 
 $$
@@ -223,7 +223,7 @@ psys = {p1, p2};
 ::: {.schritt zeige="system last2 dof federn" zoom="0 0 780 380"}
 ### Jeder Stab eine Feder
 
-Die Steifigkeiten folgen aus $c_e = E_e A_e / L_e$:
+Die Steifigkeiten folgen aus $c_j = E_j A_j / L_j$:
 
 $$
 c_1 = 126\,000\ \tfrac{\text{N}}{\text{mm}}, \quad
@@ -249,7 +249,7 @@ Innere Energie aller Stäbe und Potential der beiden Kräfte ($5F$ zeigt gegen $
 
 $$
 \begin{aligned}
-\Pi_i &= \sum_{e=1}^{3} \tfrac12\,\frac{E_e A_e}{L_e}\,\Delta u_e^2
+\Pi_i &= \sum_{j=1}^{3} \tfrac12\,\frac{E_j A_j}{L_j}\,\Delta u_j^2
 = \tfrac12\,c_1\,\Delta u_1^2 + \tfrac12\,c_2\,\Delta u_2^2 + \tfrac12\,c_3\,\Delta u_3^2 \\
 \Pi_a &= -(-5F)\,p_1 - 2F\,p_2
 \end{aligned}
@@ -300,7 +300,7 @@ dort konstant, Verlängerung durch Länge:
 $$
 \varepsilon(x) = u'(x)
 \qquad\Rightarrow\qquad
-\varepsilon_e = \frac{\Delta u_e}{L_e}
+\varepsilon_j = \frac{\Delta u_j}{L_j}
 $$
 
 Der Stahlstab dehnt sich am wenigsten: Er hat die mit Abstand größte Dehnsteifigkeit $EA$. Am Übergang der Stäbe
@@ -319,7 +319,7 @@ Table[eps, {x, {40, 100, 170}}]
 ::: {.schritt zeige="system last2 dof ergebnis spannung"}
 ### Spannungen
 
-Mit dem Hookeschen Gesetz $\sigma_e = E_e\,\varepsilon_e$:
+Mit dem Hookeschen Gesetz $\sigma_j = E_j\,\varepsilon_j$:
 
 | Stab | 1 (Al) | 2 (St) | 3 (Al) |
 |:--|:-:|:-:|:-:|
@@ -345,7 +345,7 @@ Table[sig, {x, {40, 100, 170}}]
 ::: {.schritt zeige="system last2 dof ergebnis spannung"}
 ### Stabkräfte
 
-Die Stabkräfte folgen aus dem Federgesetz, $N_e = c_e\,\Delta u_e$ (oder $N_e = \sigma_e A_e$):
+Die Stabkräfte folgen aus dem Federgesetz, $N_j = c_j\,\Delta u_j$ (oder $N_j = \sigma_j A_j$):
 
 | Stab | 1 (Al) | 2 (St) | 3 (Al) |
 |:--|:-:|:-:|:-:|

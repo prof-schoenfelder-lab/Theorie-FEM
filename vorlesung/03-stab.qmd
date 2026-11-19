@@ -12,6 +12,193 @@ einfacher Ansatz. Heraus kommt ein Gleichungssystem $\mathbf{K}_{sys}\,\mathbf{p
 das ein Computer für beliebig viele Elemente aufstellen und lösen kann.
 :::
 
+## Warum nicht einfach Ritz?
+
+:::: {.scrolly svg="../grafiken/stab/welle-ritz.svg"}
+
+::: {.schritt zeige="system exakt"}
+### Die abgesetzte Welle
+
+Erinnerung an die Übung `02-welle-ritz` aus Vorlesung 2: eine Stahlwelle aus drei Abschnitten, links
+eingespannt, rechts drückt die Kraft $F$.
+
+**Gegeben:** $L^{(1)} = L^{(3)} = 240\,\text{mm}$, $L^{(2)} = 160\,\text{mm}$, Durchmesser $11\,\text{mm}$,
+$25\,\text{mm}$, $11\,\text{mm}$, $E = 210\,000\,\text{MPa}$, $F = 1500\,\text{N}$
+
+In jedem Abschnitt ist $EA$ konstant. Die exakte Verschiebung ist deshalb **abschnittsweise linear** und knickt
+an den Absätzen, die Spannung **springt** dort.
+:::
+
+::: {.schritt zeige="system exakt ritz3 ritz8"}
+### Ritz: ein Polynom für die ganze Welle
+
+Mit Ritz brauchen wir **einen** Ansatz für die ganze Welle. Ein Polynom ist glatt, die Knicke kann es nur
+abrunden. Selbst mit Grad 8 ist die Verschiebung am Ende noch zu klein:
+
+| | $u(L)$ in mm | Fehler |
+|:--|:-:|:-:|
+| exakt | $-0{,}0384$ | |
+| Grad 3 | $-0{,}0324$ | $-16\,\%$ |
+| Grad 8 | $-0{,}0364$ | $-5{,}1\,\%$ |
+:::
+
+::: {.schritt zeige="system exakt ritz3 ritz8"}
+### Die Spannungen
+
+Noch schlechter sieht es bei den Spannungen aus. Die Sprünge kann kein Polynom abbilden: Es schwingt um die
+exakte Lösung und überschätzt die Spannung am Rand. Mit noch höherem Grad schwingt es stärker.
+
+Und das bei einer Aufgabe, die wir mit drei Federn sofort lösen können. Hätte die Welle konische Abschnitte,
+hülfen auch die Federn nicht mehr.
+:::
+
+::: {.schritt zeige="system exakt ritz3 ritz8 elemente" dimmen="ritz3 ritz8"}
+### Die Idee: Ritz bereichsweise
+
+Statt eines Ansatzes für das ganze Bauteil nehmen wir für **jeden Bereich einen eigenen, einfachen Ansatz** und
+verbinden die Bereiche an den **Knoten**. Mit je einem linearen Element pro Abschnitt ist die Lösung hier sogar
+exakt.
+
+Genau das ist die **Finite-Elemente-Methode**. Die Bereiche heißen Elemente. Damit sich die Rechnung für beliebig
+viele Elemente gleich aufschreiben lässt, brauchen wir **Matrizen**.
+:::
+
+::::
+
+## Matrizenrechnung, wie wir sie brauchen
+
+:::: {.scrolly svg="../grafiken/stab/matrizen.svg"}
+
+::: {.schritt zeige="schreibweise"}
+### Matrizen und Vektoren
+
+Eine Matrix $\mathbf{A}$ hat $m$ Zeilen und $n$ Spalten. Im Eintrag $A_{ij}$ nennt der **erste Index die Zeile**,
+der **zweite die Spalte**.
+
+Vektoren schreiben wir immer als **Spaltenvektor**, also als Matrix mit einer Spalte. Ein **Zeilenvektor** ist ein
+transponierter Spaltenvektor: $\mathbf{a}^\mathsf{T}$. Vektoren und Matrizen sind fett gesetzt.
+
+```mathematica
+A = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+A // MatrixForm
+A[[2, 3]]
+Dimensions[A]
+```
+
+In Mathematica ist eine Matrix eine Liste von Zeilen. `A[[2, 3]]` ist der Eintrag in Zeile 2, Spalte 3.
+:::
+
+::: {.schritt zeige="addition"}
+### Addition
+
+Matrizen gleicher Größe werden **komponentenweise** addiert: Jeder Eintrag zu dem Eintrag an derselben Stelle.
+
+```mathematica
+B = {{10, 20, 30}, {40, 50, 60},
+     {70, 80, 90}};
+S = A + B;
+S // MatrixForm
+```
+:::
+
+::: {.schritt zeige="multiplikation"}
+### Multiplikation: Zeile mal Spalte
+
+Der Eintrag $(\mathbf{AB})_{ij}$ ist **Zeile $i$ von $\mathbf{A}$ mal Spalte $j$ von $\mathbf{B}$**: die Einträge
+paarweise multiplizieren und addieren,
+
+$$
+(\mathbf{AB})_{ij} = \sum_k A_{ik}\,B_{kj}
+$$
+
+Dazu muss $\mathbf{A}$ so viele Spalten haben wie $\mathbf{B}$ Zeilen. Die Reihenfolge zählt:
+$\mathbf{AB} \neq \mathbf{BA}$.
+
+```mathematica
+P = A . B;
+P // MatrixForm
+A . B == B . A
+```
+
+Der **Punkt** ist das Matrixprodukt. `A B` mit Leerzeichen multipliziert in Mathematica nur Eintrag für Eintrag.
+:::
+
+::: {.schritt zeige="beispiele"}
+### Beispiele
+
+Eine $3 \times 3$-Matrix mal eine $3 \times 2$-Matrix ergibt eine $3 \times 2$-Matrix. Mit einer
+$2 \times 3$-Matrix geht es nicht: Die Zeilen von $\mathbf{A}$ haben drei Einträge, die Spalten nur zwei.
+Transponiert passt es wieder.
+
+```mathematica
+B2 = {{10, 20}, {40, 50}, {70, 80}};
+P2 = A . B2;
+P2 // MatrixForm
+B3 = {{10, 20, 30}, {40, 50, 60}};
+A . B3
+P3 = A . Transpose[B3];
+P3 // MatrixForm
+```
+
+`A . B3` meldet, dass die Größen nicht zusammenpassen.
+:::
+
+::: {.schritt zeige="vektoren"}
+### Vektoren multiplizieren
+
+- Spaltenvektor mal Spaltenvektor: geht nicht.
+- **Zeilenvektor mal Spaltenvektor**, $\mathbf{x}^\mathsf{T}\mathbf{y}$: eine **Zahl** (Skalarprodukt).
+- **Spaltenvektor mal Zeilenvektor**, $\mathbf{x}\mathbf{y}^\mathsf{T}$: eine **Matrix** (dyadisches Produkt).
+- **Matrix mal Spaltenvektor**, $\mathbf{A}\mathbf{x}$: wieder ein Spaltenvektor. So sieht später
+  $\mathbf{K}\,\mathbf{p} = \mathbf{q}$ aus.
+
+```mathematica
+xv = {x1, x2, x3};
+yv = {y1, y2, y3};
+xv . yv
+Dy = Transpose[{xv}] . {yv};
+Dy // MatrixForm
+A . xv
+```
+
+Die Namen `xv`, `yv` statt `x`, `y`, weil `x` später die Koordinate ist. Mathematica unterscheidet bei Listen
+nicht zwischen Zeilen- und Spaltenvektor: `xv . yv` ist immer das Skalarprodukt. Für Spaltenvektor mal
+Zeilenvektor macht `{yv}` aus der Liste einen echten Zeilenvektor und `Transpose[{xv}]` einen echten
+Spaltenvektor.
+:::
+
+::: {.schritt zeige="quadrat"}
+### Das Quadrat eines Produkts
+
+Beim Transponieren eines Produkts **dreht sich die Reihenfolge um**:
+$(\mathbf{AB})^\mathsf{T} = \mathbf{B}^\mathsf{T}\mathbf{A}^\mathsf{T}$.
+
+Zeilenvektor mal Spaltenvektor ist eine Zahl $s = \mathbf{x}^\mathsf{T}\mathbf{y}$, und eine Zahl ändert sich beim
+Transponieren nicht: $s = s^\mathsf{T} = \mathbf{y}^\mathsf{T}\mathbf{x}$. Ihr Quadrat lässt sich deshalb so
+schreiben:
+
+$$
+\begin{aligned}
+s^2 &= s^\mathsf{T} s = \mathbf{y}^\mathsf{T}\mathbf{x}\,\mathbf{x}^\mathsf{T}\mathbf{y} \\
+&= \mathbf{y}^\mathsf{T}\left(\mathbf{x}\,\mathbf{x}^\mathsf{T}\right)\mathbf{y}
+\end{aligned}
+$$
+
+In der Mitte steht **Spaltenvektor mal Zeilenvektor**, also eine **Matrix**. Diese Umformung brauchen wir für die
+Energie des Stabelements.
+
+```mathematica
+s1 = (xv . yv)^2;
+s2 = yv . Transpose[{xv}] . {xv} . yv;
+Simplify[s1 - s2]
+Clear[A, B]
+```
+
+`Clear[A, B]` gibt die Namen wieder frei: Ab jetzt steht $A$ für den Querschnitt.
+:::
+
+::::
+
 ## Das Beispiel: konischer Zugstab
 
 :::: {.scrolly svg="../grafiken/stab/system.svg"}
@@ -64,12 +251,12 @@ In Mathematica über die DGL des Normalkraftstabes, $(E A u')' = 0$:
 
 ::: {.links}
 ```mathematica
-dgl = D[Em Ax u'[x], x] == 0;
-rb1 = u[0] == 0;
-rb2 = Em Ax u'[x] == F /. x -> L;
-lsgex = DSolve[{dgl, rb1, rb2} /. data,
+dgl = D[Em Ax D[u[x], x], x] == 0;
+rb1 = u[x] == 0 /. x -> 0;
+rb2 = Em Ax D[u[x], x] == F /. x -> L;
+dlsg = DSolve[{dgl, rb1, rb2} /. data,
           u[x], x];
-uex = u[x] /. First[lsgex]
+uex = u[x] /. dlsg[[1]]
 sigex = Em D[uex, x] /. data
 N[{uex, sigex} /. x -> 1000]
 ```
@@ -84,24 +271,34 @@ einen **konstanten** Querschnitt, hier den Wert in Elementmitte:
 
 $$
 \begin{aligned}
-A^1 &= 86{,}7\,\text{mm}^2 \\
-A^2 &= 60\,\text{mm}^2 \\
-A^3 &= 33{,}3\,\text{mm}^2
+A^{(1)} &= 86{,}7\,\text{mm}^2 \\
+A^{(2)} &= 60\,\text{mm}^2 \\
+A^{(3)} &= 33{,}3\,\text{mm}^2
 \end{aligned}
 $$
 
-Die Elemente sind an den **Knoten** miteinander verbunden.
+Die Elemente sind an den **Knoten** miteinander verbunden. Anders als bei der abgesetzten Welle nähern die
+Elemente hier den Querschnitt nur an.
 
-Warum nicht einfach ein Polynom höheren Grades für den ganzen Stab wie in Vorlesung 2? Bei der abgesetzten Welle
-(Übung `02-welle-ritz`) knickt der Verschiebungsverlauf an jedem Querschnittssprung. Ein Polynom über den ganzen
-Stab kann das nicht abbilden. Elemente können es: An jeden Sprung legt man einen Knoten.
+**Schreibweise:** Größen eines Elements tragen ein **hochgestelltes $e$**: $L^e$, $A^e$, $E^e$, $x^e$. Ist ein
+bestimmtes Element gemeint, steht seine **Nummer hochgestellt in Klammern**: $A^{(1)}$ ist der Querschnitt von
+Element 1. Die Klammern verhindern die Verwechslung mit einer Potenz.
+In Mathematica stehen die Elementgrößen als **Index** $L_e$ (Eingabe mit Strg + _). Kopieren Sie Code von
+dieser Seite, kommt der Index mit. Die Regelliste `datafe` setzt für jedes Element seine Werte ein.
+
+Gleich lang müssen die Elemente nicht sein: Wo es interessiert, vernetzt man **feiner**, hier etwa am dünnen
+Ende mit der größten Spannung.
 
 ::: {.links}
 ```mathematica
 nel = 3;
-le = L/nel;
-ae = Table[Ax /. x -> (e - 1/2) le,
-       {e, nel}] /. data
+datafe = Flatten[Table[{
+    Subscript[L, e] -> L/nel,
+    Subscript[A, e] ->
+      (Ax /. x -> (e - 1/2) L/nel),
+    Subscript[Em, e] -> Em}, {e, nel}]];
+Table[Subscript[A, e], {e, nel}] /.
+  datafe /. data
 ```
 :::
 :::
@@ -116,6 +313,7 @@ $$
 \mathbf{p}_{sys} = \begin{pmatrix} p_1 & p_2 & p_3 & p_4 \end{pmatrix}^\mathsf{T}
 $$
 
+$\mathbf{p}_{sys}$ ist ein **Spaltenvektor**. Als Zeilenvektor hingeschrieben, steht deshalb ein $^\mathsf{T}$ daran.
 Das Lager hält $p_1 = 0$ fest. Gesucht sind $p_2$, $p_3$, $p_4$.
 
 ::: {.links}
@@ -131,6 +329,10 @@ psys = {p1, p2, p3, p4};
 Jedes Element für sich hat zwei Knoten und damit zwei **Elementfreiheitsgrade**:
 $p_2^e$ am linken und $p_1^e$ am rechten Knoten. Jedes Element hat außerdem eine eigene
 Koordinate $x^e$ von $0$ bis $L^e$.
+
+Der **untere Index** ist der Knoten im Element, der **obere** das Element: $p_1^{(2)}$ ist der rechte Knoten von
+Element 2. Diese Nummerierung liegt mit der Definition des Elements fest (rechts 1, links 2). Die
+Systemfreiheitsgrade dagegen nummerieren wir frei, hier von links nach rechts.
 
 Für **ein** Element leiten wir alles nur einmal her. Danach müssen wir die Elemente nur noch
 richtig miteinander verbinden.
@@ -172,30 +374,50 @@ $$
 u^e(x^e) = a_1\,x^e + a_2
 $$
 
+Anders als bei Ritz in Vorlesung 2 gehört die **Konstante $a_2$** hier dazu: Das Element liegt irgendwo im
+Stab. Es kann sich als Ganzes verschieben und dabei verlängern. Festgehalten wird ein Knoten erst beim
+Zusammenbau durch das Lager.
+
 Statt der abstrakten Koeffizienten $a_1$, $a_2$ verwenden wir die **Knotenverschiebungen**:
-$u^e(0) = p_2^e$ und $u^e(L^e) = p_1^e$. Daraus folgt
+
+$$
+\begin{aligned}
+u^e(0) &= a_2 = p_2^e \\
+u^e(L^e) &= a_1 L^e + a_2 = p_1^e
+\quad\Rightarrow\quad a_1 = \frac{p_1^e - p_2^e}{L^e}
+\end{aligned}
+$$
+
+Eingesetzt:
 
 $$
 u^e(x^e) = \frac{p_1^e - p_2^e}{L^e}\,x^e + p_2^e
 $$
 
 ```mathematica
-ue = a1 xe + a2;
-koeff = Solve[{ue == p2e /. xe -> 0,
-     ue == p1e /. xe -> Le}, {a1, a2}];
-ue = ue /. First[koeff]
+ue = a1 Subscript[x, e] + a2;
+glg1 = p2e == ue /. Subscript[x, e] -> 0;
+glg2 = p1e == ue /.
+    Subscript[x, e] -> Subscript[L, e];
+alsg = Solve[{glg1, glg2}, {a1, a2}];
+ue = ue /. alsg[[1]]
 ```
 :::
 
 ::: {.schritt zeige="element dof ansatz_achsen ansatz form_achsen formfkt"}
 ### Ansatzfunktionen
 
-Sortiert nach den Freiheitsgraden:
+Ausmultiplizieren und nach den Freiheitsgraden sortieren:
 
 $$
-u^e(x^e) = \frac{x^e}{L^e}\,p_1^e + \left(1 - \frac{x^e}{L^e}\right) p_2^e
+\begin{aligned}
+u^e(x^e) &= \frac{x^e}{L^e}\,p_1^e - \frac{x^e}{L^e}\,p_2^e + p_2^e \\
+&= \frac{x^e}{L^e}\,p_1^e + \left(1 - \frac{x^e}{L^e}\right) p_2^e
 = \mathbf{N}^e\,\mathbf{p}^e
+\end{aligned}
 $$
+
+Das ist **Zeilenvektor mal Spaltenvektor**:
 
 $$
 \mathbf{N}^e = \begin{pmatrix} \dfrac{x^e}{L^e} & 1 - \dfrac{x^e}{L^e} \end{pmatrix},
@@ -203,75 +425,96 @@ $$
 \mathbf{p}^e = \begin{pmatrix} p_1^e \\ p_2^e \end{pmatrix}
 $$
 
+So schreiben wir es das ganze Semester: $u^e = \mathbf{N}^e\mathbf{p}^e$, egal wie viele Freiheitsgrade ein
+Element hat.
+
 Jede Ansatzfunktion ist an „ihrem“ Knoten $1$ und am anderen Knoten $0$. Damit sind die Koeffizienten
 des Ansatzes direkt die Knotenverschiebungen.
 
 Probe: $\mathbf{N}^e\mathbf{p}^e$ ist derselbe Ansatz.
 
 ```mathematica
-Ne = {xe/Le, 1 - xe/Le};
+Ne = Coefficient[ue, {p1e, p2e}]
 Simplify[Ne . pe - ue]
+```
+:::
+
+::: {.schritt zeige="element dof form_achsen formfkt ableitung_achsen ableitung"}
+### Die Ableitung des Ansatzes
+
+Für die innere Energie brauchen wir $u^e{}'(x^e)$. Die Knotenverschiebungen hängen nicht von $x^e$ ab,
+abgeleitet werden nur die Ansatzfunktionen:
+
+$$
+u^e{}'(x^e) = \mathbf{N}^e{}'\,\mathbf{p}^e
+= \begin{pmatrix} \dfrac{1}{L^e} & -\dfrac{1}{L^e} \end{pmatrix}
+\begin{pmatrix} p_1^e \\ p_2^e \end{pmatrix}
+= \frac{p_1^e - p_2^e}{L^e}
+$$
+
+Die Dehnung ist im linearen Element also konstant: Verlängerung durch Länge.
+
+```mathematica
+dNe = D[Ne, Subscript[x, e]]
+dNe . pe
 ```
 :::
 
 ::: {.schritt zeige="element dof form_achsen formfkt ableitung_achsen ableitung"}
 ### Energie mit den Ansatzfunktionen
 
-Für die innere Energie brauchen wir die Ableitung des Ansatzes. Die Knotenverschiebungen hängen nicht von
-$x^e$ ab, abgeleitet werden nur die Ansatzfunktionen:
+Einsetzen in $\Pi_i^e$. Das Quadrat schreiben wir als Produkt (siehe „Das Quadrat eines Produkts“):
 
 $$
-u^e{}'(x^e) = \mathbf{N}^e{}'\,\mathbf{p}^e,
-\qquad
-\mathbf{N}^e{}' = \begin{pmatrix} \dfrac{1}{L^e} & -\dfrac{1}{L^e} \end{pmatrix}
+\begin{aligned}
+\Pi_i^e &= \frac{1}{2}\int_{L^e} E^e A^e\,(\mathbf{N}^e{}'\mathbf{p}^e)^2\,\mathrm{d}x^e \\
+&= \frac{1}{2}\int_{L^e} E^e A^e\,\mathbf{p}^{e\mathsf{T}}\,\mathbf{N}^e{}'^{\mathsf{T}}\mathbf{N}^e{}'\,\mathbf{p}^e\,\mathrm{d}x^e
+\end{aligned}
 $$
 
-Das Quadrat schreiben wir als Produkt,
-$u^e{}'(x^e)^2 = \mathbf{p}^{e\mathsf{T}}\,\mathbf{N}^e{}'^{\mathsf{T}}\,\mathbf{N}^e{}'\,\mathbf{p}^e$.
-Die Knotenverschiebungen ziehen wir vor das Integral:
+Was hängt von $x^e$ ab? Die Ansatzfunktionen und bei veränderlichem Querschnitt $A^e$, die
+Knotenverschiebungen nicht. Sie kommen aus dem Integral, aber in der **richtigen Reihenfolge**:
+$\mathbf{p}^{e\mathsf{T}}$ nach vorn, $\mathbf{p}^e$ nach hinten.
 
 $$
-\Pi_i^e = \frac{1}{2}\,\mathbf{p}^{e\mathsf{T}}\,\mathbf{K}^e\,\mathbf{p}^e
+\Pi_i^e = \frac{1}{2}\,\mathbf{p}^{e\mathsf{T}}
+\underbrace{\Big(\int_{L^e} \mathbf{N}^e{}'^{\mathsf{T}}\,E^e A^e\,\mathbf{N}^e{}'\,\mathrm{d}x^e\Big)}_{\mathbf{K}^e}
+\,\mathbf{p}^e
 $$
 
-$$
-\mathbf{K}^e = \int_{L^e} \mathbf{N}^e{}'^{\mathsf{T}}\, E^e A^e\, \mathbf{N}^e{}'\,\mathrm{d}x^e
-$$
-
-```mathematica
-dNe = D[Ne, xe]
-```
+Dieselbe Form wie bei der Feder, $\frac{1}{2}\,c\,u^2$, nur mit Matrizen.
 :::
 
 ::: {.schritt zeige="element dof form_achsen formfkt ableitung_achsen ableitung"}
 ### Die Elementsteifigkeitsmatrix
 
-$\mathbf{N}^e{}'$ ist konstant. Mit $E^e A^e = \text{konst.}$ im Element bleibt nur $\int_0^{L^e}\mathrm{d}x^e = L^e$:
+Wir setzen die Ableitungen der Ansatzfunktionen in die Formel für $\mathbf{K}^e$ ein: Spaltenvektor mal
+Zeilenvektor ergibt eine Matrix. $\mathbf{N}^e{}'$ ist konstant, und mit $E^e A^e = \text{konst.}$ im Element
+bleibt nur $\int_0^{L^e}\mathrm{d}x^e = L^e$:
 
-$$
-\mathbf{K}^e = \frac{E^e A^e}{L^e}\begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix}
-$$
-
-Material ($E^e$) und Geometrie ($A^e$, $L^e$) stecken vollständig in $\mathbf{K}^e$.
-
-
-`Outer[Times, a, b]` bildet das dyadische Produkt $\mathbf{a}^\mathsf{T}\mathbf{b}$.
-
-```mathematica
-Ke = Integrate[Outer[Times, dNe, dNe]
-       Ee Ae, {xe, 0, Le}];
-Ke // MatrixForm
-```
-::: {.vertiefung titel="Ausführlicher: Integration der Steifigkeitsmatrix"}
 $$
 \begin{aligned}
-\mathbf{K}^e &= E^e A^e \int_0^{L^e} \begin{pmatrix} \frac{1}{L^e} \\ -\frac{1}{L^e} \end{pmatrix}
-\begin{pmatrix} \frac{1}{L^e} & -\frac{1}{L^e} \end{pmatrix} \mathrm{d}x^e \\
-&= \frac{E^e A^e}{L^{e\,2}} \begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix} \int_0^{L^e} \mathrm{d}x^e \\
+\mathbf{K}^e &= \int_0^{L^e} \mathbf{N}^e{}'^{\mathsf{T}}\, E^e A^e\, \mathbf{N}^e{}'\,\mathrm{d}x^e \\
+&= E^e A^e \int_0^{L^e} \begin{pmatrix} \dfrac{1}{L^e} \\[2mm] -\dfrac{1}{L^e} \end{pmatrix}
+\begin{pmatrix} \dfrac{1}{L^e} & -\dfrac{1}{L^e} \end{pmatrix} \mathrm{d}x^e \\
+&= \frac{E^e A^e}{(L^e)^2} \begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix} \int_0^{L^e} \mathrm{d}x^e \\
 &= \frac{E^e A^e}{L^e} \begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix}
 \end{aligned}
 $$
 
+Material ($E^e$) und Geometrie ($A^e$, $L^e$) stecken vollständig in $\mathbf{K}^e$.
+
+`{dNe}` ist der Zeilenvektor, `Transpose[{dNe}]` der Spaltenvektor.
+
+```mathematica
+Ke = Integrate[
+   Subscript[Em, e] Subscript[A, e]
+   Transpose[{dNe}] . {dNe},
+   {Subscript[x, e], 0, Subscript[L, e]}];
+Ke // MatrixForm
+```
+
+::: {.vertiefung titel="Ausführlicher: veränderlicher Querschnitt im Element"}
 Ist der Querschnitt im Element veränderlich, bleibt $A^e(x^e)$ im Integral stehen. Bei einem linearen
 Querschnittsverlauf ergibt das genau den Mittelwert $A^e = \frac{1}{2}\left(A^e(0) + A^e(L^e)\right)$, also die
 Fläche in Elementmitte, die wir oben verwendet haben.
@@ -304,16 +547,16 @@ Pie = 1/2 pe . Ke . pe - pe . qe;
 D[Pie, {pe}] // Simplify
 ```
 ::: {.vertiefung titel="Ausführlicher: Ableitung Komponente für Komponente"}
-Mit $c = E^e A^e / L^e$ ist $\frac{1}{2}\,\mathbf{p}^{e\mathsf{T}}\mathbf{K}^e\mathbf{p}^e = \frac{1}{2}\,c\,(p_1^e - p_2^e)^2$, also
+Mit $c^e = E^e A^e / L^e$ ist $\frac{1}{2}\,\mathbf{p}^{e\mathsf{T}}\mathbf{K}^e\mathbf{p}^e = \frac{1}{2}\,c^e\,(p_1^e - p_2^e)^2$, also
 
 $$
-\Pi^e = \frac{1}{2}\,c\,(p_1^e - p_2^e)^2 - p_1^e q_1^e - p_2^e q_2^e
+\Pi^e = \frac{1}{2}\,c^e\,(p_1^e - p_2^e)^2 - p_1^e q_1^e - p_2^e q_2^e
 $$
 
 $$
 \begin{aligned}
-\frac{\partial \Pi^e}{\partial p_1^e} &= c\,(p_1^e - p_2^e) - q_1^e \overset{!}{=} 0 \\
-\frac{\partial \Pi^e}{\partial p_2^e} &= -c\,(p_1^e - p_2^e) - q_2^e \overset{!}{=} 0
+\frac{\partial \Pi^e}{\partial p_1^e} &= c^e\,(p_1^e - p_2^e) - q_1^e \overset{!}{=} 0 \\
+\frac{\partial \Pi^e}{\partial p_2^e} &= -c^e\,(p_1^e - p_2^e) - q_2^e \overset{!}{=} 0
 \end{aligned}
 $$
 
@@ -332,19 +575,24 @@ $$
 = \begin{pmatrix} q_1^e \\ q_2^e \end{pmatrix}
 $$
 
-Das ist die Gleichung einer **Feder** mit der Steifigkeit $c = E^e A^e / L^e$, wie in Vorlesung 2. Für unsere
+Das ist die Gleichung einer **Feder** mit der Steifigkeit $c^e = E^e A^e / L^e$, wie in Vorlesung 2. Für unsere
 drei Elemente:
 
 $$
 \begin{aligned}
-c_1 &= 18\,200\,\text{N/mm} \\
-c_2 &= 12\,600\,\text{N/mm} \\
-c_3 &= 7000\,\text{N/mm}
+c^{(1)} &= 18\,200\,\text{N/mm} \\
+c^{(2)} &= 12\,600\,\text{N/mm} \\
+c^{(3)} &= 7000\,\text{N/mm}
 \end{aligned}
 $$
 
+Die Analogie gilt nur bei **konstantem** $E^e A^e$ im Element. Den konischen Stab selbst kann man nicht durch
+eine Feder ersetzen, wohl aber durch viele kurze Elemente mit konstantem Querschnitt: So lassen sich auch
+komplexe Systeme aus vielen linearen Stäben (Federn) beschreiben.
+
 ```mathematica
-c = Em ae/le /. data
+Table[Ke[[1, 1]] /. e -> k, {k, nel}] /.
+  datafe /. data
 ```
 :::
 
@@ -361,10 +609,10 @@ Aus dem Bild lesen wir die **Kinematik** ab:
 
 | Systemknoten | Elementfreiheitsgrade |
 |:-:|:--|
-| $p_1$ | $p_2^1$ |
-| $p_2$ | $p_1^1 = p_2^2$ |
-| $p_3$ | $p_1^2 = p_2^3$ |
-| $p_4$ | $p_1^3$ |
+| $p_1$ | $p_2^{(1)}$ |
+| $p_2$ | $p_1^{(1)} = p_2^{(2)}$ |
+| $p_3$ | $p_1^{(2)} = p_2^{(3)}$ |
+| $p_4$ | $p_1^{(3)}$ |
 
 Gesucht ist eine Matrix, die genau diese Zuordnung beschreibt: $\mathbf{p}^e = \boldsymbol{\Lambda}^e\,\mathbf{p}_{sys}$.
 :::
@@ -376,12 +624,12 @@ Für Element 1 tragen wir eine $1$ ein, wo ein Elementfreiheitsgrad zu einem Sys
 
 | | $p_1$ | $p_2$ | $p_3$ | $p_4$ |
 |:-:|:-:|:-:|:-:|:-:|
-| $p_1^1$ | 0 | 1 | 0 | 0 |
-| $p_2^1$ | 1 | 0 | 0 | 0 |
+| $p_1^{(1)}$ | 0 | 1 | 0 | 0 |
+| $p_2^{(1)}$ | 1 | 0 | 0 | 0 |
 
 $$
-\begin{pmatrix} p_1^1 \\ p_2^1 \end{pmatrix}
-= \underbrace{\begin{pmatrix} 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \end{pmatrix}}_{\boldsymbol{\Lambda}^1}
+\begin{pmatrix} p_1^{(1)} \\ p_2^{(1)} \end{pmatrix}
+= \underbrace{\begin{pmatrix} 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \end{pmatrix}}_{\boldsymbol{\Lambda}^{(1)}}
 \begin{pmatrix} p_1 \\ p_2 \\ p_3 \\ p_4 \end{pmatrix}
 = \begin{pmatrix} p_2 \\ p_1 \end{pmatrix}
 $$
@@ -391,19 +639,24 @@ $$
 ### Alle drei Inzidenzmatrizen
 
 $$
-\boldsymbol{\Lambda}^1 = \begin{pmatrix} 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \end{pmatrix},\quad
-\boldsymbol{\Lambda}^2 = \begin{pmatrix} 0 & 0 & 1 & 0 \\ 0 & 1 & 0 & 0 \end{pmatrix},\quad
-\boldsymbol{\Lambda}^3 = \begin{pmatrix} 0 & 0 & 0 & 1 \\ 0 & 0 & 1 & 0 \end{pmatrix}
+\begin{aligned}
+\boldsymbol{\Lambda}^{(1)} &= \begin{pmatrix} 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \end{pmatrix} \\
+\boldsymbol{\Lambda}^{(2)} &= \begin{pmatrix} 0 & 0 & 1 & 0 \\ 0 & 1 & 0 & 0 \end{pmatrix} \\
+\boldsymbol{\Lambda}^{(3)} &= \begin{pmatrix} 0 & 0 & 0 & 1 \\ 0 & 0 & 1 & 0 \end{pmatrix}
+\end{aligned}
 $$
 
 Die Inzidenzmatrizen beschreiben die **Konnektivität** des Netzes. Sie enthalten nur Nullen und Einsen,
 keine Mechanik. Ein FEM-Programm erzeugt sie beim Vernetzen automatisch.
 
 ```mathematica
-Λ[1] = {{0, 1, 0, 0}, {1, 0, 0, 0}};
-Λ[2] = {{0, 0, 1, 0}, {0, 1, 0, 0}};
-Λ[3] = {{0, 0, 0, 1}, {0, 0, 1, 0}};
-Λ[1] . psys
+Subscript[Λ, 1] =
+  {{0, 1, 0, 0}, {1, 0, 0, 0}};
+Subscript[Λ, 2] =
+  {{0, 0, 1, 0}, {0, 1, 0, 0}};
+Subscript[Λ, 3] =
+  {{0, 0, 0, 1}, {0, 0, 1, 0}};
+Subscript[Λ, 1] . psys
 ```
 :::
 
@@ -416,15 +669,15 @@ keine Mechanik. Ein FEM-Programm erzeugt sie beim Vernetzen automatisch.
 ::: {.schritt zeige="system" zoom="40 0 740 165"}
 ### Die Elemente in Reihe
 
-Jedes Element ist ein Stab mit konstantem Querschnitt $A^e$ und damit eine Feder mit $c_e = E^e A^e / L^e$.
+Jedes Element ist ein Stab mit konstantem Querschnitt $A^e$ und damit eine Feder mit $c^e = E^e A^e / L^e$.
 Die drei Elemente sind an den Knoten verbunden. Gesucht sind die Verschiebungen $p_2$, $p_3$, $p_4$ der Knoten.
 
 Wie kommen die drei Elementmatrizen in **eine** Gleichung für das ganze System?
 
 ::: {.links}
 ```mathematica
-K[e_] := Ke /. {Ee -> Em,
-    Ae -> ae[[e]], Le -> le}
+K3 = Ke /. e -> 3 /. datafe /. data;
+K3 // MatrixForm
 ```
 :::
 :::
@@ -455,18 +708,20 @@ Element 1 verbindet $p_1$ und $p_2$. Die Inzidenzmatrix setzt seine $2 \times 2$
 Spalten 1 und 2:
 
 $$
-\boldsymbol{\Lambda}^{1\mathsf{T}}\mathbf{K}^1\boldsymbol{\Lambda}^1 =
+\boldsymbol{\Lambda}^{(1)\mathsf{T}}\mathbf{K}^{(1)}\boldsymbol{\Lambda}^{(1)} =
 \begin{pmatrix}
-c_1 & -c_1 & 0 & 0 \\
--c_1 & c_1 & 0 & 0 \\
+c^{(1)} & -c^{(1)} & 0 & 0 \\
+-c^{(1)} & c^{(1)} & 0 & 0 \\
 0 & 0 & 0 & 0 \\
 0 & 0 & 0 & 0
 \end{pmatrix}
 $$
 
 ```mathematica
-K1sys = Transpose[Λ[1]] . K[1] . Λ[1];
-K1sys /. data // MatrixForm
+K1sys = Transpose[Subscript[Λ, e]] . Ke .
+    Subscript[Λ, e] /. e -> 1 /.
+    datafe /. data;
+K1sys // MatrixForm
 ```
 :::
 
@@ -479,10 +734,10 @@ an den inneren Knoten, werden die Steifigkeiten **addiert**:
 $$
 \mathbf{K}_{sys} =
 \begin{pmatrix}
-c_1 & -c_1 & 0 & 0 \\
--c_1 & c_1 + c_2 & -c_2 & 0 \\
-0 & -c_2 & c_2 + c_3 & -c_3 \\
-0 & 0 & -c_3 & c_3
+c^{(1)} & -c^{(1)} & 0 & 0 \\
+-c^{(1)} & c^{(1)} + c^{(2)} & -c^{(2)} & 0 \\
+0 & -c^{(2)} & c^{(2)} + c^{(3)} & -c^{(3)} \\
+0 & 0 & -c^{(3)} & c^{(3)}
 \end{pmatrix}
 $$
 
@@ -490,8 +745,9 @@ Ein FEM-Programm rechnet die Produkte $\boldsymbol{\Lambda}^{e\mathsf{T}}\mathbf
 sondern addiert die Elementmatrizen direkt an die richtigen Stellen.
 
 ```mathematica
-Ksys = Sum[Transpose[Λ[e]] . K[e] .
-      Λ[e], {e, nel}] /. data;
+Ksys = Sum[Transpose[Subscript[Λ, e]] .
+     Ke . Subscript[Λ, e], {e, nel}] /.
+     datafe /. data;
 Ksys // MatrixForm
 ```
 :::
@@ -533,6 +789,8 @@ gl = Thread[Expand[D[Piges, {psys}]] == 0]
   Knoten koppelt.
 - **Singulär ohne Lager:** Die Zeilensummen sind null. Ohne Lager könnte sich der Stab als Ganzes
   verschieben, ohne dass Energie gespeichert wird.
+- **Dünn besetzt:** Bei 1000 Freiheitsgraden hat $\mathbf{K}_{sys}$ eine Million Einträge, besetzt ist aber nur
+  das Band. Für solche Matrizen gibt es sehr effiziente Löser.
 
 ```mathematica
 SymmetricMatrixQ[Ksys]
@@ -576,7 +834,7 @@ $$
 Die gestrichene erste Gleichung liefert anschließend die Lagerkraft:
 
 $$
-q_1 = -c_1\,p_2 = -5000\,\text{N}
+q_1 = -c^{(1)}\,p_2 = -5000\,\text{N}
 $$
 
 Sie hält der Kraft $F$ das Gleichgewicht.
@@ -608,11 +866,12 @@ Die Verschiebung ist **stückweise linear**: ein Polygonzug durch die Knotenwert
 ::: {.links}
 ```mathematica
 pl = psys /. rb /. First[lsg];
-l = le /. data;
-uelem[e_] := Ne . Λ[e] . pl /. Le -> l
-ufem = Piecewise[Table[{uelem[e] /.
-      xe -> x - (e - 1) l,
-      (e - 1) l <= x <= e l}, {e, nel}]];
+l = L/nel /. data;
+uelem[k_] := Ne . Subscript[Λ, e] . pl /.
+   e -> k /. datafe /. data
+ufem = Piecewise[Table[{uelem[k] /.
+      Subscript[x, k] -> x - (k - 1) l,
+      (k - 1) l <= x <= k l}, {k, nel}]];
 ```
 :::
 :::
@@ -650,9 +909,9 @@ Beim linearen Element ist die Spannung **je Element konstant**:
 
 $$
 \begin{aligned}
-\sigma^1 &= 57{,}7\,\text{MPa} \\
-\sigma^2 &= 83{,}3\,\text{MPa} \\
-\sigma^3 &= 150\,\text{MPa}
+\sigma^{(1)} &= 57{,}7\,\text{MPa} \\
+\sigma^{(2)} &= 83{,}3\,\text{MPa} \\
+\sigma^{(3)} &= 150\,\text{MPa}
 \end{aligned}
 $$
 
@@ -660,22 +919,23 @@ Das Maximum von $250\,\text{MPa}$ am Stabende wird deutlich unterschätzt.
 
 **Spannungen sind ungenauer als Verschiebungen**, weil sie aus der Ableitung entstehen.
 
-::: {.links}
-```mathematica
-sigelem[e_] := Em dNe . Λ[e] . pl /.
-    Le -> l /. data
-Table[sigelem[e], {e, nel}]
-```
-:::
-:::
-
-::::
-
 ::: {.aufgabe}
 **Ausprobieren:** Im Beispiel [Konischer Stab: Elementanzahl und Konvergenz](../beispiele/stab-konvergenz/index.html)
 können Sie die Anzahl der Elemente und das Verhältnis $A_1/A_0$ verändern. Wie viele Elemente brauchen Sie,
 damit die maximale Spannung auf $5\,\%$ genau ist? Und wie viele für die Verschiebung am Stabende?
 :::
+
+::: {.links}
+```mathematica
+epsel[k_] := dNe . Subscript[Λ, e] . pl /.
+   e -> k /. datafe /. data
+Table[epsel[k], {k, nel}]
+Table[Em epsel[k], {k, nel}] /. data
+```
+:::
+:::
+
+::::
 
 ## Zusammenfassung
 
@@ -701,8 +961,15 @@ eingearbeitet und das Gleichungssystem $\mathbf{K}_{sys}\,\mathbf{p}_{sys} = \ma
 ::: {.schritt zeige="pre solution post" dimmen="pre solution"}
 ### Postprocessor
 
-Im **Postprocessor** werden aus $\mathbf{p}_{sys}$ die Elementverschiebungen, der Verschiebungsverlauf und die
-Spannungen berechnet.
+Im **Postprocessor** werden aus $\mathbf{p}_{sys}$ die Elementverschiebungen, der Verschiebungsverlauf, die
+Dehnungen und die Spannungen berechnet:
+
+$$
+\begin{aligned}
+\varepsilon^e &= \mathbf{N}^e{}'\,\boldsymbol{\Lambda}^e\,\mathbf{p}_{sys} \\
+\sigma^e &= E^e\,\varepsilon^e
+\end{aligned}
+$$
 
 Die Spannungen entstehen aus der Ableitung und sind deshalb ungenauer als die Verschiebungen.
 :::
@@ -734,7 +1001,7 @@ Querschnittssprung knickt der Verschiebungsverlauf. Die FEM legt dort einfach ei
 | | 5. Gleichungssystem lösen | $\mathbf{K}_{sys}\,\mathbf{p}_{sys} = \mathbf{q}_{sys}$ |
 | [**Postprocessor**]{style="color:#006414"} | 6. Elementverschiebungen | $\mathbf{p}^e = \boldsymbol{\Lambda}^e\mathbf{p}_{sys}$ |
 | | 7. Verschiebungsverlauf im Element | $u^e(x^e) = \mathbf{N}^e\boldsymbol{\Lambda}^e\mathbf{p}_{sys}$ |
-| | 8. Dehnungen und Spannungen | $\sigma^e = E^e\mathbf{N}^e{}'\boldsymbol{\Lambda}^e\mathbf{p}_{sys}$ |
+| | 8. Dehnungen und Spannungen | $\varepsilon^e = \mathbf{N}^e{}'\boldsymbol{\Lambda}^e\mathbf{p}_{sys}$, $\sigma^e = E^e\varepsilon^e$ |
 
 : {.striped}
 
@@ -746,4 +1013,12 @@ Gehen Sie dabei den Ablauf der FEM Schritt für Schritt durch: Elementsteifigkei
 Zusammenbau, Lösung, Verschiebungs- und Spannungsverlauf. Vergleichen Sie mit der exakten Lösung.
 
 [Aufgabe herunterladen (Mathematica)](../mathematica/03-stab-konisch-fem-task.nb){download="03-stab-konisch-fem-task.nb"}
+:::
+
+::: {.aufgabe}
+**Abgesetzte Welle mit FEM.** Rechnen Sie die abgesetzte Welle vom Anfang dieser Vorlesung mit einem linearen
+Stabelement je Abschnitt: Elementsteifigkeitsmatrizen, Inzidenzmatrizen, Zusammenbau, Lösung, Verschiebungen und
+Spannungen. Vergleichen Sie mit der exakten Lösung und mit Ritz (Übung `02-welle-ritz`).
+
+[Aufgabe herunterladen (Mathematica)](../mathematica/03-welle-fem-task.nb){download="03-welle-fem-task.nb"}
 :::

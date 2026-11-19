@@ -60,8 +60,8 @@ def _tspans(label: str, italic: bool = True) -> str:
             arg = arg[1:-1] if arg.startswith("{") else arg
             # Index mit fester Verschiebung wie in LaTeX; "sub" setzt Chrome mit Latin Modern viel zu tief
             shift = TIEF if op == "_" else HOCH
-            # Indizes aus Ziffern/Großbuchstaben aufrecht, sonst kursiv
-            style = "normal" if re.fullmatch(r"[0-9A-ZIV,. ]+|max|min|ges|res", arg) else ("italic" if italic else "normal")
+            # Indizes aus Ziffern/Großbuchstaben aufrecht (auch die Elementnummer (1)), sonst kursiv
+            style = "normal" if re.fullmatch(r"[0-9A-ZIV,. ()]+|max|min|ges|res", arg) else ("italic" if italic else "normal")
             out.append(f'<tspan baseline-shift="{shift}" font-size="70%" font-style="{style}">{escape(arg)}</tspan>')
         elif italic:
             # wie LaTeX: Buchstaben kursiv; Ziffern, Klammern, Operatoren und große griechische Buchstaben aufrecht
