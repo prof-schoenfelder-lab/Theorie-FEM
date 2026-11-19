@@ -670,9 +670,14 @@ Eingesetzt wird aus dem Funktional $\Pi[u]$ eine gewöhnliche Funktion $\Pi(a_1,
 Ableitungen null, $\partial \Pi / \partial a_i = 0$. Das ergibt ein lineares Gleichungssystem
 
 $$
-\mathbf{K}\,\mathbf{a} = \mathbf{q}
+\begin{pmatrix} K_{11} & \cdots & K_{1n} \\ \vdots & \ddots & \vdots \\ K_{n1} & \cdots & K_{nn} \end{pmatrix}
+\begin{pmatrix} a_1 \\ \vdots \\ a_n \end{pmatrix}
+=
+\begin{pmatrix} q_1 \\ \vdots \\ q_n \end{pmatrix}
 $$
 
+kurz $\mathbf{K}\,\mathbf{a} = \mathbf{q}$. $\mathbf{a}$ ist der Spaltenvektor der Koeffizienten, $\mathbf{q}$ der
+Spaltenvektor der Lasten.
 Das ist dieselbe Struktur wie beim Federsystem, nur sind die Unbekannten jetzt Koeffizienten eines Ansatzes.
 
 ::: {.vertiefung titel="Allgemeine Formel für K und q"}
