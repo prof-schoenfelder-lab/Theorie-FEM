@@ -592,7 +592,7 @@ herauszulösen, ohne von Hand zu sortieren.
 
 ## Matrizenrechnung kompakt
 
-Für die FEM brauchen wir nur wenige Regeln. Vektoren schreiben wir immer als **Spalten**.
+Für die FEM brauchen wir nur wenige Regeln. Vektoren schreiben wir immer als **Spaltenvektoren**.
 
 | | Regel | Mathematica |
 |:--|:--|:--|
@@ -610,8 +610,8 @@ Für die FEM brauchen wir nur wenige Regeln. Vektoren schreiben wir immer als **
 $\mathbf{A}\mathbf{B}$ ist nur definiert, wenn $\mathbf{A}$ so viele **Spalten** hat wie $\mathbf{B}$ **Zeilen**.
 Eine $(m \times n)$-Matrix mal eine $(n \times r)$-Matrix ergibt eine $(m \times r)$-Matrix. Im Allgemeinen ist
 $\mathbf{A}\mathbf{B} \ne \mathbf{B}\mathbf{A}$. Zwei Spaltenvektoren lassen sich deshalb nicht direkt
-multiplizieren: Erst $\mathbf{x}^\mathsf{T}\mathbf{y}$ (Zeile mal Spalte) oder $\mathbf{x}\,\mathbf{y}^\mathsf{T}$
-(Spalte mal Zeile) ist definiert. Beim Transponieren eines Produkts kehrt sich die Reihenfolge um:
+multiplizieren: Erst $\mathbf{x}^\mathsf{T}\mathbf{y}$ (Zeilenvektor mal Spaltenvektor) oder $\mathbf{x}\,\mathbf{y}^\mathsf{T}$
+(Spaltenvektor mal Zeilenvektor) ist definiert. Beim Transponieren eines Produkts kehrt sich die Reihenfolge um:
 $(\mathbf{A}\mathbf{B})^\mathsf{T} = \mathbf{B}^\mathsf{T}\mathbf{A}^\mathsf{T}$. Diese Regel brauchen wir in
 Vorlesung 3 beim Zusammenbau der Systemsteifigkeitsmatrix.
 
