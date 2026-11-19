@@ -10,7 +10,7 @@ import math
 from pathlib import Path
 
 from nlzeichnen import Diagramm, feder, notiz
-from tmzeichnen import FARBE, Abbildung, einspannung, kraft, kreis, linie, mass, pfeil, polylinie, text
+from tmzeichnen import FARBE, KRAEFTIG, Abbildung, bruch, einspannung, kraft, kreis, linie, mass, pfeil, polylinie, text
 
 ZIEL = Path(__file__).resolve().parent.parent / "grafiken" / "energie"
 BLAU, ROT, GR = FARBE["linear"], FARBE["nichtlinear"], FARBE["mass"]
@@ -58,8 +58,8 @@ def kugel():
     e.append(linie(xs_, ys_, 470, ys_, GRAU, 0.8, "4 3"))   # h von Auflagepunkt zu Auflagepunkt
     e.append(linie(360, yt, 470, yt, GRAU, 0.8, "4 3"))
     e.append(mass(455, yt, 455, ys_, "h", abstand=0, hilfslinien=False))
-    e.append(pfeil(cx - 34, cy - 18, cx - 34, cy + 26, GRAU, 1.4, (9, 6)))
-    e.append(text(cx - 44, cy + 14, "g", GRAU, anker="end"))
+    e.append(pfeil(cx - 76, cy - 34, cx - 76, cy + 16, FARBE["last"], KRAEFTIG["kraft"], KRAEFTIG["spitze"]))  # g wie eine Kraft
+    e.append(text(cx - 66, cy - 22, "g", FARBE["last"], 22, anker="start"))
     e.append(text(cx, cy - 36, "Π = m g h", "#000000"))
 
     e = abb.ebene("rollen", "Kugel rollt ins Tal")
@@ -77,9 +77,9 @@ def kugel():
     xt_, yt_ = _PROFIL[2][0], _boden(_PROFIL[2][0])
     for x, y in ((xs_, ys_), (xt_, yt_)):
         e.append(linie(x - 62, y, x + 62, y, BLAU, 2.0))
-    e.append(text(xs_ + 66, ys_ - 26, "h' = 0,  h'' < 0", BLAU, 17, anker="start"))
+    e.append(text(xs_ + 66, ys_ - 26, "h′ = 0,  h″ < 0", BLAU, 17, anker="start"))
     e.append(notiz(xs_ + 66, ys_ - 4, ["Maximum: instabil"], BLAU, 15))
-    e.append(text(xt_ - 70, yt_ - 30, "h' = 0,  h'' > 0", BLAU, 17, anker="end"))
+    e.append(text(xt_ - 70, yt_ - 30, "h′ = 0,  h″ > 0", BLAU, 17, anker="end"))
     e.append(notiz(xt_ - 70, yt_ - 8, ["Minimum: stabil"], BLAU, 15, anker="end"))
 
     e = abb.ebene("bergauf", "Bergauf unmöglich")
@@ -96,15 +96,8 @@ def kugel():
 
 # ---------------------------------------------------------------- Eine Feder mit Energiediagramm
 def _halb(X, Y, links, rechts, farbe, g=19):
-    """Formel „links ½ rechts“ mit ½ als echtem Bruch; (X, Y) = Mitte des Bruchstrichs."""
-    z, d = 0.79 * g, 0.58 * g                      # Größe und Abstand der Bruchziffern
-    return "".join([
-        text(X - 9, Y, links, farbe, g, anker="end") if links else "",
-        text(X, Y - d, "1", farbe, z, italic=False),
-        linie(X - 0.32 * g, Y, X + 0.32 * g, Y, farbe, 1.1),
-        text(X, Y + d, "2", farbe, z, italic=False),
-        text(X + 0.53 * g, Y, rechts, farbe, g, anker="start"),
-    ])
+    """Formel „links ½ rechts“ mit ½ als Bruch im displaystyle; (X, Y) = Mitte des Bruchstrichs."""
+    return bruch(X, Y, "1", "2", farbe, g, links=links, rechts=rechts)
 
 
 def feder_energie():
@@ -121,12 +114,12 @@ def feder_energie():
     e.append(text(xf, ym + hm / 2, "m", "#000000", 19))
 
     e = abb.ebene("kraft", "Gewichtskraft")
-    e.append(kraft(xf, ym + hm, -90, "F = m g", laenge=58, ziehend=True, label_seite=-1))
+    e.append(kraft(xf, ym + hm, -90, "F = m g", laenge=62, ziehend=True, label_seite=-1, kraeftig=True))
 
     e = abb.ebene("verschiebung", "Verschiebung")
     for yy in (yr, ym):
         e.append(linie(xf + 34, yy, xf + 96, yy, GRAU, 0.8, "4 3"))
-    e.append(pfeil(xf + 80, yr, xf + 80, ym, GR, 1.4, (9, 6)))
+    e.append(pfeil(xf + 80, yr, xf + 80, ym, GR, KRAEFTIG["dof"], KRAEFTIG["dof_spitze"]))
     e.append(text(xf + 88, (yr + ym) / 2, "u", GR, anker="start"))
     e.append(notiz(xf + 100, yr, ["entspannt"], "#666666", 13))
 
@@ -139,7 +132,7 @@ def feder_energie():
     e.append(A.kurve(lambda v: v, 0, 1.15, farbe=BLAU))
     e.append(A.linie(1, 0, 1, 1, GRAU, 0.8, "4 3"))
     e.append(A.text(0.72, 0.28, "Π_i", BLAU, groesse=17))
-    e.append(A.text(0.6, 0.6, "N ds", BLAU, dx=-6, dy=-16, groesse=14, anker="end"))
+    e.append(A.text(0.6, 0.6, "N [d]s", BLAU, dx=-6, dy=-16, groesse=14, anker="end"))
     e.append(A.text(1.15, 1.15, "N = c s", BLAU, dx=4, dy=-4, groesse=15, anker="start"))
 
     # Wo ist die andere Hälfte? Die Last verliert F u (Rechteck), die Feder speichert nur das untere Dreieck
@@ -160,7 +153,10 @@ def feder_energie():
     # Diagramm: u in F/c, Π in F²/c
     D = Diagramm(120, 665, 470, 340, 2.4, 2.2, xmin=-0.3, ymin=-1.3)
     e = abb.ebene("achsen", "Achsen")
-    e.append(D.achsen("u", "Π", [(1, "F/c"), (2, "2F/c")], [(1, ""), (-1, "")], raster=True))
+    e.append(D.achsen("u", "Π", [(1, ""), (2, "")], [(1, ""), (-1, "")], raster=True))
+    for v, z in ((1, "F"), (2, "2F")):
+        X, Y = D.px(v, 0)
+        e.append(bruch(X + 16, Y + 24, z, "c", "#000000", 15))
 
     e = abb.ebene("pi_i", "Innere Energie")
     e.append(D.kurve(lambda u: u * u / 2, -0.3, 2.4, farbe=BLAU))
@@ -169,7 +165,7 @@ def feder_energie():
 
     e = abb.ebene("pi_a", "Äußere Energie")
     e.append(D.kurve(lambda u: -u, -0.3, 1.3, farbe=ROT))
-    e.append(D.text(1.3, -1.3, "Π_a = −F u", ROT, dx=10, dy=-4, anker="start"))
+    e.append(D.text(1.3, -1.3, "Π_a = −F u", ROT, dx=-16, dy=6, anker="end"))
 
     e = abb.ebene("pi_ges", "Gesamte Energie")
     e.append(D.kurve(lambda u: u * u / 2 - u, -0.3, 2.4, farbe="#000000", breite=2.6))
@@ -178,8 +174,10 @@ def feder_energie():
     e = abb.ebene("minimum", "Minimum")
     e.append(D.hilfslinien(1, -0.5))
     e.append(D.punkt(1, -0.5, GR, 5))
-    e.append(D.notiz(1, -0.5, ["Minimum"], GR, dx=14, dy=22))
-    e.append(D.text(1, -0.5, "dΠ_{ges}/du = 0  ⇒  u = F/c", GR, dx=14, dy=48, anker="start"))
+    e.append(D.notiz(1, -0.5, ["Minimum"], GR, dx=14, dy=20))
+    X, Y = D.px(1.5, -0.5)
+    e.append(bruch(X, Y + 52, "[d]Π_{ges}", "[d]u", GR, 18, rechts="= 0", anker="start"))
+    e.append(bruch(X + 74, Y + 52, "F", "c", GR, 18, links="⇒  u =", anker="start"))
     return abb.speichern(ZIEL / "feder.svg")
 
 
@@ -201,7 +199,12 @@ def hoehenlinien():
     abb = Abbildung(620, 560, "Höhenlinien der potentiellen Energie")
     D = Diagramm(90, 510, 450, 450, 2.5, 2.0, xmin=-0.5, ymin=-1.0)    # gleicher Maßstab in p1 und p2
     e = abb.ebene("achsen", "Achsen")
-    e.append(D.achsen("p_1", "p_2", [(1, "F/k"), (2, "2F/k")], [(1, "F/k"), (-0.5, "")], raster=True))
+    e.append(D.achsen("p_1", "p_2", [(1, ""), (2, "")], [(1, ""), (-0.5, "")], raster=True))
+    for v, z in ((1, "F"), (2, "2F")):
+        X, Y = D.px(v, 0)
+        e.append(bruch(X, Y + 26, z, "k", "#000000", 15))
+    X, Y = D.px(0, 1)
+    e.append(bruch(X - 20, Y, "F", "k", "#000000", 15))
 
     e = abb.ebene("konturen", "Höhenlinien")
     stufen = [-1.0, -0.5, 0.0, 1.0, 2.0, 3.0]
@@ -222,11 +225,66 @@ def hoehenlinien():
     e = abb.ebene("minimum", "Minimum")
     e.append(D.hilfslinien(pm[0], pm[1], GR))
     e.append(D.punkt(pm[0], pm[1], ROT, 5.5))
-    e.append(D.text(0, 0.5, "F/(2k)", GR, dx=-10, groesse=15, anker="end"))
-    e.append(D.text(pm[0], pm[1], "Π_{min} = −5/4", ROT, dx=12, dy=14, groesse=16, anker="start"))
+    X, Y = D.px(0, 0.5)
+    e.append(bruch(X - 10, Y, "F", "2k", GR, 15, anker="end"))
+    X, Y = D.px(pm[0], pm[1])
+    e.append(bruch(X + 24, Y + 30, "5", "4", ROT, 17, links="Π_{min} = −", anker="start"))
     return abb.speichern(ZIEL / "hoehenlinien.svg")
 
 
+# ---------------------------------------------------------------- Zusammenfassung: Gleichgewicht oder Energie?
+def zusammenfassung():
+    """Zwei Spalten: Weg aus Vorlesung 0 (Freischnitt, Gleichgewicht) und Weg aus Vorlesung 1 (Energie),
+    beide führen auf dasselbe K p = q."""
+    from grafiken_einfuehrung import _kasten, _platte, formel
+    from tmzeichnen import freiheitsgrad
+    abb = Abbildung(720, 640, "Gleichgewicht oder Energie?")
+    xl, xr, b = 10, 370, 340                          # linke und rechte Spalte
+    zeilen = (100, 250, 340, 430)                     # Ausgangspunkt, Werkstoff, Kinematik, Gleichungen
+
+    def zeilentitel(x, y, t):
+        return notiz(x + 12, y, [t], "#666666", 14)
+
+    e = abb.ebene("gleichgewicht", "Weg über das Gleichgewicht")
+    e.append(_kasten(xl, 10, b, 500, "Vorlesung 0: Gleichgewicht"))
+    e.append(zeilentitel(xl, 50, "Freischnitt jedes Balkens"))
+    xm, ym = xl + 160, 120
+    e.append(_platte(xm, ym - 52, ym + 52))
+    e.append(kraft(xm, ym + 20, 180, "N_1", laenge=60, ziehend=True, label_seite=-1, kraeftig=True))
+    e.append(kraft(xm + 16, ym + 20, 0, "N_2", laenge=60, ziehend=True, label_seite=1, kraeftig=True))
+    e.append(kraft(xm + 16, ym - 22, 0, "f_2", laenge=60, ziehend=True, label_seite=-1, kraeftig=True))
+    e.append(zeilentitel(xl, zeilen[1] - 26, "Werkstoffgesetz"))
+    e.append(formel(xl + b / 2, zeilen[1] + 6, "N = c u", groesse=21, anker="middle"))
+    e.append(zeilentitel(xl, zeilen[2] - 26, "Kinematik"))
+    e.append(formel(xl + b / 2, zeilen[2] + 6, "u_1 = p_2,  u_2 = p_1 − p_2", groesse=20, anker="middle"))
+    e.append(zeilentitel(xl, zeilen[3] - 26, "Gleichungen: Gleichgewicht je Balken"))
+    e.append(formel(xl + b / 2, zeilen[3] + 10, "−N_1 + N_2 + f_2 = 0", groesse=21, anker="middle"))
+
+    e = abb.ebene("energie", "Weg über die Energie")
+    e.append(_kasten(xr, 10, b, 500, "Vorlesung 1: Energie"))
+    e.append(zeilentitel(xr, 50, "Energie jeder Feder, Arbeit jeder Kraft"))
+    yf = 104
+    e.append(einspannung(xr + 30, yf, 36))
+    e.append(feder(xr + 30, yf, xr + 160, yf, 5, 9, label="c", label_abstand=-20))
+    e.append(freiheitsgrad(xr + 160, yf, "p", laenge=46, label_seite=-1))
+    e.append(kraft(xr + 250, yf, 0, "f", laenge=55, ziehend=True, label_seite=-1, kraeftig=True))
+    e.append(bruch(xr + 40, yf + 62, "1", "2", BLAU, 20, links="Π_i =", rechts="c u^2", anker="start"))
+    e.append(text(xr + 220, yf + 62, "Π_a = −f p", ROT, 20, anker="start"))
+    e.append(zeilentitel(xr, zeilen[1] - 26, "Werkstoffgesetz"))
+    e.append(notiz(xr + 50, zeilen[1] + 6, ["steckt in"], "#333333", 16))
+    e.append(bruch(xr + 125, zeilen[1] + 6, "1", "2", "#000000", 20, links="Π_i =", rechts="c u^2", anker="start"))
+    e.append(zeilentitel(xr, zeilen[2] - 26, "Kinematik"))
+    e.append(formel(xr + b / 2, zeilen[2] + 6, "u_1 = p_2,  u_2 = p_1 − p_2", groesse=20, anker="middle"))
+    e.append(zeilentitel(xr, zeilen[3] - 26, "Gleichungen: Minimum der Energie"))
+    e.append(bruch(xr + 110, zeilen[3] + 10, "∂Π_{ges}", "∂p_i", "#000000", 21, rechts="= 0", anker="start"))
+
+    e = abb.ebene("ergebnis", "Dasselbe Ergebnis")
+    for x in (xl + b / 2, xr + b / 2):
+        e.append(pfeil(x, 514, 360 + (x - 360) * 0.2, 566, "#555555", 1.4, (10, 7)))
+    e.append(formel(360, 596, "**K** **p** = **q**", groesse=30, anker="middle"))
+    return abb.speichern(ZIEL / "zusammenfassung.svg")
+
+
 if __name__ == "__main__":
-    for fn in (kugel, feder_energie, hoehenlinien):
+    for fn in (kugel, feder_energie, hoehenlinien, zusammenfassung):
         print(fn())

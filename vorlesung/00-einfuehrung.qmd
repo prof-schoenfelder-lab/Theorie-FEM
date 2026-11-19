@@ -319,15 +319,20 @@ Wir schneiden ein Stabstück der Länge $\mathrm{d}x$ frei. Oben wirkt $-N(x)$, 
 dazu die Streckenlast $q_x\,\mathrm{d}x$ in Richtung $x$:
 
 $$
--N(x) + N(x + \mathrm{d}x) + q_x\,\mathrm{d}x = 0
-\qquad\Rightarrow\qquad N'(x) = -q_x(x)
+\begin{aligned}
+-N(x) + N(x + \mathrm{d}x) + q_x\,\mathrm{d}x &= 0 \\
+\Rightarrow\quad N'(x) &= -q_x(x)
+\end{aligned}
 $$
 
 Mit dem Werkstoffgesetz $\sigma = E\,\varepsilon$, also $N = \sigma A = EA\,\varepsilon$, und der Kinematik
 $\varepsilon = u'(x)$ folgt
 
 $$
-N(x) = EA\,u'(x) \qquad\Rightarrow\qquad \big(EA\,u'(x)\big)' = -q_x(x)
+\begin{aligned}
+N(x) &= EA\,u'(x) \\
+\Rightarrow\quad \big(EA\,u'(x)\big)' &= -q_x(x)
+\end{aligned}
 $$
 
 Das sind dieselben drei Bausteine wie beim Federsystem: **Gleichgewicht, Werkstoffgesetz, Kinematik.**
@@ -585,50 +590,6 @@ einmal (Jacobi-Matrix). Für lineare Systeme ist das eine bequeme Art, $\mathbf{
 herauszulösen, ohne von Hand zu sortieren.
 :::
 
-## Was macht ein FE-Programm?
-
-Genau dasselbe, nur größer:
-
-1. **Preprocessing:** Aus dem Netz entstehen die Freiheitsgrade. Ein 2D-Netz mit 1000 Knoten und zwei
-   Verschiebungen je Knoten hat 2000 Freiheitsgrade, $\mathbf{K}$ ist dann eine $2000 \times 2000$-Matrix.
-   Lager sind Freiheitsgrade mit vorgegebener Verschiebung $0$, Lasten stehen in $\mathbf{q}$.
-2. **Solution:** Ein Klick auf *Solve* löst $\mathbf{K}\,\mathbf{p} = \mathbf{q}$. $\mathbf{K}$ wird dabei nicht
-   invertiert, das wäre viel zu aufwendig. Stattdessen nutzt man Verfahren wie die Gauß-Elimination, die auch
-   Gleichungssysteme mit Millionen Unbekannten effizient lösen.
-3. **Postprocessing:** Die Verschiebungen werden gezeichnet (das verformte Netz). Daraus berechnet das Programm
-   rückwärts die inneren Größen, beim Federsystem die Federkräfte, beim Bauteil Dehnungen und Spannungen.
-
-Hinter allem stecken die Gleichungen der Technischen Mechanik: Gleichgewicht, Werkstoffgesetz, Kinematik.
-
-::: {.aufgabe}
-**Ausprobieren:** Im Beispiel [Federsystem: Steifigkeitsmatrix](../beispiele/federsystem/index.html) können Sie
-Federsteifigkeiten und Kräfte verändern und sehen sofort $\mathbf{K}$, die Verschiebungen und die Federkräfte.
-Was passiert, wenn Sie $c_1$ und $c_3$ gegen null gehen lassen? Wann ist $N_2 = 0$?
-:::
-
-## Das Lösungsmuster auf einen Blick
-
-Die ganze Rechnung zum Kopieren. Jede Beziehung hat einen Namen, Zahlenwerte kommen erst am Ende:
-
-```mathematica
-glgw        = {-N2 - N3 + f1 == 0, -N1 + N2 + f2 == 0};
-federgesetz = {N1 -> c1 u1, N2 -> c2 u2, N3 -> c3 u3};
-kinematik   = {u1 -> p2, u2 -> p1 - p2, u3 -> p1};
-data        = {c1 -> 2 k, c2 -> 4 k, c3 -> k, f1 -> 3 F, f2 -> -F};
-
-(* direkt lösen *)
-lsg = Solve[glgw /. federgesetz /. kinematik /. data, {p1, p2}]
-
-(* oder als K p = q *)
-psys  = {p1, p2};
-qsys  = {f1, f2};
-innen = {N2 + N3, N1 - N2} /. federgesetz /. kinematik;
-Ksys  = D[innen, {psys}];
-Ksys // MatrixForm
-plsg  = LinearSolve[Ksys, qsys] /. data // Simplify
-{N1, N2, N3} /. federgesetz /. kinematik /. Thread[psys -> plsg] /. data
-```
-
 ## Matrizenrechnung kompakt
 
 Für die FEM brauchen wir nur wenige Regeln. Vektoren schreiben wir immer als **Spalten**.
@@ -656,6 +617,86 @@ Vorlesung 3 beim Zusammenbau der Systemsteifigkeitsmatrix.
 
 Mathematica unterscheidet bei Listen nicht zwischen Zeilen- und Spaltenvektoren. `x . y` ist immer das
 Skalarprodukt, `M . x` das Produkt Matrix mal Vektor.
+:::
+
+## Zusammenfassung
+
+:::: {.scrolly svg="../grafiken/einfuehrung/zusammenfassung.svg"}
+
+::: {.schritt zeige="werkzeuge"}
+### Mathematica als Werkzeug
+
+An drei bekannten Aufgaben haben wir die wichtigsten Befehle kennengelernt:
+
+- **Kurvendiskussion:** `Plot`, `Solve`, `D`, `Integrate`
+- **Schnittgrößen:** Gleichgewicht mit `Solve`, Verläufe mit `Piecewise`
+- **Differentialgleichung:** `DSolve` mit Randbedingungen
+
+Jede Gleichung bekommt einen Namen, Zahlenwerte stehen in `data` und werden erst am Ende mit `/. data`
+eingesetzt.
+:::
+
+::: {.schritt zeige="werkzeuge muster" dimmen="werkzeuge"}
+### Das Lösungsmuster
+
+Beim Federsystem stecken drei Bausteine der Technischen Mechanik: **Gleichgewicht, Federgesetz, Kinematik.**
+Jede Beziehung hat einen Namen, die Zahlenwerte kommen zuletzt:
+
+```mathematica
+glgw = {-N2 - N3 + f1 == 0,
+        -N1 + N2 + f2 == 0};
+federgesetz = {N1 -> c1 u1,
+  N2 -> c2 u2, N3 -> c3 u3};
+kinematik = {u1 -> p2,
+  u2 -> p1 - p2, u3 -> p1};
+data = {c1 -> 2 k, c2 -> 4 k,
+  c3 -> k, f1 -> 3 F, f2 -> -F};
+lsg = Solve[glgw /. federgesetz /.
+  kinematik /. data, {p1, p2}]
+```
+:::
+
+::: {.schritt zeige="werkzeuge muster" dimmen="werkzeuge"}
+### Als $\mathbf{K}\,\mathbf{p} = \mathbf{q}$
+
+Statt direkt zu lösen, bringen wir die Gleichungen in die Form $\mathbf{K}\,\mathbf{p} = \mathbf{q}$:
+**Steifigkeitsmatrix mal Freiheitsgrade gleich Lasten.**
+
+```mathematica
+psys = {p1, p2};
+qsys = {f1, f2};
+innen = {N2 + N3, N1 - N2} /.
+  federgesetz /. kinematik;
+Ksys = D[innen, {psys}];
+Ksys // MatrixForm
+plsg = LinearSolve[Ksys, qsys] /.
+  data // Simplify
+{N1, N2, N3} /. federgesetz /.
+  kinematik /.
+  Thread[psys -> plsg] /. data
+```
+:::
+
+::: {.schritt zeige="werkzeuge muster fe" dimmen="werkzeuge muster"}
+### Was macht ein FE-Programm?
+
+Genau dasselbe, nur größer:
+
+1. **Preprocessing:** Aus dem Netz entstehen die Freiheitsgrade. 1000 Knoten mit je zwei Verschiebungen ergeben
+   2000 Freiheitsgrade, $\mathbf{K}$ ist dann eine $2000 \times 2000$-Matrix. Lager sind Freiheitsgrade mit
+   vorgegebener Verschiebung $0$, Lasten stehen in $\mathbf{q}$.
+2. **Solution:** *Solve* löst $\mathbf{K}\,\mathbf{p} = \mathbf{q}$, ohne $\mathbf{K}$ zu invertieren, z. B. mit
+   der Gauß-Elimination, auch für Millionen Unbekannte.
+3. **Postprocessing:** Die Verschiebungen werden gezeichnet. Rückwärts folgen die inneren Größen, beim
+   Federsystem die Federkräfte, beim Bauteil Dehnungen und Spannungen.
+:::
+
+::::
+
+::: {.aufgabe}
+**Ausprobieren:** Im Beispiel [Federsystem: Steifigkeitsmatrix](../beispiele/federsystem/index.html) können Sie
+Federsteifigkeiten und Kräfte verändern und sehen sofort $\mathbf{K}$, die Verschiebungen und die Federkräfte.
+Was passiert, wenn Sie $c_1$ und $c_3$ gegen null gehen lassen? Wann ist $N_2 = 0$?
 :::
 
 ## Ausblick

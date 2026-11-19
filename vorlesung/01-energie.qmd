@@ -372,24 +372,40 @@ Am Minimum gilt außerdem $\Pi_i = -\tfrac12\,\Pi_a$. Im Beispiel ist $\Pi_i = \
 $\Pi_a = -\tfrac52\,F^2/k$.
 :::
 
-## Gleichgewicht oder Energie?
+## Zusammenfassung: Gleichgewicht oder Energie?
 
-| | Vorlesung 0: Gleichgewicht | Vorlesung 1: Energie |
-|:--|:--|:--|
-| Ausgangspunkt | Freischnitt jedes Balkens | Energie jeder Feder, Arbeit jeder Kraft |
-| Kinematik | nötig | nötig |
-| Werkstoffgesetz | Federgesetz $N = c\,u$ | steckt in $\Pi_i = \frac12 c\,u^2$ |
-| Gleichungen | Gleichgewicht je Balken | $\partial \Pi_{ges} / \partial p_i = 0$ |
-| Ergebnis | $\mathbf{K}\,\mathbf{p} = \mathbf{q}$ | dasselbe $\mathbf{K}\,\mathbf{p} = \mathbf{q}$ |
+:::: {.scrolly svg="../grafiken/energie/zusammenfassung.svg"}
 
-: {.striped}
+::: {.schritt zeige="gleichgewicht"}
+### Vorlesung 0: Gleichgewicht
 
-::: {.merke}
-**Beide Methoden sind gleichwertig** und liefern dieselben Verschiebungen und Federkräfte. Der Energieweg ist aber
-**formaler**: Wir müssen nicht überlegen, welche Kraft an welchem Schnittufer in welche Richtung zeigt. Wir
-addieren nur die Energie aller Bauteile und die Arbeit aller Lasten. Genau so arbeitet die FEM: Sie berechnet die
-Energie jedes Elements und setzt sie zum Gesamtsystem zusammen.
+Wir schneiden **jeden Balken frei** und überlegen, welche Kraft an welchem Schnittufer in welche Richtung zeigt.
+Mit dem Federgesetz $N = c\,u$ und der Kinematik entsteht je Balken eine Gleichgewichtsbedingung.
 :::
+
+::: {.schritt zeige="gleichgewicht energie" dimmen="gleichgewicht"}
+### Vorlesung 1: Energie
+
+Wir addieren die **Energie jeder Feder** und die **Arbeit jeder Kraft**. Das Werkstoffgesetz steckt in
+$\Pi_i = \frac12 c\,u^2$, die Kinematik brauchen wir genauso. Statt Gleichgewicht je Balken gilt
+
+$$
+\frac{\partial \Pi_{ges}}{\partial p_i} = 0
+$$
+:::
+
+::: {.schritt zeige="gleichgewicht energie ergebnis"}
+### Dasselbe Ergebnis
+
+Beide Wege führen auf dasselbe $\mathbf{K}\,\mathbf{p} = \mathbf{q}$ und liefern dieselben Verschiebungen und
+Federkräfte.
+
+Der Energieweg ist aber **formaler**: Wir müssen nicht überlegen, welche Kraft an welchem Schnittufer in welche
+Richtung zeigt. Genau so arbeitet die FEM: Sie berechnet die Energie jedes Elements und setzt sie zum Gesamtsystem
+zusammen.
+:::
+
+::::
 
 ## Ausblick
 

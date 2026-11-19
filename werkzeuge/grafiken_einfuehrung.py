@@ -13,8 +13,9 @@ from xml.sax.saxutils import escape
 
 from nlzeichnen import Diagramm, feder
 from nlzeichnen import notiz
-from tmzeichnen import (FARBE, SCHRIFT, Abbildung, balken, balkenzug, einspannung, festlager, kraft, kreis, linie, loslager, mass,
-                        pfeil, streckenlast, text, verlauf, winkelbogen)
+from tmzeichnen import (FARBE, SCHRIFT, TIEF, Abbildung, balken, balkenzug, bruch, einspannung, festlager, freiheitsgrad, kraft,
+                        kreis, laengslast, lastverlauf, linie, loslager, mass, pfeil, streckenlast, text, verlauf,
+                        winkelbogen)
 
 ZIEL = Path(__file__).resolve().parent.parent / "grafiken" / "einfuehrung"
 EX, ROT, GR = FARBE["linear"], FARBE["nichtlinear"], FARBE["mass"]
@@ -58,7 +59,7 @@ def kurve():
     pts = [(r[1], 0)] + [(r[1] + (r[2] - r[1]) * i / 80, f(r[1] + (r[2] - r[1]) * i / 80)) for i in range(81)] + [(r[2], 0)]
     e.append(D.flaeche(pts, FARBE["bereich_nl"], 0.95))
     e.append(D.kurve(f, r[1], r[2], farbe=EX))
-    e.append(D.text(-1.0, -7, "A = −53,6", ROT, groesse=17, italic=False))
+    e.append(D.text(-1.0, -7, "A = −53,6", ROT, groesse=17))
 
     e = abb.ebene("nullstellen", "Nullstellen")
     for x in r:
@@ -95,7 +96,7 @@ def federsystem():
     xw, xm, xr, b = 70, 330, 560, 16          # Wand, mittlerer Balken (p2), rechter Balken (p1)
     y3, y12 = 85, 225                          # Höhen der Federn
     ym0, ym1, yr0, yr1 = 150, 262, 50, 262     # Ausdehnung der Balken
-    yf2, yf1, yp1 = 178, 130, 190
+    yf2, yf1, yp1, yp2 = 164, y12, 150, 194    # f_1 auf der Linie der Feder c_2
     dy = 280                                   # Versatz Freischnitt
 
     e = abb.ebene("system", "System")
@@ -112,14 +113,12 @@ def federsystem():
     e.append(_knoten_nr(xr, y3, 3))
 
     e = abb.ebene("last", "Lasten")
-    e.append(kraft(xm + b, yf2, 0, "f_2", laenge=55, ziehend=True, label_seite=1))
-    e.append(kraft(xr + b, yf1, 0, "f_1", laenge=60, ziehend=True, label_seite=1))
+    e.append(kraft(xm + b, yf2, 0, "f_2", laenge=60, ziehend=True, label_seite=-1, kraeftig=True))
+    e.append(kraft(xr + b, yf1, 0, "f_1", laenge=65, ziehend=True, label_seite=-1, kraeftig=True))
 
     e = abb.ebene("dof", "Freiheitsgrade")
-    e.append(pfeil(xm + b, ym0 - 22, xm + b + 44, ym0 - 22, GR, 1.4, (9, 6)))
-    e.append(text(xm + b + 50, ym0 - 22, "p_2", GR, anker="start"))
-    e.append(pfeil(xr + b, yp1, xr + b + 50, yp1, GR, 1.4, (9, 6)))
-    e.append(text(xr + b + 56, yp1, "p_1", GR, anker="start"))
+    e.append(freiheitsgrad(xm + b, yp2, "p_2", laenge=48, label_seite=0))
+    e.append(freiheitsgrad(xr + b, yp1, "p_1", laenge=55))
 
     e = abb.ebene("dehnung", "Federverlängerungen")
     e.append(text((xw + xm) / 2, y12 + 34, "u_1 = p_2", GR, 17))
@@ -130,12 +129,9 @@ def federsystem():
     e = abb.ebene("freischnitt", "Freischnitt")
     e.append(_platte(xm, ym0 + dy, ym1 + dy))
     e.append(_platte(xr, yr0 + dy, yr1 + dy))
-    e.append(kraft(xm, y12 + dy, 180, "N_1", laenge=60, ziehend=True, label_seite=-1))
-    e.append(kraft(xm + b, y12 + dy, 0, "N_2", laenge=60, ziehend=True, label_seite=1))
-    e.append(kraft(xm + b, yf2 + dy, 0, "f_2", laenge=55, ziehend=True, label_seite=1))
-    e.append(kraft(xr, y12 + dy, 180, "N_2", laenge=60, ziehend=True, label_seite=-1))
-    e.append(kraft(xr, y3 + dy, 180, "N_3", laenge=60, ziehend=True, label_seite=-1))
-    e.append(kraft(xr + b, yf1 + dy, 0, "f_1", laenge=60, ziehend=True, label_seite=1))
+    for x, yy, w, lab, s_ in ((xm, y12, 180, "N_1", -1), (xm + b, y12, 0, "N_2", 1), (xm + b, yf2, 0, "f_2", -1),
+                              (xr, y12, 180, "N_2", -1), (xr, y3, 180, "N_3", -1), (xr + b, yf1, 0, "f_1", -1)):
+        e.append(kraft(x, yy + dy, w, lab, laenge=60, ziehend=True, label_seite=s_, kraeftig=True))
     e.append(linie(20, dy + 8, 700, dy + 8, "#c8c8c8", 0.8, "6 4"))
     e.append(text(30, dy + 30, "Freischnitt", "#555555", 15, anker="start", italic=False))
     return abb.speichern(ZIEL / "federsystem.svg")
@@ -161,11 +157,10 @@ def federsystem_3dof():
     e.append(_knoten_nr(xm, y2, 2))
     e.append(_knoten_nr(xr, y3, 3))
     e.append(_knoten_nr(xw + 8, y4, 4))
-    e.append(kraft(xl + b, 140, 0, "F", laenge=55, ziehend=True, label_seite=1))
-    e.append(kraft(xr + b, 300, 0, "3F", laenge=55, ziehend=True, label_seite=1))
-    for x, y, n in ((xl + b, 180, 1), (xm + b, 190, 2), (xr + b, 230, 3)):
-        e.append(pfeil(x, y, x + 44, y, GR, 1.4, (9, 6)))
-        e.append(text(x + 50, y, f"p_{n}", GR, anker="start"))
+    e.append(kraft(xl + b, 130, 0, "F", laenge=60, ziehend=True, label_seite=-1, kraeftig=True))
+    e.append(kraft(xr + b, 300, 0, "3F", laenge=60, ziehend=True, label_seite=-1, kraeftig=True))
+    for x, y, n in ((xl + b, 190, 1), (xm + b, 250, 2), (xr + b, 230, 3)):
+        e.append(freiheitsgrad(x, y, f"p_{n}", laenge=50))
     return abb.speichern(ZIEL / "federsystem-3dof.svg")
 
 
@@ -186,7 +181,7 @@ def formel(x, y, s, farbe="#000000", groesse=20, anker="start", faerben=True):
             t.append(f'<tspan font-style="italic" fill="{fa}">{escape(name)}</tspan>')
             if index:
                 index = index.strip("{}")
-                t.append(f'<tspan font-style="normal" fill="{fa}" font-size="70%" baseline-shift="sub">{escape(index)}</tspan>')
+                t.append(f'<tspan font-style="normal" fill="{fa}" font-size="70%" baseline-shift="{TIEF}">{escape(index)}</tspan>')
         elif leer:
             t.append(f"<tspan> </tspan>")
         else:
@@ -301,7 +296,8 @@ def kpq():
     # Zahlenwerte und Lösung
     y6 = y5 + 160
     e = abb.ebene("schritt_zahlen", "Zahlenwerte und Lösung")
-    e.append(notiz(xg, y6 - 40, ["mit c_1 = 2k, c_2 = 4k, c_3 = k, f_1 = 3F, f_2 = −F:"], "#444444", 15))
+    e.append(notiz(xg, y6 - 40, ["mit"], "#444444", 15))
+    e.append(formel(xg + 30, y6 - 40, "c_1 = 2k,  c_2 = 4k,  c_3 = k,  f_1 = 3F,  f_2 = −F :", groesse=17, faerben=False))
     e.append(formel(xg + 4, y6 + 17, "k", groesse=G))
     e.append(_matrix(xg + 20, y6, [["5", "−4"], ["−4", "6"]], [26, 76], groesse=G))
     e.append(_matrix(xg + 128, y6, [["p_1"], ["p_2"]], [26], groesse=G))
@@ -337,7 +333,7 @@ def traeger71():
 
     e = abb.ebene("lasten", "Lasten")
     e.append(streckenlast(x0, xB, y - 4, 34, label="q"))
-    e.append(kraft(xE, y - 2, 225, "F", laenge=62, label_seite=1))
+    e.append(kraft(xE, y - 2, 225, "F", laenge=66, label_seite=1, kraeftig=True))
     e.append(linie(xE, y, xE + 60, y, GRAU, 0.8, "4 3"))
     e.append(winkelbogen(xE, y, 40, 0, 45, "α"))
 
@@ -346,14 +342,14 @@ def traeger71():
     e.append(mass(xB, y + 26, xE, y + 26, "a", abstand=-22))
 
     e = abb.ebene("reaktionen", "Lagerreaktionen")
-    e.append(kraft(x0, y + 4, 90, "A", laenge=48, label_seite=1))
-    e.append(kraft(xB, y + 4, 90, "B_v", laenge=48, label_seite=1))
-    e.append(kraft(xB - 4, y + 22, 0, "B_h", laenge=48, label_seite=1, label_pos=0.6))
+    e.append(kraft(x0, y + 4, 90, "A", laenge=56, label_seite=1, kraeftig=True))
+    e.append(kraft(xB, y + 4, 90, "B_v", laenge=56, label_seite=1, kraeftig=True))
+    e.append(kraft(xB - 5, y, 0, "B_h", laenge=70, label_seite=1, label_pos=0.85, kraeftig=True))   # Wirkungslinie = Achse
 
     e = abb.ebene("bereiche", "Bereiche")
-    for xa, n, rom in ((x0, 1, "I"), (xB, 2, "II")):
-        e.append(pfeil(xa, y - 66, xa + 40, y - 66, GR, 1.25, (8, 5)))
-        e.append(text(xa + 46, y - 66, f"x_{n}", GR, anker="start"))
+    for xa, n, rom in ((x0, 1, "I"), (xB, 2, "II")):      # x_i im Ursprung des Bereichs auf der Achse
+        e.append(pfeil(xa, y, xa + 50, y, GR, 1.25, (9, 6)))
+        e.append(text(xa + 52, y + 16, f"x_{n}", GR, 21, anker="start"))
     e.append(text((x0 + xB) / 2, y - 86, "[Bereich I]", "#444444", 15, italic=False))
     e.append(text((xB + xE) / 2, y - 86, "[Bereich II]", "#444444", 15, italic=False))
 
@@ -378,44 +374,55 @@ def traeger71():
 
 # ---------------------------------------------------------------- Stab unter Eigengewicht
 def _haengestab(xs, y0, y1, lager_oben=True, lager_unten=False, beschriften=True):
-    t = [balken(xs, y0, xs, y1, 9)]
+    """Stab unter Eigengewicht: Last als Pfeilkette auf der Mittellinie, Verlauf q_x(x) = q_0 versetzt rechts daneben."""
+    t = [balken(xs, y0, xs, y1, 14)]
     if lager_oben:
         t.append(festlager(xs, y0, drehung=180))
     if lager_unten:
         t.append(festlager(xs, y1))
-    for i in range(7):
-        yy = y0 + 18 + i * (y1 - y0 - 36) / 6
-        t.append(pfeil(xs + 16, yy - 14, xs + 16, yy + 8, ROT, 1.1, (7, 4.5)))
+    t.append(laengslast((xs, y0), (xs, y1), n=7))
+    t.append(lastverlauf((xs, y0), (xs, y1), 20, 20, (1, 0), abstand=16))
     if beschriften:
-        t.append(text(xs + 28, (y0 + y1) / 2, "q_0", ROT, anker="start"))
+        t.append(text(xs + 42, (y0 + y1) / 2, "q_0", ROT, anker="start"))
     return "".join(t)
 
 
 def eigengewicht():
-    abb = Abbildung(780, 470, "Normalkraftstab unter Eigengewicht")
+    abb = Abbildung(800, 470, "Normalkraftstab unter Eigengewicht")
     y0, y1 = 70, 380
     BLAU, ROTK, GRAUK = EX, ROT, "#555555"
 
     e = abb.ebene("stab_a", "a) hängend")
-    xa = 90
+    xa = 130
     e.append(_haengestab(xa, y0, y1))
-    e.append(pfeil(xa - 26, y0 + 4, xa - 26, y0 + 50, GR, 1.25, (8, 5)))
-    e.append(text(xa - 32, y0 + 44, "x", GR, anker="end"))
+    # Die Mittellinie trägt die Last: x beginnt am Ursprung (Hilfslinie) und steht daneben (Beispiel Dozent 19.11.)
+    e.append(linie(xa - 72, y0, xa - 8, y0, GR, 0.9))            # Hilfslinien der Bemaßung oben und unten
+    e.append(linie(xa - 72, y1, xa - 8, y1, GR, 0.9))
+    e.append(pfeil(xa - 24, y0, xa - 24, y0 + 56, GR, 1.25, (9, 6)))   # Koordinatenpfeil dünn
+    e.append(text(xa - 30, y0 + 46, "x", GR, 21, anker="end"))
     e.append(mass(xa - 64, y0, xa - 64, y1, "L", abstand=0, hilfslinien=False))
+    e.append(pfeil(30, y0 + 110, 30, y0 + 170, ROT, 3.0, (18, 11)))     # Erdbeschleunigung wie eine Kraft
+    e.append(text(22, y0 + 150, "g", ROT, 22, anker="end"))
     e.append(text(xa, y1 + 40, "[a)]", BLAU, 17, italic=False))
 
     e = abb.ebene("stab_b", "b) beidseitig gelagert")
-    e.append(_haengestab(200, y0, y1, lager_unten=True, beschriften=False))
-    e.append(text(200, y1 + 40, "[b)]", ROTK, 17, italic=False))
+    e.append(_haengestab(240, y0, y1, lager_unten=True, beschriften=False))
+    e.append(text(240, y1 + 40, "[b)]", ROTK, 17, italic=False))
     e = abb.ebene("stab_c", "c) stehend")
-    e.append(_haengestab(300, y0, y1, lager_oben=False, lager_unten=True, beschriften=False))
-    e.append(text(300, y1 + 40, "[c)]", GRAUK, 17, italic=False))
+    e.append(_haengestab(350, y0, y1, lager_oben=False, lager_unten=True, beschriften=False))
+    e.append(text(350, y1 + 40, "[c)]", GRAUK, 17, italic=False))
 
-    Du = Diagramm(430, 190, 280, 130, 1.0, 0.55)
-    Dn = Diagramm(430, 380, 280, 130, 1.0, 1.0, ymin=-1.0)
+    Du = Diagramm(490, 200, 250, 130, 1.0, 0.55)
+    Dn = Diagramm(490, 400, 250, 130, 1.0, 1.0, ymin=-1.0)
     e = abb.ebene("achsen", "Achsen")
-    e.append(Du.achsen("x", "u · EA/(q_0 L^2)", [(0.5, "L/2"), (1, "L")], [(0.25, "0,25"), (0.5, "0,5")], raster=True, groesse=16))
-    e.append(Dn.achsen("x", "N/(q_0 L)", [(0.5, ""), (1, "")], [(-1, "−1"), (1, "1")], raster=True, groesse=16))
+    e.append(Du.achsen("x", "", [(0.5, ""), (1, "L")], [(0.25, "0,25"), (0.5, "0,5")], raster=True, groesse=16))
+    e.append(Dn.achsen("x", "", [(0.5, ""), (1, "")], [(-1, "−1"), (1, "1")], raster=True, groesse=16))
+    X, Y = Du.px(0.5, 0)
+    e.append(bruch(X, Y + 26, "L", "2", "#000000", 15))
+    X, Y = Du.px(0, 0.55)
+    e.append(bruch(X - 12, Y - 34, "u EA", "q_0 L^2", "#000000", 16, anker="end"))
+    X, Y = Dn.px(0, 1.0)
+    e.append(bruch(X - 12, Y - 34, "N", "q_0 L", "#000000", 16, anker="end"))
 
     faelle = (("a", BLAU, lambda x: (2 - x) * x / 2, lambda x: 1 - x),
               ("b", ROTK, lambda x: (1 - x) * x / 2, lambda x: 0.5 - x),
@@ -447,7 +454,9 @@ def aufgabe73():
     e.append(loslager(xB, y + 3.5, label="B", label_pos=(-20, 12)))
     e.append(streckenlast(x0, xE - 4, y - 4, 0, 0.75 * s, label="", n=18))
     e.append(text(xE - 18, y - 0.75 * s / 2 - 4, "q_0", ROT, anker="end"))
-    e.append(kraft(xE, y - s, 0, "F", laenge=60, label_seite=-1))
+    e.append(kraft(xE, y - s, 0, "F", laenge=64, label_seite=-1, kraeftig=True))
+    e.append(pfeil(x0, y, x0 + 50, y, GR, 1.25, (9, 6)))          # x im Ursprung auf der Achse
+    e.append(text(x0 + 52, y + 16, "x", GR, 21, anker="start"))
     e.append(mass(x0, y + 26, xB, y + 26, "2a", abstand=-22))
     e.append(mass(xB, y + 26, xE, y + 26, "a", abstand=-22))
     e.append(mass(xE + 4, y, xE + 4, y - s, "a", abstand=-30))
@@ -462,14 +471,82 @@ def aufgabe_konisch():
     e.append(f'<polygon points="{x0},{y - h0} {x1},{y - h1} {x1},{y + h1} {x0},{y + h0}" fill="{FARBE["bauteil"]}" stroke="#000" stroke-width="1.25"/>')
     e.append(einspannung(x0, y, 2 * h0 + 16))
     e.append(linie(x0, y, x1, y, GRAU, 0.8, "8 3 2 3"))
-    e.append(pfeil(x0 + 4, y, x0 + 64, y, GR, 1.6, (10, 6)))
+    e.append(pfeil(x0, y, x0 + 64, y, GR, 1.25, (9, 6)))
     e.append(text(x0 + 58, y + 17, "x, u(x)", GR, anker="start"))
-    e.append(kraft(x1 + 4, y, 0, "F", laenge=55, ziehend=True))
+    e.append(kraft(x1 + 4, y, 0, "F", laenge=60, ziehend=True, kraeftig=True))
     e.append(text(x0 + 16, y - h0 - 16, "A_0", GR, anker="start"))
     e.append(text(x1 - 4, y - h1 - 16, "A_1", GR, anker="end"))
     e.append(text((x0 + x1) / 2, y - (h0 + h1) / 2 - 18, "E, A(x)", GR))
     e.append(mass(x0, y + h0, x1, y + h0, "L", abstand=-34))
     return abb.speichern(ZIEL / "aufgabe-konisch.svg")
+
+
+# ---------------------------------------------------------------- Zusammenfassung
+CODE = "'Source Code Pro','SFMono-Regular',Menlo,Consolas,monospace"
+
+
+def _code(x, y, zeilen, farbe="#333333", groesse=14, anker="middle"):
+    return "".join(f'<text x="{x}" y="{y + i * groesse * 1.35 + 0.34 * groesse:.1f}" fill="{farbe}" font-family="{CODE}" '
+                   f'font-size="{groesse}" text-anchor="{anker}" xml:space="preserve">{escape(z)}</text>'
+                   for i, z in enumerate(zeilen))
+
+
+def _kasten(x, y, b, h, titel, farbe="#8a8f96", fuellung="#f6f8fb"):
+    return (f'<rect x="{x}" y="{y}" width="{b}" height="{h}" rx="6" fill="{fuellung}" stroke="{farbe}" stroke-width="1"/>'
+            + notiz(x + b / 2, y + 18, [titel], "#333333", 16, anker="middle"))
+
+
+def zusammenfassung():
+    """Drei Ebenen: Mathematica als Werkzeug (drei Beispiele), Lösungsmuster → K p = q, FE-Programm."""
+    abb = Abbildung(720, 640, "Zusammenfassung Vorlesung 0")
+
+    # Mathematica: drei Kacheln mit Mini-Skizze und Befehlen
+    e = abb.ebene("werkzeuge", "Mathematica als Werkzeug")
+    for i, (titel, befehle) in enumerate((("Kurvendiskussion", ["Plot, Solve", "D, Integrate"]),
+                                          ("Schnittgrößen", ["Solve, Piecewise", "Plot"]),
+                                          ("Differentialgleichung", ["DSolve", "Plot"]))):
+        x = 10 + i * 236
+        e.append(_kasten(x, 10, 224, 176, titel))
+        e.append(_code(x + 112, 146, befehle))
+    D = Diagramm(32, 112, 180, 64, 3.0, 15.0, xmin=-6.0, ymin=-25.0)              # Kurve
+    e.append(D.linie(-6, 0, 3, 0, "#000000", 0.9))
+    e.append(D.kurve(f, -6, 3, farbe=EX, breite=1.8))
+    xb, yb = 268, 96                                                              # Träger mit Streckenlast
+    e.append(balken(xb, yb, xb + 160, yb, 6))
+    e.append(streckenlast(xb, xb + 120, yb - 3, 18, n=8))
+    e.append(loslager(xb, yb + 3, groesse=9))
+    e.append(festlager(xb + 120, yb + 3, groesse=9))
+    xs, y0, y1 = 590, 62, 128                                                     # hängender Stab
+    e.append(balken(xs, y0, xs, y1, 10))
+    e.append(festlager(xs, y0, groesse=9, drehung=180))
+    e.append(laengslast((xs, y0 + 3), (xs, y1 - 3), n=4))
+
+    # Lösungsmuster: drei Gleichungsgruppen → K p = q
+    y = 222
+    e = abb.ebene("muster", "Lösungsmuster")
+    e.append(linie(10, y - 18, 710, y - 18, "#b4b9c0", 1.2))     # trennt Mathematica-Kacheln vom Lösungsmuster
+    for i, (titel, zeile) in enumerate((("Gleichgewicht", "−N_2 − N_3 + f_1 = 0"), ("Federgesetz", "N_1 = c_1 u_1"),
+                                        ("Kinematik", "u_2 = p_1 − p_2"))):
+        x = 10 + i * 236
+        e.append(_kasten(x, y, 224, 84, titel))
+        e.append(formel(x + 112, y + 56, zeile, groesse=19, anker="middle"))
+        e.append(pfeil(x + 112, y + 90, 360 + (x + 112 - 360) * 0.25, y + 124, "#555555", 1.3, (9, 6)))
+    e.append(formel(360, y + 152, "**K** **p** = **q**", groesse=30, anker="middle"))
+    e.append(notiz(360, y + 186, ["Steifigkeitsmatrix mal Freiheitsgrade = Lasten"], "#444444", 15, anker="middle"))
+
+    # FE-Programm: Pre-, Solution, Postprocessing
+    y = 440
+    e = abb.ebene("fe", "FE-Programm")
+    for i, (titel, zeilen) in enumerate((("Preprocessing", ["Netz → Freiheitsgrade", "Lager und Lasten"]),
+                                         ("Solution", ["Gleichungssystem lösen", "(Gauß, nicht invertieren)"]),
+                                         ("Postprocessing", ["Verschiebungen zeichnen", "rückwärts: Kräfte, Spannungen"]))):
+        x = 10 + i * 236
+        e.append(_kasten(x, y, 224, 110, titel, "#0050b4", "#eef3fb"))
+        e.append(notiz(x + 112, y + 54, zeilen, "#333333", 15, anker="middle"))
+        if i < 2:
+            e.append(pfeil(x + 226, y + 55, x + 244, y + 55, "#0050b4", 2.0, (9, 7)))
+    e.append(notiz(360, y + 150, ["dasselbe wie beim Federsystem, nur größer"], "#0050b4", 16, anker="middle"))
+    return abb.speichern(ZIEL / "zusammenfassung.svg")
 
 
 def federsystem_beispiel():
@@ -488,5 +565,5 @@ def federsystem_beispiel():
 
 if __name__ == "__main__":
     for fn in (kurve, traeger71, eigengewicht, federsystem, kpq, federsystem_3dof, aufgabe73, aufgabe_konisch,
-               federsystem_beispiel):
+               zusammenfassung, federsystem_beispiel):
         print(fn())

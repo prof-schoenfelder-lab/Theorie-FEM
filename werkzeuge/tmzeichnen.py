@@ -58,13 +58,25 @@ def _tspans(label: str, italic: bool = True) -> str:
             out.append(f'<tspan font-style="normal">{escape(up)}</tspan>')
         elif op:
             arg = arg[1:-1] if arg.startswith("{") else arg
-            shift = "sub" if op == "_" else "super"
+            # Index mit fester Verschiebung wie in LaTeX; "sub" setzt Chrome mit Latin Modern viel zu tief
+            shift = TIEF if op == "_" else HOCH
             # Indizes aus Ziffern/Großbuchstaben aufrecht, sonst kursiv
             style = "normal" if re.fullmatch(r"[0-9A-ZIV,. ]+|max|min|ges|res", arg) else ("italic" if italic else "normal")
             out.append(f'<tspan baseline-shift="{shift}" font-size="70%" font-style="{style}">{escape(arg)}</tspan>')
+        elif italic:
+            # wie LaTeX: Buchstaben kursiv; Ziffern, Klammern, Operatoren und große griechische Buchstaben aufrecht
+            for buchst, sonst in _BUCHST.findall(plain):
+                if buchst:
+                    out.append(f'<tspan font-style="italic">{escape(buchst)}</tspan>')
+                else:
+                    out.append(f'<tspan font-style="normal">{escape(sonst)}</tspan>')
         else:
             out.append(f"<tspan>{escape(plain)}</tspan>")
     return "".join(out)
+
+
+TIEF, HOCH = "-0.25em", "super"     # tief: in em des Index (70 %), also 0,18 der Grundschrift
+_BUCHST = re.compile(r"([A-Za-zα-ωϑϕϵ]+)|([^A-Za-zα-ωϑϕϵ]+)")
 
 
 _WORT = re.compile(r"[A-Za-zÄÖÜäöüß]*[a-zäöüß]{2}[A-Za-zÄÖÜäöüß]*")
@@ -147,7 +159,7 @@ def pfeil(x1, y1, x2, y2, farbe="#000000", breite=STRICH["dick"], spitze=(12, 8)
 
 # ---------------------------------------------------------------- Lasten
 def kraft(x, y, winkel, label="", farbe=None, laenge=55, ziehend=False, label_abstand=9,
-          label_seite=1, label_pos=0.7, id_=None):
+          label_seite=1, label_pos=0.7, id_=None, kraeftig=False):
     """Einzelkraft mit Angriffspunkt (x, y).
 
     winkel: Richtung des Pfeils in Grad, mathematisch (0 = nach rechts, 90 = nach oben).
@@ -163,14 +175,114 @@ def kraft(x, y, winkel, label="", farbe=None, laenge=55, ziehend=False, label_ab
     else:
         x1, y1, x2, y2 = x - ux * laenge, y - uy * laenge, x, y
         px, py = x - ux * laenge * label_pos, y - uy * laenge * label_pos
-    teile = [pfeil(x1, y1, x2, y2, farbe)]
+    teile = [pfeil(x1, y1, x2, y2, farbe, *((KRAEFTIG["kraft"], KRAEFTIG["spitze"]) if kraeftig else ()))]
     if label:
         nx, ny = -uy * label_seite, ux * label_seite
         # Text so ausrichten, dass er neben (nicht auf) dem Pfeil steht
         anker = "start" if nx > 0.3 else ("end" if nx < -0.3 else "middle")
         dy = ny * 9 if anker == "middle" else 0
-        teile.append(text(px + nx * label_abstand, py + ny * label_abstand + dy, label, farbe, anker=anker))
+        g = KRAEFTIG["groesse"] if kraeftig else GROESSE
+        if kraeftig:                                  # Spitze frei lassen: Label weiter weg und zur Pfeilmitte
+            label_abstand = max(label_abstand, 14)
+            if label_pos == 0.7:
+                label_pos = 0.45
+                px, py = (x + ux * laenge * label_pos, y + uy * laenge * label_pos) if ziehend else \
+                         (x - ux * laenge * label_pos, y - uy * laenge * label_pos)
+        teile.append(text(px + nx * label_abstand, py + ny * label_abstand + dy, label, farbe, g, anker=anker))
     return gruppe(teile, id_)
+
+
+KRAEFTIG = {"kraft": 3.0, "dof": 2.8, "spitze": (18, 11), "dof_spitze": (16, 10), "groesse": 22}
+
+
+def freiheitsgrad(x, y, label, winkel=0, laenge=55, knoten=False, label_abstand=12, label_seite=1, label_pos=0.6,
+                  farbe=None, id_=None):
+    """Freiheitsgrad: kräftiger grüner Pfeil, beginnt immer am Knoten (x, y) (nicht verschieblich).
+    knoten=True zeichnet den Knoten als Kreis (nicht an Federsystemen). Label neben dem Pfeil (label_seite ±1) oder hinter der Spitze (0)."""
+    farbe = farbe or FARBE["koord"]
+    ux, uy = math.cos(math.radians(winkel)), -math.sin(math.radians(winkel))
+    teile = [pfeil(x, y, x + ux * laenge, y + uy * laenge, farbe, KRAEFTIG["dof"], KRAEFTIG["dof_spitze"])]
+    if knoten:
+        teile.append(kreis(x, y, 4.6))
+    if label and label_seite == 0:                 # Label hinter der Pfeilspitze
+        anker = "start" if ux > 0.3 else ("end" if ux < -0.3 else "middle")
+        teile.append(text(x + ux * (laenge + 8), y + uy * (laenge + 14), label, farbe, KRAEFTIG["groesse"], anker=anker))
+    elif label:
+        nx, ny = -uy * label_seite, ux * label_seite
+        anker = "start" if nx > 0.3 else ("end" if nx < -0.3 else "middle")
+        px, py = x + ux * laenge * label_pos, y + uy * laenge * label_pos
+        dy = ny * 10 if anker == "middle" else 0
+        teile.append(text(px + nx * label_abstand, py + ny * label_abstand + dy, label, farbe, KRAEFTIG["groesse"],
+                          anker=anker))
+    return gruppe(teile, id_)
+
+
+def laengslast(p0, p1, n=7, farbe=None, luecke=0.22, id_=None):
+    """Streckenlast in Stabrichtung: dünne Pfeilkette auf der Mittellinie von p0 nach p1 (Lastrichtung p0 → p1),
+    lückenlos von Stabanfang (erster Pfeil beginnt bei p0) bis Stabende (letzte Spitze bei p1).
+    Der Verlauf q(x) kommt versetzt daneben (lastverlauf)."""
+    farbe = farbe or FARBE["last"]
+    (x0, y0), (x1, y1) = p0, p1
+    lx, ly = (x1 - x0) / n, (y1 - y0) / n
+    teile = []
+    for i in range(n):
+        a = i + (luecke / 2 if i > 0 else 0)
+        b = i + 1 - (luecke / 2 if i < n - 1 else 0)
+        teile.append(pfeil(x0 + lx * a, y0 + ly * a, x0 + lx * b, y0 + ly * b, farbe, STRICH["normal"], (9, 6)))
+    return gruppe(teile, id_)
+
+
+def lastverlauf(p0, p1, w0, w1, seite, abstand=24, label="", farbe=None, label_pos=0.5, id_=None):
+    """Verlauf einer Streckenlast versetzt neben dem Stab: Grundlinie parallel zur Achse p0–p1 im Abstand
+    abstand zur Seite seite = (nx, ny), Ordinaten w0 → w1 (px, proportional zu q), roter Umriss."""
+    farbe = farbe or FARBE["last"]
+    (x0, y0), (x1, y1) = p0, p1
+    nx, ny = seite
+    a0 = (x0 + nx * abstand, y0 + ny * abstand)
+    a1 = (x1 + nx * abstand, y1 + ny * abstand)
+    pts = [a0, (a0[0] + nx * w0, a0[1] + ny * w0), (a1[0] + nx * w1, a1[1] + ny * w1), a1]
+    teile = [polylinie(pts, farbe, STRICH["normal"], "#fbe3e3", schliessen=True)]
+    if label:
+        w = w0 + (w1 - w0) * label_pos
+        lx = a0[0] + (a1[0] - a0[0]) * label_pos + nx * (w + 10)
+        ly = a0[1] + (a1[1] - a0[1]) * label_pos + ny * (w + 10)
+        anker = "start" if nx > 0.3 else ("end" if nx < -0.3 else "middle")
+        teile.append(text(lx, ly, label, farbe, anker=anker))
+    return gruppe(teile, id_)
+
+
+def _breite(label, groesse):
+    """Grobe Textbreite einer Formel in px (für Bruchstriche)."""
+    index = sum(len(m.strip("{}")) for m in re.findall(r"[_^](\{[^}]*\}|.)", label))
+    rein = re.sub(r"[\[\]{}]", "", re.sub(r"[_^](\{[^}]*\}|.)", "", label))
+    return 0.52 * groesse * (len(rein) + 0.7 * index)
+
+
+def bruch(X, Y, zaehler, nenner, farbe="#000000", groesse=GROESSE, links="", rechts="", anker="middle", halo=True):
+    """Bruch im \\displaystyle: Zähler und Nenner in voller Schriftgröße, Bruchstrich auf Höhe Y.
+    anker="middle": X = Mitte des Bruchs; "start"/"end": X = linker/rechter Rand des ganzen Ausdrucks.
+    links/rechts: Formeltext davor/dahinter auf der Höhe des Bruchstrichs."""
+    g = groesse
+    bb = max(_breite(zaehler, g), _breite(nenner, g)) + 0.3 * g
+    lb = _breite(links, g) + 0.3 * g if links else 0
+    rb = _breite(rechts, g) + 0.3 * g if rechts else 0
+    if anker == "start":
+        xm = X + lb + bb / 2
+    elif anker == "end":
+        xm = X - rb - bb / 2
+    else:
+        xm = X
+    teile = []
+    if links:
+        teile.append(text(xm - bb / 2 - 0.2 * g, Y, links, farbe, g, anker="end", halo=halo))
+    oben = 0.8 if "_" in zaehler else 0.62           # tiefgestellter Index im Zähler braucht Platz über dem Strich
+    unten = 0.86 if "^" in nenner else 0.68
+    teile.append(text(xm, Y - oben * g, zaehler, farbe, g, halo=halo))
+    teile.append(linie(xm - bb / 2, Y, xm + bb / 2, Y, farbe, 0.06 * g))
+    teile.append(text(xm, Y + unten * g, nenner, farbe, g, halo=halo))
+    if rechts:
+        teile.append(text(xm + bb / 2 + 0.2 * g, Y, rechts, farbe, g, anker="start", halo=halo))
+    return gruppe(teile)
 
 
 def moment(x, y, label="", gegen_uhrzeiger=True, r=17, start=-60, bogen=250, farbe=None,
