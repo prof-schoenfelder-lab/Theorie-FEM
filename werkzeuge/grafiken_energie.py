@@ -177,7 +177,7 @@ def feder_energie():
     e.append(D.notiz(1, -0.5, ["Minimum"], GR, dx=14, dy=20))
     X, Y = D.px(1.5, -0.5)
     e.append(bruch(X, Y + 52, "[d]Π_{ges}", "[d]u", GR, 18, rechts="= 0", anker="start"))
-    e.append(bruch(X + 74, Y + 52, "F", "c", GR, 18, links="⇒  u =", anker="start"))
+    e.append(bruch(X + 86, Y + 52, "F", "c", GR, 18, links="⇒  u =", anker="start"))
     return abb.speichern(ZIEL / "feder.svg")
 
 

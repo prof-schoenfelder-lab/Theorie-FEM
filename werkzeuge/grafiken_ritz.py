@@ -180,7 +180,7 @@ def stabsystem():
 
     D = Diagramm(xa[0], 545, xa[3] - xa[0], 120, 225, 0.0, ymin=-0.16)
     e = abb.ebene("ergebnis", "Verschiebungsverlauf")
-    e.append(D.achsen("x", "u in mm", [(80, ""), (115, ""), (225, "")], [(-0.1, "−0,1")], raster=True))
+    e.append(D.achsen("x", "u [in mm]", [(80, ""), (115, ""), (225, "")], [(-0.1, "−0,1")], raster=True))
     e.append(D.kurve(punkte=[(0, 0), (80, P2), (115, P1), (225, 0)], farbe=ROT))
     for x, p in ((80, P2), (115, P1)):
         e.append(D.punkt(x, p, ROT, 4))
@@ -192,7 +192,7 @@ def stabsystem():
     eps = (SIG[0] / 70000 * 1000, SIG[1] / 210000 * 1000, SIG[2] / 70000 * 1000)    # in ‰
     for name, titel, werte, ymax, ylabel, fmt, farbe, fuell in (
             ("dehnung", "Dehnungen", eps, 2.0, "ε in ‰", "{:.2f}", GR, "#d8eadb"),
-            ("spannung", "Spannungen", SIG, 140, "σ in MPa", "{:.1f}", ROT, "#f6d5d5")):
+            ("spannung", "Spannungen", SIG, 140, "σ [in MPa]", "{:.1f}", ROT, "#f6d5d5")):
         Ds = Diagramm(xa[0], 380, xa[3] - xa[0], 120, 225, ymax, ymin=-ymax)
         e = abb.ebene(name, titel)
         e.append(Ds.achsen("x", ylabel, [(80, ""), (115, ""), (225, "")], [], raster=True))
@@ -265,8 +265,8 @@ def konisch_ritz():
     Du = Diagramm(x0, 380, lp, 190, L, 1.6)
     Ds = Diagramm(x0, 630, lp, 190, L, 260)
     e = abb.ebene("achsen", "Achsen")
-    e.append(Du.achsen("x", "u in mm", [(500, ""), (1000, "L")], [(0.5, "0,5"), (1.0, "1"), (1.5, "1,5")], raster=True))
-    e.append(Ds.achsen("x", "σ in MPa", [(500, ""), (1000, "L")], [(100, "100"), (200, "200")], raster=True))
+    e.append(Du.achsen("x", "u [in mm]", [(500, ""), (1000, "L")], [(0.5, "0,5"), (1.0, "1"), (1.5, "1,5")], raster=True))
+    e.append(Ds.achsen("x", "σ [in MPa]", [(500, ""), (1000, "L")], [(100, "100"), (200, "200")], raster=True))
 
     e = abb.ebene("exakt", "Exakte Lösung")
     e.append(Du.kurve(u_exakt, 0, L, farbe=EX))

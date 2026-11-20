@@ -378,7 +378,7 @@ def zusammenfassung():
                                      ("1b  Vernetzen", "*p*_{sys}, *q*_{sys}"),
                                      ("2  Material und Geometrie", "*K*^e"),
                                      ("3  Konnektivität", "*Λ*^e")]),
-        ("solution", "Solution", FE, [("4  Zusammenbau", "*K*_{sys} = [Σ] *Λ*^{eT}*K*^e*Λ*^e"),
+        ("solution", "Solution", FE, [("4  Zusammenbau", "*K*_{sys} = [Σ] *Λ*^{e}^T*K*^e*Λ*^e"),
                                       ("5  Gleichungssystem lösen", "*K*_{sys} *p*_{sys} = *q*_{sys}")]),
         ("post", "Postprocessor", GR, [("6  Elementverschiebungen", "*p*^e = *Λ*^e *p*_{sys}"),
                                        ("7  Verschiebungsverlauf", "u^e(x^e) = *N*^e*Λ*^e *p*_{sys}"),
