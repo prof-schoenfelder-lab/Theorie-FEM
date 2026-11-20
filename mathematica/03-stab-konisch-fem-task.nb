@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      4011,        102]
-NotebookOptionsPosition[      2753,         79]
-NotebookOutlinePosition[      3046,         93]
-CellTagsIndexPosition[      3003,         90]
+NotebookDataLength[      4163,        104]
+NotebookOptionsPosition[      2904,         81]
+NotebookOutlinePosition[      3197,         95]
+CellTagsIndexPosition[      3154,         92]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -41,7 +41,7 @@ gleicher L\[ADoubleDot]nge:
 a) die Elementsteifigkeitsmatrizen und die Systemsteifigkeitsmatrix,
 b) die Knotenverschiebungen und die Lagerkraft,
 c) den Verschiebungs- und den Spannungsverlauf im Vergleich mit der exakten L\
-\[ODoubleDot]sung (Bilder),
+\[ODoubleDot]sung (Bilder) sowie die Dehnungen je Element,
 d) die Fehler von Verschiebung und Spannung am Stabende. Wie viele Elemente \
 br\[ADoubleDot]uchte man f\[UDoubleDot]r 5 % Genauigkeit der Spannung?\
 \>", "Text"],
@@ -66,7 +66,9 @@ N/mm \[CenterDot] {{1, \[Minus]1}, {\[Minus]1, 1}}; Ksys = {{11 200, \
 \[Minus]11 200, 0}, {\[Minus]11 200, 16 800, \[Minus]5600}, {0, \[Minus]5600, \
 5600}} N/mm
 b) p2 = 0,446 mm, p3 = 1,339 mm, Lagerkraft q1 = \[Minus]5000 N
-c) Spannungen je Element konstant: \[Sigma]1 = 62,5 MPa, \[Sigma]2 = 125 MPa
+c) Dehnungen und Spannungen je Element konstant: \[CurlyEpsilon]1 = 0,893 \
+\[Times] 10\.b3\[Minus]3, \[CurlyEpsilon]2 = 1,786 \[Times] 10\.b3\[Minus]3; \
+\[Sigma]1 = 62,5 MPa, \[Sigma]2 = 125 MPa
 d) u(L): FEM 1,339 mm, exakt 1,437 mm (\[Minus]6,8 %); \[Sigma](L): FEM 125 \
 MPa, exakt 250 MPa (\[Minus]50 %)\
 \>", "Text"],
@@ -92,18 +94,18 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 58, 0, 87, "Title",ExpressionUUID->"780fd8f0-3c6d-4a60-8a0c-0ba033858ebb"],
-Cell[619, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"ee1fa62b-e7ef-4857-b1e9-7d93939860d0"],
-Cell[742, 25, 26, 0, 87, "Section",ExpressionUUID->"60f76883-31a9-4e41-9be3-c7b8aa2b925e"],
-Cell[771, 27, 182, 3, 87, "Text",ExpressionUUID->"5e7a1deb-1b71-4252-be54-a09783d4facf"],
-Cell[956, 32, 113, 3, 87, "Text",ExpressionUUID->"11c0f286-f7d3-49c3-a0f4-285bf630909c"],
-Cell[1072, 37, 504, 9, 87, "Text",ExpressionUUID->"15f8a5ef-f327-421e-972b-15ce12747edc"],
-Cell[1579, 48, 30, 0, 87, "Subsection",ExpressionUUID->"ec170c01-4836-4115-80fd-31b4ac223abb"],
-Cell[1612, 50, 426, 8, 87, "Text",ExpressionUUID->"c588a738-d0f4-4db6-8f94-df80b53ec516"],
-Cell[2041, 60, 40, 0, 87, "Subsection",ExpressionUUID->"ce8fe54d-0d79-43b3-994d-88653791e020"],
-Cell[2084, 62, 518, 9, 87, "Text",ExpressionUUID->"082c8b65-8d65-4885-b4d4-ca5067945b16"],
-Cell[2605, 73, 37, 0, 87, "Section",ExpressionUUID->"3a77a12f-77f7-4c39-89ac-049d522937ca"],
-Cell[2645, 75, 104, 2, 87, "Input",ExpressionUUID->"fd36cc7a-cd7a-437d-af6a-d6cbf04ffaec"]
+Cell[558, 20, 58, 0, 87, "Title",ExpressionUUID->"168907cf-11da-4d45-a1bb-36ffefbca035"],
+Cell[619, 22, 120, 1, 87, "Subtitle",ExpressionUUID->"8448983c-2bd4-4c91-a975-bcd38114baf5"],
+Cell[742, 25, 26, 0, 87, "Section",ExpressionUUID->"74a05a32-a3d8-4799-bbfc-ff0d68919786"],
+Cell[771, 27, 182, 3, 87, "Text",ExpressionUUID->"827f5426-df2c-41a7-88ef-b85e742f3b9c"],
+Cell[956, 32, 113, 3, 87, "Text",ExpressionUUID->"16e16f10-ad5f-439b-b852-c821c0c5fbfc"],
+Cell[1072, 37, 535, 9, 87, "Text",ExpressionUUID->"56ccca15-4d2e-4c7a-8f9c-e9fa5faa89b4"],
+Cell[1610, 48, 30, 0, 87, "Subsection",ExpressionUUID->"189333a0-561a-4e58-acfa-bebb91bfe61b"],
+Cell[1643, 50, 426, 8, 87, "Text",ExpressionUUID->"7679fb83-71df-4715-ae87-e4ed98313fee"],
+Cell[2072, 60, 40, 0, 87, "Subsection",ExpressionUUID->"4787d22f-2dc2-49ca-a703-06b365fd12fc"],
+Cell[2115, 62, 638, 11, 87, "Text",ExpressionUUID->"264555d0-5eac-4ce1-b132-48a0e5e27513"],
+Cell[2756, 75, 37, 0, 87, "Section",ExpressionUUID->"66805a60-564a-4ade-ab37-7cbf992c1dfb"],
+Cell[2796, 77, 104, 2, 87, "Input",ExpressionUUID->"6299a6d1-0359-4f97-94b7-4ce924b9b83e"]
 }
 ]
 *)

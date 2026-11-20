@@ -292,13 +292,18 @@ Ende mit der größten Spannung.
 ::: {.links}
 ```mathematica
 nel = 3;
-datafe = Flatten[Table[{
-    Subscript[L, e] -> L/nel,
-    Subscript[A, e] ->
-      (Ax /. x -> (e - 1/2) L/nel),
-    Subscript[Em, e] -> Em}, {e, nel}]];
-Table[Subscript[A, e], {e, nel}] /.
-  datafe /. data
+datafe = {
+  Subscript[L, 1] -> L/3,
+  Subscript[A, 1] -> Ax /. x -> L/6,
+  Subscript[Em, 1] -> Em,
+  Subscript[L, 2] -> L/3,
+  Subscript[A, 2] -> Ax /. x -> L/2,
+  Subscript[Em, 2] -> Em,
+  Subscript[L, 3] -> L/3,
+  Subscript[A, 3] -> Ax /. x -> 5 L/6,
+  Subscript[Em, 3] -> Em};
+{Subscript[A, 1], Subscript[A, 2],
+  Subscript[A, 3]} /. datafe /. data
 ```
 :::
 :::
@@ -651,12 +656,17 @@ keine Mechanik. Ein FEM-Programm erzeugt sie beim Vernetzen automatisch.
 
 ```mathematica
 Subscript[Λ, 1] =
-  {{0, 1, 0, 0}, {1, 0, 0, 0}};
+    {{0, 1, 0, 0}, {1, 0, 0, 0}};
+% // MatrixForm
+%% . psys
 Subscript[Λ, 2] =
-  {{0, 0, 1, 0}, {0, 1, 0, 0}};
+    {{0, 0, 1, 0}, {0, 1, 0, 0}};
+% // MatrixForm
+%% . psys
 Subscript[Λ, 3] =
-  {{0, 0, 0, 1}, {0, 0, 1, 0}};
-Subscript[Λ, 1] . psys
+    {{0, 0, 0, 1}, {0, 0, 1, 0}};
+% // MatrixForm
+%% . psys
 ```
 :::
 
@@ -676,8 +686,9 @@ Wie kommen die drei Elementmatrizen in **eine** Gleichung für das ganze System?
 
 ::: {.links}
 ```mathematica
-K3 = Ke /. e -> 3 /. datafe /. data;
-K3 // MatrixForm
+Ke /. e -> 1 /. datafe /. data // MatrixForm
+Ke /. e -> 2 /. datafe /. data // MatrixForm
+Ke /. e -> 3 /. datafe /. data // MatrixForm
 ```
 :::
 :::
@@ -777,7 +788,7 @@ Das ist dieselbe Form wie das Federgesetz $F = c\,u$, nur für alle Freiheitsgra
 qsys = {q1, 0, 0, F};
 Piges = 1/2 psys . Ksys . psys -
     psys . qsys;
-gl = Thread[Expand[D[Piges, {psys}]] == 0]
+gl = D[Piges, {psys}] == {0, 0, 0, 0}
 ```
 :::
 
@@ -801,8 +812,11 @@ Det[Ksys]
 ::: {.schritt zeige="system raster block1 block2 block3 nullen vektoren rb"}
 ### Randbedingung einarbeiten
 
-Das Lager hält $p_1 = 0$ fest. Die erste Gleichung enthält die unbekannte Lagerkraft $q_1$ und ist zunächst
-nicht nutzbar. Wir streichen die erste Zeile und Spalte und setzen die Zahlen ein:
+Das Lager hält $p_1 = 0$ fest. Dafür ist die Lagerkraft $q_1$ unbekannt. Es bleiben **vier Gleichungen für vier
+Unbekannte**: $p_2$, $p_3$, $p_4$ und $q_1$. In Mathematica setzen wir $p_1 = 0$ ein und lösen nach allen vier.
+
+Von Hand geht es kürzer: $q_1$ steht nur in der ersten Gleichung. Ohne sie, also mit gestrichener erster Zeile und
+Spalte, bleiben drei Gleichungen für die Verschiebungen:
 
 $$
 \begin{pmatrix} 30\,800 & -12\,600 & 0 \\ -12\,600 & 19\,600 & -7000 \\ 0 & -7000 & 7000 \end{pmatrix}
@@ -813,15 +827,14 @@ $$
 Einträge der Matrix in N/mm, Kräfte in N.
 
 ```mathematica
-rb = p1 -> 0;
-gl2 = Rest[gl] /. rb /. data
+gl2 = gl /. p1 -> 0 /. data
 ```
 :::
 
 ::: {.schritt zeige="system raster block1 block2 block3 nullen vektoren rb loesung"}
 ### Lösung und Lagerkraft
 
-Das reduzierte System ist lösbar:
+Das Gleichungssystem liefert die Verschiebungen und die Lagerkraft zusammen:
 
 $$
 \begin{aligned}
@@ -831,8 +844,6 @@ p_4 &= 1{,}386\,\text{mm}
 \end{aligned}
 $$
 
-Die gestrichene erste Gleichung liefert anschließend die Lagerkraft:
-
 $$
 q_1 = -c^{(1)}\,p_2 = -5000\,\text{N}
 $$
@@ -840,9 +851,7 @@ $$
 Sie hält der Kraft $F$ das Gleichgewicht.
 
 ```mathematica
-lsg = Solve[gl2, {p2, p3, p4}] // N
-lager = gl[[1]] /. rb /. First[lsg];
-Solve[lager /. data, q1]
+lsg = Solve[gl2, {q1, p2, p3, p4}] // N
 ```
 :::
 
@@ -852,7 +861,23 @@ Solve[lager /. data, q1]
 
 :::: {.scrolly svg="../grafiken/stab/ergebnis.svg"}
 
-::: {.schritt zeige="achsen fem_u"}
+::: {.schritt zeige="achsen exakt"}
+### Die exakte Lösung zum Vergleich
+
+Zuerst die Referenz: die exakte Verschiebung $u(x)$ und die exakte Spannung $\sigma(x) = F/A(x)$, beide blau.
+Am Stabende ist $u(L) = 1{,}437\,\text{mm}$ und $\sigma(L) = 250\,\text{MPa}$.
+
+::: {.links}
+```mathematica
+Plot[uex, {x, 0, 1000}, PlotTheme -> {"Detailed", "LargeLabels"},
+  FrameLabel -> {"x in mm", "u in mm"}]
+Plot[sigex, {x, 0, 1000}, PlotTheme -> {"Detailed", "LargeLabels"},
+  FrameLabel -> {"x in mm", "σ in MPa"}]
+```
+:::
+:::
+
+::: {.schritt zeige="achsen exakt fem_u"}
 ### Verschiebungen im Element
 
 Aus der Lösung $\mathbf{p}_{sys}$ holen wir uns die Elementfreiheitsgrade zurück und setzen sie in den Ansatz ein:
@@ -865,19 +890,19 @@ Die Verschiebung ist **stückweise linear**: ein Polygonzug durch die Knotenwert
 
 ::: {.links}
 ```mathematica
-pl = psys /. rb /. First[lsg];
-l = L/nel /. data;
-uelem[k_] := Ne . Subscript[Λ, e] . pl /.
-   e -> k /. datafe /. data
-ufem = Piecewise[Table[{uelem[k] /.
-      Subscript[x, k] -> x - (k - 1) l,
-      (k - 1) l <= x <= k l}, {k, nel}]];
+plsg = psys /. p1 -> 0 /. lsg[[1]]
+ue = Table[Ne . Subscript[Λ, e] . plsg, {e, nel}] /. datafe /. data
+ufem = Piecewise[{
+   {ue[[1]] /. Subscript[x, 1] -> x, 0 <= x <= Subscript[L, 1]},
+   {ue[[2]] /. Subscript[x, 2] -> x - Subscript[L, 1], Subscript[L, 1] <= x <= Subscript[L, 1] + Subscript[L, 2]},
+   {ue[[3]] /. Subscript[x, 3] -> x - Subscript[L, 1] - Subscript[L, 2], Subscript[L, 1] + Subscript[L, 2] <= x <= Subscript[L, 1] + Subscript[L, 2] + Subscript[L, 3]}
+   }] /. datafe /. data;
 ```
 :::
 :::
 
 ::: {.schritt zeige="achsen exakt fem_u"}
-### Vergleich mit der exakten Lösung
+### Vergleich der Verschiebungen
 
 | in mm | $p_2$ | $p_3$ | $p_4$ |
 |:--|:-:|:-:|:-:|
@@ -889,13 +914,13 @@ Die Verschiebung ist schon mit drei Elementen gut getroffen. Am Stabende fehlen 
 ::: {.links}
 ```mathematica
 {ufem, uex} /. x -> 1000 // N
-Plot[Evaluate[{uex, ufem}], {x, 0, 1000},
-  PlotLegends -> {"exakt", "FEM"}]
+Plot[Evaluate[{uex, ufem}], {x, 0, 1000}, PlotLegends -> {"exakt", "FEM"},
+  PlotTheme -> {"Detailed", "LargeLabels"}, FrameLabel -> {"x in mm", "u in mm"}]
 ```
 :::
 :::
 
-::: {.schritt zeige="achsen exakt fem_s"}
+::: {.schritt zeige="achsen exakt fem_u fem_s"}
 ### Dehnungen und Spannungen
 
 Ableiten des Ansatzes liefert die Dehnung, das Hookesche Gesetz die Spannung:
@@ -927,17 +952,23 @@ damit die maximale Spannung auf $5\,\%$ genau ist? Und wie viele für die Versch
 
 ::: {.links}
 ```mathematica
-epsel[k_] := dNe . Subscript[Λ, e] . pl /.
-   e -> k /. datafe /. data
-Table[epsel[k], {k, nel}]
-Table[Em epsel[k], {k, nel}] /. data
+epse = Table[dNe . Subscript[Λ, e] . plsg, {e, nel}] /. datafe /. data
+sige = Em epse /. data
+sigfem = Piecewise[{
+   {sige[[1]], 0 <= x <= Subscript[L, 1]},
+   {sige[[2]], Subscript[L, 1] < x <= Subscript[L, 1] + Subscript[L, 2]},
+   {sige[[3]], Subscript[L, 1] + Subscript[L, 2] < x <= Subscript[L, 1] + Subscript[L, 2] + Subscript[L, 3]}
+   }] /. datafe /. data;
+Plot[Evaluate[{sigex, sigfem}], {x, 0, 1000}, Exclusions -> None,
+  PlotLegends -> {"exakt", "FEM"}, PlotTheme -> {"Detailed", "LargeLabels"},
+  FrameLabel -> {"x in mm", "σ in MPa"}]
 ```
 :::
 :::
 
 ::::
 
-## Zusammenfassung
+## Zusammenfassung: der Ablauf der FEM
 
 :::: {.scrolly svg="../grafiken/stab/zusammenfassung.svg"}
 
@@ -951,14 +982,14 @@ Im **Preprocessor** wird das Modell aufgebaut: Elementtyp wählen (bei uns der l
 Vernetzen automatisch.
 :::
 
-::: {.schritt zeige="pre solution" dimmen="pre"}
+::: {.schritt zeige="pre solution"}
 ### Solution
 
 In der **Solution** wird $\mathbf{K}_{sys}$ aus den Elementmatrizen zusammengebaut, die Randbedingungen werden
 eingearbeitet und das Gleichungssystem $\mathbf{K}_{sys}\,\mathbf{p}_{sys} = \mathbf{q}_{sys}$ wird gelöst.
 :::
 
-::: {.schritt zeige="pre solution post" dimmen="pre solution"}
+::: {.schritt zeige="pre solution post"}
 ### Postprocessor
 
 Im **Postprocessor** werden aus $\mathbf{p}_{sys}$ die Elementverschiebungen, der Verschiebungsverlauf, die
