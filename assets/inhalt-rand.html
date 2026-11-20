@@ -1,17 +1,17 @@
-<!-- Inhaltsverzeichnis am rechten Rand der Vorlesungsseiten: im Ruhezustand eine Spalte kurzer Striche
+<!-- Inhaltsverzeichnis am linken Rand der Vorlesungsseiten: im Ruhezustand eine Spalte kurzer Striche
      (lang = Abschnitt ##, kurz = Schritt ###), die aktuelle Stelle hervorgehoben. Beim Darüberfahren klappt die
      Liste der Überschriften auf; ein Klick springt an die Stelle (Schritte in die Mitte, damit die Scroll-Grafik
      den Schritt zeigt). Ohne Maus (Touch) und unter 900 px statt der Striche ein Knopf „Inhalt“ oben rechts,
      der dieselbe Liste öffnet; ein Tipp auf einen Eintrag springt hin und schließt sie. Im Druck ausgeblendet. -->
 <style>
   .inhalt-rand {
-    position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 40;
-    display: flex; flex-direction: row-reverse; align-items: center;
+    position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 40;
+    display: flex; flex-direction: row; align-items: center;
     font-family: "Source Sans Pro", sans-serif;
   }
   .inhalt-striche {
-    display: flex; flex-direction: column; align-items: flex-end;
-    padding: 0.6rem 0.55rem 0.6rem 0.9rem; cursor: pointer;
+    display: flex; flex-direction: column; align-items: flex-start;
+    padding: 0.6rem 0.9rem 0.6rem 0.55rem; cursor: pointer;
   }
   .inhalt-striche span {
     display: block; height: 2px; width: 9px; margin: var(--strich-abstand, 3px) 0;
@@ -46,7 +46,7 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
     }
     .inhalt-rand.mobil-offen {
-      display: flex; top: calc(var(--kopf-unten, 60px) + 3rem); bottom: auto; right: 0.75rem; transform: none; z-index: 61;
+      display: flex; top: calc(var(--kopf-unten, 60px) + 3rem); bottom: auto; left: auto; right: 0.75rem; transform: none; z-index: 61;
     }
     .inhalt-rand.mobil-offen .inhalt-striche { display: none; }
     .inhalt-rand.mobil-offen .inhalt-liste {
