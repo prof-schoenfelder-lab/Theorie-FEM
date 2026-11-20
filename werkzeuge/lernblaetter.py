@@ -30,6 +30,9 @@ BILDER = {
     "element-formfkt": ("grafiken/stab/element.svg", ["form_achsen", "formfkt"], "440 220 330 290"),
     "stab-ergebnis": ("grafiken/stab/ergebnis.svg", ["achsen", "exakt", "fem_u", "fem_s"], "20 40 840 340"),
     "stab-ablauf": ("grafiken/stab/zusammenfassung.svg", ["pre", "solution", "post"], "10 20 800 440"),
+    "matrix-schreibweise": ("grafiken/stab/matrizen.svg", ["schreibweise"], "80 70 430 275"),
+    "matrix-produkt": ("grafiken/stab/matrizen.svg", ["multiplikation"], "20 310 640 350"),
+    "matrix-vektoren": ("grafiken/stab/matrizen.svg", ["vektoren"], "20 10 520 630"),
     # V0
     "federsystem": ("grafiken/einfuehrung/federsystem.svg", ["system", "last", "dof", "dehnung"], "40 20 680 265"),
     "freischnitt": ("grafiken/einfuehrung/federsystem.svg", ["freischnitt"], "260 310 390 250"),

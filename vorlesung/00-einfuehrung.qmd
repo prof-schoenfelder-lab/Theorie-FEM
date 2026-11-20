@@ -699,11 +699,12 @@ Federsteifigkeiten und Kräfte verändern und sehen sofort $\mathbf{K}$, die Ver
 Was passiert, wenn Sie $c_1$ und $c_3$ gegen null gehen lassen? Wann ist $N_2 = 0$?
 :::
 
-## Lernblatt
+## Lernblätter
 
 Die Kernzusammenhänge dieser Vorlesung auf einer Seite: Herleitung in Schritten und das Wichtigste zum Merken. Zum Ausdrucken und Wiederholen.
 
 - [Federsystem: die Struktur K p = q (PDF)](../lernblaetter/00-federsystem.pdf){target="_blank"}
+- [Matrizenrechnung für die FEM (PDF)](../lernblaetter/03-matrizen.pdf){target="_blank"}
 
 ## Ausblick
 
