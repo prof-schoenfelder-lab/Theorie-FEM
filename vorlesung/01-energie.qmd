@@ -407,6 +407,12 @@ zusammen.
 
 ::::
 
+## Lernblatt
+
+Die Kernzusammenhänge dieser Vorlesung auf einer Seite: Herleitung in Schritten und das Wichtigste zum Merken. Zum Ausdrucken und Wiederholen.
+
+- [Minimum der potentiellen Energie (PDF)](../lernblaetter/01-energie.pdf){target="_blank"}
+
 ## Ausblick
 
 Eine Feder speichert $\frac12 c\,u^2$. Ein Normalkraftstab speichert Formänderungsenergie über seine ganze Länge:

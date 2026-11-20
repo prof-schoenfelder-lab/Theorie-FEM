@@ -989,6 +989,14 @@ Querschnittssprung knickt der Verschiebungsverlauf. Die FEM legt dort einfach ei
 
 ::::
 
+## Lernblätter
+
+Die Kernzusammenhänge dieser Vorlesung auf einer Seite: Herleitung in Schritten und das Wichtigste zum Merken. Zum Ausdrucken und Wiederholen.
+
+- [Normalkraftstab als finites Element (PDF)](../lernblaetter/03-element.pdf){target="_blank"}
+- [Inzidenzmatrix und Zusammenbau (PDF)](../lernblaetter/03-inzidenzmatrix.pdf){target="_blank"}
+- [Der Ablauf der FEM (PDF)](../lernblaetter/03-ablauf.pdf){target="_blank"}
+
 ## Der Ablauf der FEM zum Nachschlagen
 
 | | Schritt | Ergebnis |

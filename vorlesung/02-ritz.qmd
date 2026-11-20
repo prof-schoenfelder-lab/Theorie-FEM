@@ -836,6 +836,13 @@ Stabsysteme lassen sich damit wie Federsysteme über das Minimum der potentielle
 
 ::::
 
+## Lernblätter
+
+Die Kernzusammenhänge dieser Vorlesung auf einer Seite: Herleitung in Schritten und das Wichtigste zum Merken. Zum Ausdrucken und Wiederholen.
+
+- [Der Stab ist eine Feder (PDF)](../lernblaetter/02-stab-feder.pdf){target="_blank"}
+- [Das Verfahren nach Rayleigh-Ritz (PDF)](../lernblaetter/02-ritz.pdf){target="_blank"}
+
 ## Ausblick
 
 Beim konischen Stab war ein Polynom über die ganze Länge noch leicht zu finden. Bei einem Bauteil aus

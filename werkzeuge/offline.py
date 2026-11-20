@@ -13,6 +13,7 @@ Die Versionskennung im Service Worker ist ein Hash über alle gespeicherten Date
 Die marimo-Beispiele (WebAssembly, je ca. 27 MB) werden nicht gespeichert; offline erscheint dort ein Hinweis.
 Die Mathematica-Aufgaben (*-task.nb) werden mitgespeichert, damit der Download auch offline klappt; Musterlösungen
 (*-solved.nb) stehen nie in _site und sind zusätzlich ausgeschlossen.
+Die Lernblätter (lernblaetter/*.pdf) werden ebenfalls mitgespeichert.
 Übernommen aus dem TM-Kurs (Commit d2de810), angepasst an die Ordner des FEM-Kurses."""
 import hashlib
 import json
@@ -21,7 +22,7 @@ from pathlib import Path
 # Offline verfügbar: Startseite, Spickzettel und alle Vorlesungen, die in _site stehen, dazu die Mathematica-Aufgaben.
 # Entwürfe (entwuerfe.txt) fehlen beim Veröffentlichen in _site und sind damit automatisch ausgenommen.
 SEITEN_MUSTER = ["index.html", "spickzettel.html", "vorlesung/*.html"]
-DATEI_MUSTER = ["mathematica/*-task.nb"]
+DATEI_MUSTER = ["mathematica/*-task.nb", "lernblaetter/*.pdf"]
 # Ordner, die vollständig gespeichert werden (Skripte, Stile, Schriften, Logos, App-Symbol, Kursübersicht)
 ORDNER = ["site_libs", "assets", "grafiken"]
 EINZELN = ["search.json", "manifest.webmanifest"]
