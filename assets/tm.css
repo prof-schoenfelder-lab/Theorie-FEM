@@ -98,10 +98,12 @@
 
 /* ------------------------------------------------ Beamer-Modus */
 .beamer-schalter {
-  position: fixed; right: 1rem; bottom: 1rem; z-index: 50;
+  position: fixed; right: 1rem; top: calc(var(--kopf-unten, 60px) + 0.4rem); z-index: 50;
+  transition: top 0.2s ease;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.2rem; height: 2.2rem; padding: 0;
   border: 1px solid var(--tm-rand); background: #fff; color: #555;
-  border-radius: 0.4rem; padding: 0.25rem 0.7rem; font-size: 0.8rem;
-  opacity: 0.6;
+  border-radius: 0.4rem; opacity: 0.75;
 }
 .beamer-schalter:hover { opacity: 1; }
 html.beamer { font-size: 125%; }
@@ -119,7 +121,6 @@ html.beamer { font-size: 125%; }
   display: inline-flex; align-items: center; justify-content: center;
   width: 1.5rem; height: 1.5rem; border-radius: 50%; background: #fff; color: #0050b4; font-weight: 700;
 }
-html.mit-hilfe .beamer-schalter { bottom: 3.8rem; }
 @media (max-width: 700px) {
   .hilfe-text { display: none; }
   .hilfe-schalter { padding: 0.4rem; }
@@ -161,11 +162,12 @@ h1, h2, h3, .title { font-weight: 600; }
 .tm-fusszeile p {
   display: flex; align-items: center; justify-content: space-between;
   gap: 2rem; flex-wrap: nowrap; margin: 0.4rem 0;
-  padding-right: 5.5rem;            /* Platz für die Beamer-Schaltfläche unten rechts */
+  padding-right: 9rem;              /* Platz für „Frage stellen“ unten rechts */
 }
 .tm-fusszeile img { height: 58px; width: auto; }
 .tm-fusszeile span { white-space: nowrap; font-size: 0.95rem; }
-@media (max-width: 700px) {
+/* unter 1000 px umbrechen, sonst wird die Seite auf Tablets breiter als das Fenster */
+@media (max-width: 1000px) {
   .tm-fusszeile p { flex-wrap: wrap; justify-content: center; gap: 0.6rem; padding-right: 0; padding-bottom: 2.5rem; }
   .tm-fusszeile img { height: 46px; }
   .tm-fusszeile span { white-space: normal; text-align: center; }

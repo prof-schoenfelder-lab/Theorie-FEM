@@ -1,7 +1,8 @@
 <!-- Inhaltsverzeichnis am rechten Rand der Vorlesungsseiten: im Ruhezustand eine Spalte kurzer Striche
      (lang = Abschnitt ##, kurz = Schritt ###), die aktuelle Stelle hervorgehoben. Beim Darüberfahren klappt die
      Liste der Überschriften auf; ein Klick springt an die Stelle (Schritte in die Mitte, damit die Scroll-Grafik
-     den Schritt zeigt). Ohne Maus (Touch) und im Druck ausgeblendet. -->
+     den Schritt zeigt). Ohne Maus (Touch) und unter 900 px statt der Striche ein Knopf „Inhalt“ oben rechts,
+     der dieselbe Liste öffnet; ein Tipp auf einen Eintrag springt hin und schließt sie. Im Druck ausgeblendet. -->
 <style>
   .inhalt-rand {
     position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 40;
@@ -34,8 +35,25 @@
   .inhalt-liste a.aktiv { border-left-color: #0050b4; color: #0050b4; background: #f4f7fc; }
   .inhalt-liste mjx-container { font-size: 100% !important; }
   html.beamer .inhalt-liste { font-size: 0.85rem; }
-  @media (hover: none), (max-width: 900px) { .inhalt-rand { display: none; } }
-  @media print { .inhalt-rand { display: none; } }
+  .inhalt-knopf { display: none; }
+  @media (hover: none), (max-width: 900px) {
+    .inhalt-rand { display: none; }
+    .inhalt-knopf {
+      display: inline-flex; align-items: center; gap: 0.35rem; position: fixed; right: 3.7rem; top: calc(var(--kopf-unten, 60px) + 0.4rem);
+      height: 2.2rem; box-sizing: border-box; transition: top 0.2s ease;
+      z-index: 60; border: 1px solid #0050b4; background: #fff; color: #0050b4; border-radius: 2rem;
+      padding: 0.35rem 0.8rem; font: 600 0.9rem "Source Sans Pro", sans-serif;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    }
+    .inhalt-rand.mobil-offen {
+      display: flex; top: calc(var(--kopf-unten, 60px) + 3rem); bottom: auto; right: 0.75rem; transform: none; z-index: 61;
+    }
+    .inhalt-rand.mobil-offen .inhalt-striche { display: none; }
+    .inhalt-rand.mobil-offen .inhalt-liste {
+      display: block; width: min(20rem, calc(100vw - 1.5rem)); max-height: 60vh;
+    }
+  }
+  @media print { .inhalt-rand, .inhalt-knopf { display: none; } }
 </style>
 <script>
 (function () {
@@ -73,7 +91,7 @@
     const kopie = h.cloneNode(true);
     kopie.querySelectorAll(".anchorjs-link, .header-section-number").forEach(x => x.remove());
     a.innerHTML = kopie.innerHTML;
-    a.addEventListener("click", e => { e.preventDefault(); springe(h); });
+    a.addEventListener("click", e => { e.preventDefault(); springe(h); rand.classList.remove("mobil-offen"); });
     liste.appendChild(a);
     return { h, s, a };
   });
@@ -114,13 +132,31 @@
   }, { passive: true });
   // beim Öffnen den aktuellen Eintrag in den sichtbaren Teil der Liste holen
   rand.addEventListener("mouseenter", () => {
-    if (!aktiv) return;
+    // nicht bei der per Knopf geöffneten Liste: auf Touch-Geräten feuert mouseenter beim Tippen und
+    // würde die Liste unter dem Finger verschieben
+    if (!aktiv || rand.classList.contains("mobil-offen")) return;
     const a = aktiv.a;
     if (a.offsetTop < liste.scrollTop || a.offsetTop > liste.scrollTop + liste.clientHeight - 30)
       liste.scrollTop = a.offsetTop - liste.clientHeight / 3;
   });
 
+  // Touch und schmale Fenster: Knopf „Inhalt“ öffnet die Liste per Tipp
+  const knopf = document.createElement("button");
+  knopf.type = "button";
+  knopf.className = "inhalt-knopf";
+  knopf.setAttribute("aria-label", "Inhalt dieser Seite");
+  knopf.innerHTML = "<span aria-hidden=\"true\">☰</span> Inhalt";
+  knopf.addEventListener("click", e => {
+    e.stopPropagation();
+    const offen = rand.classList.toggle("mobil-offen");
+    if (offen && aktiv) liste.scrollTop = aktiv.a.offsetTop - liste.clientHeight / 3;
+  });
+  document.addEventListener("click", e => {
+    if (rand.classList.contains("mobil-offen") && !rand.contains(e.target)) rand.classList.remove("mobil-offen");
+  });
+
   document.body.appendChild(rand);
+  document.body.appendChild(knopf);
   markieren();
   // Formeln in den kopierten Überschriften setzen, falls MathJax schon fertig war
   if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([liste]).catch(() => {});

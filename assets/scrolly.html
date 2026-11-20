@@ -1,4 +1,4 @@
-<button class="beamer-schalter" type="button" title="Beamer-Modus (Taste B): größere Schrift, Schrittweise mit Bild↓/Bild↑ oder Pfeiltasten →/←">Beamer</button>
+<button class="beamer-schalter" type="button" aria-label="Beamer-Modus" title="Beamer-Modus (Taste B): größere Schrift, Schrittweise mit Bild↓/Bild↑ oder Pfeiltasten →/←"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8"/></svg></button>
 <script>
 /* Scrollytelling: blendet beim Scrollen Ebenen der SVG-Grafik ein/aus und
    animiert den Bildausschnitt (viewBox) – ähnlich „Morphen“ in PowerPoint. */
@@ -269,6 +269,21 @@
     const zur = ["PageUp", "ArrowLeft"].includes(e.key);
     if ((vor || zur) && naechster(vor ? 1 : -1)) e.preventDefault();
   });
+  // Knöpfe oben rechts folgen der ein- und ausfahrenden Kopfzeile: --kopf-unten = Unterkante der Kopfzeile
+  const kopfzeile = document.querySelector("#quarto-header");
+  if (kopfzeile) {
+    let geplant = false;
+    const setzen = () => {
+      geplant = false;
+      document.documentElement.style.setProperty("--kopf-unten",
+        Math.max(0, kopfzeile.getBoundingClientRect().bottom) + "px");
+    };
+    const anstossen = () => { if (!geplant) { geplant = true; requestAnimationFrame(setzen); } };
+    window.addEventListener("scroll", anstossen, { passive: true });
+    window.addEventListener("resize", anstossen);
+    kopfzeile.addEventListener("transitionend", anstossen);
+    setzen();
+  }
   const knopf = document.querySelector(".beamer-schalter");
   if (knopf) knopf.addEventListener("click", () => document.documentElement.classList.toggle("beamer"));
 
